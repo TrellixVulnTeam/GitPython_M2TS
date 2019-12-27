@@ -1,0 +1,8 @@
+body{
+	font-family:verdana;
+	margin-left: 40px;
+	background: url(/static/LSNYCLogo.jpg);
+	background-size: 210px 70px;
+	background-repeat: no-repeat;
+    background-position: 95% 5%;
+	 }

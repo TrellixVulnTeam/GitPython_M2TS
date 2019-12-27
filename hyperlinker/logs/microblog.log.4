@@ -1,0 +1,134 @@
+2019-12-06 09:42:56,721 ERROR: Exception on /upload [POST] [inC:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py:1761]
+Traceback (most recent call last):
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\pandas\core\indexes\base.py", line 2657, in get_loc
+    return self._engine.get_loc(key)
+  File "pandas\_libs\index.pyx", line 108, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas\_libs\index.pyx", line 132, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas\_libs\hashtable_class_helper.pxi", line 1601, in pandas._libs.hashtable.PyObjectHashTable.get_item
+  File "pandas\_libs\hashtable_class_helper.pxi", line 1608, in pandas._libs.hashtable.PyObjectHashTable.get_item
+KeyError: 'id'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 2292, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 1815, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 1718, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\_compat.py", line 35, in reraise
+    raise value
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 1813, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 1799, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "C:\Users\jackley\Python\Python37-32\hyperlinker\app\Hyperlink.py", line 63, in upload_hyperlink
+    data_xls['Matter/Case ID#'] = data_xls['id'].astype(str)
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\pandas\core\frame.py", line 2927, in __getitem__
+    indexer = self.columns.get_loc(key)
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\pandas\core\indexes\base.py", line 2659, in get_loc
+    return self._engine.get_loc(self._maybe_cast_indexer(key))
+  File "pandas\_libs\index.pyx", line 108, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas\_libs\index.pyx", line 132, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas\_libs\hashtable_class_helper.pxi", line 1601, in pandas._libs.hashtable.PyObjectHashTable.get_item
+  File "pandas\_libs\hashtable_class_helper.pxi", line 1608, in pandas._libs.hashtable.PyObjectHashTable.get_item
+KeyError: 'id'
+2019-12-06 09:45:10,736 ERROR: Exception on /upload [POST] [inC:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py:1761]
+Traceback (most recent call last):
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\pandas\core\indexes\base.py", line 2657, in get_loc
+    return self._engine.get_loc(key)
+  File "pandas\_libs\index.pyx", line 108, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas\_libs\index.pyx", line 132, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas\_libs\hashtable_class_helper.pxi", line 1601, in pandas._libs.hashtable.PyObjectHashTable.get_item
+  File "pandas\_libs\hashtable_class_helper.pxi", line 1608, in pandas._libs.hashtable.PyObjectHashTable.get_item
+KeyError: 'id'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 2292, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 1815, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 1718, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\_compat.py", line 35, in reraise
+    raise value
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 1813, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 1799, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "C:\Users\jackley\Python\Python37-32\hyperlinker\app\Hyperlink.py", line 63, in upload_hyperlink
+    data_xls['Matter/Case ID#'] = data_xls['id'].astype(str)
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\pandas\core\frame.py", line 2927, in __getitem__
+    indexer = self.columns.get_loc(key)
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\pandas\core\indexes\base.py", line 2659, in get_loc
+    return self._engine.get_loc(self._maybe_cast_indexer(key))
+  File "pandas\_libs\index.pyx", line 108, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas\_libs\index.pyx", line 132, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas\_libs\hashtable_class_helper.pxi", line 1601, in pandas._libs.hashtable.PyObjectHashTable.get_item
+  File "pandas\_libs\hashtable_class_helper.pxi", line 1608, in pandas._libs.hashtable.PyObjectHashTable.get_item
+KeyError: 'id'
+2019-12-09 10:23:16,419 ERROR: Exception on /IOIemp [POST] [inC:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py:1761]
+Traceback (most recent call last):
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 2292, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 1815, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 1718, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\_compat.py", line 35, in reraise
+    raise value
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 1813, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 1799, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "C:\Users\jackley\Python\Python37-32\hyperlinker\app\IOIemp.py", line 517, in upload_IOIemp
+    test = pd.read_excel(f)
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\pandas\util\_decorators.py", line 188, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\pandas\util\_decorators.py", line 188, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\pandas\io\excel.py", line 350, in read_excel
+    io = ExcelFile(io, engine=engine)
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\pandas\io\excel.py", line 653, in __init__
+    self._reader = self._engines[engine](self._io)
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\pandas\io\excel.py", line 422, in __init__
+    self.book = xlrd.open_workbook(file_contents=data)
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\xlrd\__init__.py", line 110, in open_workbook
+    filename = os.path.expanduser(filename)
+  File "C:\Users\jackley\Python\Python37-32\lib\ntpath.py", line 291, in expanduser
+    path = os.fspath(path)
+TypeError: expected str, bytes or os.PathLike object, not NoneType
+2019-12-09 10:23:19,457 ERROR: Exception on /IOIemp [POST] [inC:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py:1761]
+Traceback (most recent call last):
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 2292, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 1815, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 1718, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\_compat.py", line 35, in reraise
+    raise value
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 1813, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 1799, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "C:\Users\jackley\Python\Python37-32\hyperlinker\app\IOIemp.py", line 517, in upload_IOIemp
+    test = pd.read_excel(f)
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\pandas\util\_decorators.py", line 188, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\pandas\util\_decorators.py", line 188, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\pandas\io\excel.py", line 350, in read_excel
+    io = ExcelFile(io, engine=engine)
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\pandas\io\excel.py", line 653, in __init__
+    self._reader = self._engines[engine](self._io)
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\pandas\io\excel.py", line 422, in __init__
+    self.book = xlrd.open_workbook(file_contents=data)
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\xlrd\__init__.py", line 110, in open_workbook
+    filename = os.path.expanduser(filename)
+  File "C:\Users\jackley\Python\Python37-32\lib\ntpath.py", line 291, in expanduser
+    path = os.fspath(path)
+TypeError: expected str, bytes or os.PathLike object, not NoneType

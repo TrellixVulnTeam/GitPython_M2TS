@@ -1,0 +1,125 @@
+2019-11-06 10:43:10,149 ERROR: Exception on /upload [POST] [inC:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py:1761]
+Traceback (most recent call last):
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 2292, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 1815, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 1718, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\_compat.py", line 35, in reraise
+    raise value
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 1813, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 1799, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "C:\Users\jackley\Python\Python37-32\hyperlinker\app\Hyperlink.py", line 67, in upload_hyperlink
+    last7 = data_xls['Matter/Case ID#'].apply(lambda x: x[-7:])
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\pandas\core\series.py", line 3591, in apply
+    mapped = lib.map_infer(values, f, convert=convert_dtype)
+  File "pandas\_libs\lib.pyx", line 2217, in pandas._libs.lib.map_infer
+  File "C:\Users\jackley\Python\Python37-32\hyperlinker\app\Hyperlink.py", line 67, in <lambda>
+    last7 = data_xls['Matter/Case ID#'].apply(lambda x: x[-7:])
+TypeError: 'float' object is not subscriptable
+2019-11-08 14:23:48,918 ERROR: Exception on /hyperlinker [POST] [inC:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py:1761]
+Traceback (most recent call last):
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 2292, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 1815, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 1718, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\_compat.py", line 35, in reraise
+    raise value
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 1813, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 1799, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "C:\Users\jackley\Python\Python37-32\hyperlinker\app\Hyperlink.py", line 67, in upload_hyperlink
+    last7 = data_xls['Matter/Case ID#'].apply(lambda x: x[-7:])
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\pandas\core\series.py", line 3591, in apply
+    mapped = lib.map_infer(values, f, convert=convert_dtype)
+  File "pandas\_libs\lib.pyx", line 2217, in pandas._libs.lib.map_infer
+  File "C:\Users\jackley\Python\Python37-32\hyperlinker\app\Hyperlink.py", line 67, in <lambda>
+    last7 = data_xls['Matter/Case ID#'].apply(lambda x: x[-7:])
+TypeError: 'float' object is not subscriptable
+2019-11-08 14:25:51,156 ERROR: Exception on /hyperlinker [POST] [inC:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py:1761]
+Traceback (most recent call last):
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 2292, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 1815, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 1718, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\_compat.py", line 35, in reraise
+    raise value
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 1813, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 1799, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "C:\Users\jackley\Python\Python37-32\hyperlinker\app\Hyperlink.py", line 67, in upload_hyperlink
+    last7 = data_xls['Matter/Case ID#'].apply(lambda x: x[-7:])
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\pandas\core\series.py", line 3591, in apply
+    mapped = lib.map_infer(values, f, convert=convert_dtype)
+  File "pandas\_libs\lib.pyx", line 2217, in pandas._libs.lib.map_infer
+  File "C:\Users\jackley\Python\Python37-32\hyperlinker\app\Hyperlink.py", line 67, in <lambda>
+    last7 = data_xls['Matter/Case ID#'].apply(lambda x: x[-7:])
+TypeError: 'float' object is not subscriptable
+2019-11-13 10:42:32,434 ERROR: Exception on /IOIimm [POST] [inC:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py:1761]
+Traceback (most recent call last):
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\pandas\core\indexes\base.py", line 2657, in get_loc
+    return self._engine.get_loc(key)
+  File "pandas\_libs\index.pyx", line 108, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas\_libs\index.pyx", line 132, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas\_libs\hashtable_class_helper.pxi", line 1601, in pandas._libs.hashtable.PyObjectHashTable.get_item
+  File "pandas\_libs\hashtable_class_helper.pxi", line 1608, in pandas._libs.hashtable.PyObjectHashTable.get_item
+KeyError: 'Matter/Case ID#'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 2292, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 1815, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 1718, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\_compat.py", line 35, in reraise
+    raise value
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 1813, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 1799, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "C:\Users\jackley\Python\Python37-32\hyperlinker\app\IOIimm.py", line 28, in upload_IOIimm
+    last7 = data_xls['Matter/Case ID#'].apply(lambda x: x[3:])
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\pandas\core\frame.py", line 2927, in __getitem__
+    indexer = self.columns.get_loc(key)
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\pandas\core\indexes\base.py", line 2659, in get_loc
+    return self._engine.get_loc(self._maybe_cast_indexer(key))
+  File "pandas\_libs\index.pyx", line 108, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas\_libs\index.pyx", line 132, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas\_libs\hashtable_class_helper.pxi", line 1601, in pandas._libs.hashtable.PyObjectHashTable.get_item
+  File "pandas\_libs\hashtable_class_helper.pxi", line 1608, in pandas._libs.hashtable.PyObjectHashTable.get_item
+KeyError: 'Matter/Case ID#'
+2019-11-17 16:46:54,112 ERROR: Exception on /hyperlinker [POST] [inC:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py:1761]
+Traceback (most recent call last):
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 2292, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 1815, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 1718, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\_compat.py", line 35, in reraise
+    raise value
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 1813, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 1799, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "C:\Users\jackley\Python\Python37-32\hyperlinker\app\Hyperlink.py", line 67, in upload_hyperlink
+    last7 = data_xls['Matter/Case ID#'].apply(lambda x: x[-7:])
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\pandas\core\series.py", line 3591, in apply
+    mapped = lib.map_infer(values, f, convert=convert_dtype)
+  File "pandas\_libs\lib.pyx", line 2217, in pandas._libs.lib.map_infer
+  File "C:\Users\jackley\Python\Python37-32\hyperlinker\app\Hyperlink.py", line 67, in <lambda>
+    last7 = data_xls['Matter/Case ID#'].apply(lambda x: x[-7:])
+TypeError: 'float' object is not subscriptable
+2019-11-19 10:10:41,445 INFO: Microblog startup [inC:\Users\jackley\Python\Python37-32\hyperlinker\app\__init__.py:66]
