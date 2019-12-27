@@ -92,7 +92,7 @@ def split_by_borough():
     return '''
     <!doctype html>
     <title>Borough Splitter</title>
-    <link rel="stylesheet" href="/static/css/main.css">
+    <link rel="stylesheet" href="/static/css/main.css">  
     <h1>Split Your Spreadsheet by Office:</h1>
     <form action="" method=post enctype=multipart/form-data>
     <p><input type=file name=file><input type=submit value=Split!>

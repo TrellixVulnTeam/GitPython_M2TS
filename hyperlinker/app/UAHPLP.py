@@ -244,7 +244,7 @@ def upload_UAHPLP():
     </form>
     <h3>Instructions:</h3>
     <ul type="disc">
-    <li>This tool is meant to be used in conjunction with the LegalServer report called "HPLP/UAC Internal Report".</li>
+    <li>This tool is meant to be used in conjunction with the LegalServer report called <a href="https://lsnyc.legalserver.org/report/dynamic?load=1963" target="_blank">HPLP/UAC Internal Report</a>.</li>
     <li>Browse your computer using the field above to find the LegalServer excel document that you want to process for UA/HLPL cleanup.</li> 
     <li>Once you have identified this file, click ‘Clean!’ and you should shortly be given a prompt to either open the file directly or save the file to your computer.</li> 
     <li>When you first open the file, all case numbers will display as ‘0’ until you click “Enable Editing” in excel, this will populate the fields.</li> </ul>

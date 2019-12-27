@@ -366,14 +366,14 @@ def upload_BrownsvilleTRCclean():
     return '''
     <!doctype html>
     <title>BrownsvilleTRCTester</title>
-    <link rel="stylesheet" href="/static/css/main.css">
+    <link rel="stylesheet" href="/static/css/main.css">  
     <h1>Brownsville TRC Cleanup Report:</h1>
     <form action="" method=post enctype=multipart/form-data>
     <p><input type=file name=file><input type=submit value=Clean!>
     </form>
     <h3>Instructions:</h3>
     <ul type="disc">
-    <li>This tool is meant to be used in conjunction with the LegalServer report called "TRC Raw Case Data Report".</li>
+    <li>This tool is meant to be used in conjunction with the LegalServer report called <a href="https://lsnyc.legalserver.org/report/dynamic?load=1507" target="_blank">TRC Raw Case Data Report</a>.</li>
     <li>It will only return cases for Brownsville advocates.</li>
     <li>Browse your computer using the field above to find the LegalServer excel document that you want to process for TRC cleanup.</li> 
     <li>Once you have identified this file, click ‘Clean!’ and you should shortly be given a prompt to either open the file directly or save the file to your computer.</li> 

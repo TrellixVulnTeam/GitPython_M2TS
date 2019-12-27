@@ -620,15 +620,15 @@ def upload_IOIemp():
         
 
         #Does case need special legal problem code?
-        def SPLC_problem(LoS,SPLC,HRACode):
+        def SLPC_problem(LoS,SLPC,HRACode):
             if LoS == 'Hold For Review':
-                return SPLC
+                return SLPC
             elif HRACode.startswith('***') and LoS != "":
-                return '***Needs SPLC***'
+                return '***Needs SLPC***'
             else:
-                return SPLC
+                return SLPC
                 
-        data_xls['Special Legal Problem Code'] = data_xls.apply(lambda x: SPLC_problem(x['Level of Service'],x['Special Legal Problem Code'],x['HRA_Case_Coding']), axis = 1)
+        data_xls['Special Legal Problem Code'] = data_xls.apply(lambda x: SLPC_problem(x['Level of Service'],x['Special Legal Problem Code'],x['HRA_Case_Coding']), axis = 1)
         
         
         #Can case be reported based on income?
@@ -841,7 +841,7 @@ def upload_IOIemp():
                                                  'format': problem_format})
         worksheet.conditional_format('F1:F100000',{'type': 'cell',
                                                  'criteria': '==',
-                                                 'value': '"***Needs SPLC***"',
+                                                 'value': '"***Needs SLPC***"',
                                                  'format': problem_format})
         worksheet.conditional_format('G1:G100000',{'type': 'cell',
                                                  'criteria': '==',
@@ -874,14 +874,14 @@ def upload_IOIemp():
     return '''
     <!doctype html>
     <title>IOI Employment</title>
-    <link rel="stylesheet" href="/static/css/main.css">
+    <link rel="stylesheet" href="/static/css/main.css"> 
     <h1>Check your IOI Employment Cases:</h1>
     <form action="" method=post enctype=multipart/form-data>
     <p><input type=file name=file><input type=submit value=IOI-ify!>
     </form>
     <h3>Instructions:</h3>
     <ul type="disc">
-    <li>This tool is meant to be used in conjunction with the LegalServer report called "Grants Management IOI Employment (3474) Report".</li>
+    <li>This tool is meant to be used in conjunction with the LegalServer report called <a href="https://lsnyc.legalserver.org/report/dynamic?load=2020" target="_blank">Grants Management IOI Employment (3474) Report</a>.</li>
     <li>Browse your computer using the field above to find the LegalServer excel document that you want to process for IOI.</li> 
     <li>Once you have identified this file, click ‘IOI-ify!’ and you should shortly be given a prompt to either open the file directly or save the file to your computer.</li> 
     <li>When you first open the file, all case numbers will display as ‘0’ until you click “Enable Editing” in excel, this will populate the fields.</li> </ul>

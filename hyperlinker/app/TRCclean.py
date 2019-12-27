@@ -197,7 +197,7 @@ def upload_TRCclean():
     </form>
     <h3>Instructions:</h3>
     <ul type="disc">
-    <li>This tool is meant to be used in conjunction with the LegalServer report called "TRC Raw Case Data Report".</li>
+    <li>This tool is meant to be used in conjunction with the LegalServer report called <a href="https://lsnyc.legalserver.org/report/dynamic?load=1507" target="_blank">TRC Raw Case Data Report</a>.</li>
     <li>Browse your computer using the field above to find the LegalServer excel document that you want to process for TRC.</li> 
     <li>Once you have identified this file, click ‘TRC-ify!’ and you should shortly be given a prompt to either open the file directly or save the file to your computer.</li> 
     <li>When you first open the file, all case numbers will display as ‘0’ until you click “Enable Editing” in excel, this will populate the fields.</li> </ul>
