@@ -25,20 +25,23 @@ def split_by_borough():
             data_xls = pd.read_excel(f)
         
 
-        #if this is a report that has 'id' instead of 'Matter/Case id#' as the id column header - this will change it
-        if 'Matter/Case ID#' not in data_xls.columns:
-            data_xls['Matter/Case ID#'] = data_xls['id'].astype(str)
-            del data_xls['id']
-        
         #apply hyperlink methodology with splicing and concatenation
-        data_xls['Matter/Case ID#'] = data_xls['Matter/Case ID#'].apply(lambda x: 'delete' if x == '' else data_xls['Matter/Case ID#'])
-        last7 = data_xls['Matter/Case ID#'].apply(lambda x: x[-7:])
+      
+        def NoIDDelete(CaseID):
+            if CaseID == '':
+                return 'No Case ID'
+            else:
+                return str(CaseID)
+        data_xls['Matter/Case ID#'] = data_xls.apply(lambda x: NoIDDelete(x['Matter/Case ID#']), axis=1)
+        
+        last7 = data_xls['Matter/Case ID#'].apply(lambda x: x[3:])
         CaseNum = data_xls['Matter/Case ID#']
         data_xls['Temp Hyperlinked Case #']='=HYPERLINK("https://lsnyc.legalserver.org/matter/dynamic-profile/view/'+last7+'",'+ '"' + CaseNum +'"' +')'
         del data_xls['Matter/Case ID#']
         move=data_xls['Temp Hyperlinked Case #']
         data_xls.insert(0,'Hyperlinked Case #', move)           
         del data_xls['Temp Hyperlinked Case #']
+        
         
         #split into separate dataframes
         
@@ -48,10 +51,11 @@ def split_by_borough():
         MLSdata_xls = data_xls[data_xls['Assigned Branch/CC'] == 'Manhattan Legal Services']
         SILSdata_xls = data_xls[data_xls['Assigned Branch/CC'] == 'Staten Island Legal Services']
         LSUdata_xls = data_xls[data_xls['Assigned Branch/CC'] == 'Legal Support Unit']
-       
+        
         #bounce worksheets back to excel
         output_filename = f.filename     
         writer = pd.ExcelWriter("app\\sheets\\"+output_filename, engine = 'xlsxwriter')
+        
         BkLSdata_xls.to_excel(writer, sheet_name='Brooklyn',index=False)
         QLSdata_xls.to_excel(writer, sheet_name='Queens', index=False)
         MLSdata_xls.to_excel(writer, sheet_name='Manhattan', index=False)
@@ -59,8 +63,10 @@ def split_by_borough():
         SILSdata_xls.to_excel(writer, sheet_name='Staten Island', index=False)
         LSUdata_xls.to_excel(writer, sheet_name='LSU', index=False)
         
+        
         #rename worksheets with their original names 
         workbook = writer.book
+        
         worksheetBkLS = writer.sheets['Brooklyn']
         worksheetQLS = writer.sheets['Queens']
         worksheetMLS = writer.sheets['Manhattan']
@@ -69,7 +75,8 @@ def split_by_borough():
         worksheetLSU = writer.sheets['LSU']
         
         link_format = workbook.add_format({'font_color':'blue', 'bold':True, 'underline':True})
-
+        
+        
         worksheetBkLS.set_column('A:A',20,link_format)
         worksheetQLS.set_column('A:A',20,link_format)
         worksheetMLS.set_column('A:A',20,link_format)
@@ -82,6 +89,7 @@ def split_by_borough():
         worksheetBxLS.set_column('B:ZZ',25)
         worksheetSILS.set_column('B:ZZ',25)
         worksheetLSU.set_column('B:ZZ',25)
+        
         writer.save()
         
         #send file back to user
