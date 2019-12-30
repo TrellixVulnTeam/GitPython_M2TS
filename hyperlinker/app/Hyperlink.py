@@ -17,8 +17,15 @@ def upload_hyperlink():
         print(request.files['file'])
         f = request.files['file']
         
-        #turn the excel file into a dataframe, but skip the top 2 rows
-        data_xls = pd.read_excel(f,skiprows=2)
+        #turn the excel file into a dataframe, but skip the top 2 rows if they are blank
+        test = pd.read_excel(f)
+        
+        test.fillna('',inplace=True)
+        if test.iloc[0][0] == '':
+            data_xls = pd.read_excel(f,skiprows=2)
+        else:
+            data_xls = pd.read_excel(f)
+
         
         #separate last 7 digits from Case ID# so that it can be used for the link
         last7 = data_xls['Matter/Case ID#'].apply(lambda x: x[-7:])
