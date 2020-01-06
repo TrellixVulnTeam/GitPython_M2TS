@@ -1,12 +1,12 @@
-2019-12-19 15:10:49,635 ERROR: Exception on /BoroughSplitter [POST] [inC:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py:1761]
+2020-01-06 13:41:31,547 ERROR: Exception on /BrownsvilleTRCclean [POST] [inC:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py:1761]
 Traceback (most recent call last):
-  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\pandas\core\indexes\base.py", line 2657, in get_loc
-    return self._engine.get_loc(key)
-  File "pandas\_libs\index.pyx", line 108, in pandas._libs.index.IndexEngine.get_loc
-  File "pandas\_libs\index.pyx", line 132, in pandas._libs.index.IndexEngine.get_loc
-  File "pandas\_libs\hashtable_class_helper.pxi", line 1601, in pandas._libs.hashtable.PyObjectHashTable.get_item
-  File "pandas\_libs\hashtable_class_helper.pxi", line 1608, in pandas._libs.hashtable.PyObjectHashTable.get_item
-KeyError: 'id'
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\pandas\core\indexes\base.py", line 4381, in get_value
+    return libindex.get_value_box(s, key)
+  File "pandas\_libs\index.pyx", line 52, in pandas._libs.index.get_value_box
+  File "pandas\_libs\index.pyx", line 48, in pandas._libs.index.get_value_at
+  File "pandas\_libs\util.pxd", line 113, in pandas._libs.util.get_value_at
+  File "pandas\_libs\util.pxd", line 98, in pandas._libs.util.validate_indexer
+TypeError: 'str' object cannot be interpreted as an integer
 
 During handling of the above exception, another exception occurred:
 
@@ -23,18 +23,42 @@ Traceback (most recent call last):
     rv = self.dispatch_request()
   File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 1799, in dispatch_request
     return self.view_functions[rule.endpoint](**req.view_args)
-  File "C:\Users\jackley\Python\Python37-32\hyperlinker\app\BoroughSplitter.py", line 30, in split_by_borough
-    data_xls['Matter/Case ID#'] = data_xls['id'].astype(str)
-  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\pandas\core\frame.py", line 2927, in __getitem__
-    indexer = self.columns.get_loc(key)
-  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\pandas\core\indexes\base.py", line 2659, in get_loc
-    return self._engine.get_loc(self._maybe_cast_indexer(key))
-  File "pandas\_libs\index.pyx", line 108, in pandas._libs.index.IndexEngine.get_loc
+  File "C:\Users\jackley\Python\GitPython\hyperlinker\app\BrownsvilleTRCclean.py", line 324, in upload_BrownsvilleTRCclean
+    data_xls['Tester Tester'] = data_xls.apply(lambda x: TesterTester(x['HRA Release Tester'],x['Housing Type Tester'],x['Housing Level Tester'],x['Building Case Tester'],x['Referral Tester'],x['Rent Tester'],x['Unit Tester'],x[ 'Regulation Tester'],x['Subsidy Tester'],x['Years in Apartment Tester'],x['Language Tester'],x['Posture Tester'],x['Income Verification Tester'],x['PA Tester'],x['Case Number Tester'],x['Housing Activity Tester'],x['Housing Services Tester'],x['Outcome Tester']),axis=1)
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\pandas\core\frame.py", line 6487, in apply
+    return op.get_result()
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\pandas\core\apply.py", line 151, in get_result
+    return self.apply_standard()
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\pandas\core\apply.py", line 257, in apply_standard
+    self.apply_series_generator()
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\pandas\core\apply.py", line 286, in apply_series_generator
+    results[i] = self.f(v)
+  File "C:\Users\jackley\Python\GitPython\hyperlinker\app\BrownsvilleTRCclean.py", line 324, in <lambda>
+    data_xls['Tester Tester'] = data_xls.apply(lambda x: TesterTester(x['HRA Release Tester'],x['Housing Type Tester'],x['Housing Level Tester'],x['Building Case Tester'],x['Referral Tester'],x['Rent Tester'],x['Unit Tester'],x[ 'Regulation Tester'],x['Subsidy Tester'],x['Years in Apartment Tester'],x['Language Tester'],x['Posture Tester'],x['Income Verification Tester'],x['PA Tester'],x['Case Number Tester'],x['Housing Activity Tester'],x['Housing Services Tester'],x['Outcome Tester']),axis=1)
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\pandas\core\series.py", line 868, in __getitem__
+    result = self.index.get_value(self, key)
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\pandas\core\indexes\base.py", line 4389, in get_value
+    raise e1
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\pandas\core\indexes\base.py", line 4375, in get_value
+    tz=getattr(series.dtype, 'tz', None))
+  File "pandas\_libs\index.pyx", line 81, in pandas._libs.index.IndexEngine.get_value
+  File "pandas\_libs\index.pyx", line 89, in pandas._libs.index.IndexEngine.get_value
   File "pandas\_libs\index.pyx", line 132, in pandas._libs.index.IndexEngine.get_loc
   File "pandas\_libs\hashtable_class_helper.pxi", line 1601, in pandas._libs.hashtable.PyObjectHashTable.get_item
   File "pandas\_libs\hashtable_class_helper.pxi", line 1608, in pandas._libs.hashtable.PyObjectHashTable.get_item
-KeyError: 'id'
-2019-12-19 15:12:25,345 ERROR: Exception on /BoroughSplitter [POST] [inC:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py:1761]
+KeyError: ('PA Tester', 'occurred at index 23')
+2020-01-06 13:42:20,879 ERROR: Exception on /BrownsvilleTRCclean [POST] [inC:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py:1761]
+Traceback (most recent call last):
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\pandas\core\indexes\base.py", line 4381, in get_value
+    return libindex.get_value_box(s, key)
+  File "pandas\_libs\index.pyx", line 52, in pandas._libs.index.get_value_box
+  File "pandas\_libs\index.pyx", line 48, in pandas._libs.index.get_value_at
+  File "pandas\_libs\util.pxd", line 113, in pandas._libs.util.get_value_at
+  File "pandas\_libs\util.pxd", line 98, in pandas._libs.util.validate_indexer
+TypeError: 'str' object cannot be interpreted as an integer
+
+During handling of the above exception, another exception occurred:
+
 Traceback (most recent call last):
   File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 2292, in wsgi_app
     response = self.full_dispatch_request()
@@ -48,66 +72,29 @@ Traceback (most recent call last):
     rv = self.dispatch_request()
   File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 1799, in dispatch_request
     return self.view_functions[rule.endpoint](**req.view_args)
-  File "C:\Users\jackley\Python\Python37-32\hyperlinker\app\BoroughSplitter.py", line 34, in split_by_borough
-    last7 = data_xls['Matter/Case ID#'].apply(lambda x: x[-7:])
-  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\pandas\core\series.py", line 3591, in apply
-    mapped = lib.map_infer(values, f, convert=convert_dtype)
-  File "pandas\_libs\lib.pyx", line 2217, in pandas._libs.lib.map_infer
-  File "C:\Users\jackley\Python\Python37-32\hyperlinker\app\BoroughSplitter.py", line 34, in <lambda>
-    last7 = data_xls['Matter/Case ID#'].apply(lambda x: x[-7:])
-TypeError: 'float' object is not subscriptable
-2019-12-19 15:34:23,626 ERROR: Exception on /BoroughSplitter [POST] [inC:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py:1761]
-Traceback (most recent call last):
-  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 2292, in wsgi_app
-    response = self.full_dispatch_request()
-  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 1815, in full_dispatch_request
-    rv = self.handle_user_exception(e)
-  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 1718, in handle_user_exception
-    reraise(exc_type, exc_value, tb)
-  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\_compat.py", line 35, in reraise
-    raise value
-  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 1813, in full_dispatch_request
-    rv = self.dispatch_request()
-  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 1799, in dispatch_request
-    return self.view_functions[rule.endpoint](**req.view_args)
-  File "C:\Users\jackley\Python\Python37-32\hyperlinker\app\BoroughSplitter.py", line 34, in split_by_borough
-    last7 = data_xls['Matter/Case ID#'].apply(lambda x: x[-7:])
-  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\pandas\core\series.py", line 3591, in apply
-    mapped = lib.map_infer(values, f, convert=convert_dtype)
-  File "pandas\_libs\lib.pyx", line 2217, in pandas._libs.lib.map_infer
-  File "C:\Users\jackley\Python\Python37-32\hyperlinker\app\BoroughSplitter.py", line 34, in <lambda>
-    last7 = data_xls['Matter/Case ID#'].apply(lambda x: x[-7:])
-TypeError: 'float' object is not subscriptable
-2019-12-20 10:33:05,528 ERROR: Exception on /BoroughSplitter [POST] [inC:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py:1761]
-Traceback (most recent call last):
-  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 2292, in wsgi_app
-    response = self.full_dispatch_request()
-  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 1815, in full_dispatch_request
-    rv = self.handle_user_exception(e)
-  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 1718, in handle_user_exception
-    reraise(exc_type, exc_value, tb)
-  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\_compat.py", line 35, in reraise
-    raise value
-  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 1813, in full_dispatch_request
-    rv = self.dispatch_request()
-  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\flask\app.py", line 1799, in dispatch_request
-    return self.view_functions[rule.endpoint](**req.view_args)
-  File "C:\Users\jackley\Python\Python37-32\hyperlinker\app\BoroughSplitter.py", line 20, in split_by_borough
-    test = pd.read_excel(f)
-  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\pandas\util\_decorators.py", line 188, in wrapper
-    return func(*args, **kwargs)
-  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\pandas\util\_decorators.py", line 188, in wrapper
-    return func(*args, **kwargs)
-  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\pandas\io\excel.py", line 350, in read_excel
-    io = ExcelFile(io, engine=engine)
-  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\pandas\io\excel.py", line 653, in __init__
-    self._reader = self._engines[engine](self._io)
-  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\pandas\io\excel.py", line 422, in __init__
-    self.book = xlrd.open_workbook(file_contents=data)
-  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\xlrd\__init__.py", line 110, in open_workbook
-    filename = os.path.expanduser(filename)
-  File "C:\Users\jackley\Python\Python37-32\lib\ntpath.py", line 291, in expanduser
-    path = os.fspath(path)
-TypeError: expected str, bytes or os.PathLike object, not NoneType
-2019-12-20 11:02:07,724 INFO: Microblog startup [inC:\Users\jackley\Python\Python37-32\hyperlinker\app\__init__.py:66]
-2019-12-20 11:27:07,583 INFO: Microblog startup [inC:\Users\jackley\Python\Python37-32\hyperlinker\app\__init__.py:66]
+  File "C:\Users\jackley\Python\GitPython\hyperlinker\app\BrownsvilleTRCclean.py", line 324, in upload_BrownsvilleTRCclean
+    data_xls['Tester Tester'] = data_xls.apply(lambda x: TesterTester(x['HRA Release Tester'],x['Housing Type Tester'],x['Housing Level Tester'],x['Building Case Tester'],x['Referral Tester'],x['Rent Tester'],x['Unit Tester'],x[ 'Regulation Tester'],x['Subsidy Tester'],x['Years in Apartment Tester'],x['Language Tester'],x['Posture Tester'],x['Income Verification Tester'],x['PA Tester'],x['Case Number Tester'],x['Housing Activity Tester'],x['Housing Services Tester'],x['Outcome Tester']),axis=1)
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\pandas\core\frame.py", line 6487, in apply
+    return op.get_result()
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\pandas\core\apply.py", line 151, in get_result
+    return self.apply_standard()
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\pandas\core\apply.py", line 257, in apply_standard
+    self.apply_series_generator()
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\pandas\core\apply.py", line 286, in apply_series_generator
+    results[i] = self.f(v)
+  File "C:\Users\jackley\Python\GitPython\hyperlinker\app\BrownsvilleTRCclean.py", line 324, in <lambda>
+    data_xls['Tester Tester'] = data_xls.apply(lambda x: TesterTester(x['HRA Release Tester'],x['Housing Type Tester'],x['Housing Level Tester'],x['Building Case Tester'],x['Referral Tester'],x['Rent Tester'],x['Unit Tester'],x[ 'Regulation Tester'],x['Subsidy Tester'],x['Years in Apartment Tester'],x['Language Tester'],x['Posture Tester'],x['Income Verification Tester'],x['PA Tester'],x['Case Number Tester'],x['Housing Activity Tester'],x['Housing Services Tester'],x['Outcome Tester']),axis=1)
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\pandas\core\series.py", line 868, in __getitem__
+    result = self.index.get_value(self, key)
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\pandas\core\indexes\base.py", line 4389, in get_value
+    raise e1
+  File "C:\Users\jackley\Python\Python37-32\venv\lib\site-packages\pandas\core\indexes\base.py", line 4375, in get_value
+    tz=getattr(series.dtype, 'tz', None))
+  File "pandas\_libs\index.pyx", line 81, in pandas._libs.index.IndexEngine.get_value
+  File "pandas\_libs\index.pyx", line 89, in pandas._libs.index.IndexEngine.get_value
+  File "pandas\_libs\index.pyx", line 132, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas\_libs\hashtable_class_helper.pxi", line 1601, in pandas._libs.hashtable.PyObjectHashTable.get_item
+  File "pandas\_libs\hashtable_class_helper.pxi", line 1608, in pandas._libs.hashtable.PyObjectHashTable.get_item
+KeyError: ('PA Tester', 'occurred at index 23')
+2020-01-06 13:43:08,237 INFO: Microblog startup [inC:\Users\jackley\Python\GitPython\hyperlinker\app\__init__.py:66]
+2020-01-06 13:43:58,307 INFO: Microblog startup [inC:\Users\jackley\Python\GitPython\hyperlinker\app\__init__.py:66]

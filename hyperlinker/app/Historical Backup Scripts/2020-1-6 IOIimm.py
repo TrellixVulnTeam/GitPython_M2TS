@@ -2350,12 +2350,15 @@ def upload_IOIimm():
         
         #Eligibility_Date & Rollovers 
         
-        def Eligibility_Date(Effective_Date,Date_Opened):
-            if Effective_Date != '':
+        def Eligibility_Date(Effective_Date,Date_Opened,SubstantialActivityDate):
+            if SubstantialActivityDate != '':
+                return SubstantialActivityDate
+            elif Effective_Date != '':
                 return Effective_Date
             else:
                 return Date_Opened
-        data_xls['Eligibility_Date'] = data_xls.apply(lambda x : Eligibility_Date(x['IOI HRA Effective Date (optional) (IOI 2)'],x['Date Opened']), axis = 1)
+        data_xls['Eligibility_Date'] = data_xls.apply(lambda x : Eligibility_Date(x['IOI HRA Effective Date (optional) (IOI 2)'],x['Date Opened'],x['Date of Substantial Activity']), axis = 1)
+        
         
         #Manipulable Dates               
         
@@ -2379,6 +2382,8 @@ def upload_IOIimm():
         data_xls['Outcome2 Day'] = data_xls['IOI Secondary Outcome Date 2 (IOI 2)'].apply(lambda x: str(x)[3:5])
         data_xls['Outcome2 Year'] = data_xls['IOI Secondary Outcome Date 2 (IOI 2)'].apply(lambda x: str(x)[6:])
         data_xls['Outcome2 Construct'] = data_xls['Outcome2 Year'] + data_xls['Outcome2 Month'] + data_xls['Outcome2 Day']       
+        
+        
         
         
         #DHCI Form
@@ -2562,16 +2567,19 @@ def upload_IOIimm():
         data_xls['Group'] = ''
         data_xls['Prior_Enrollment_FY'] = 'Jay does this manually later'
         
-          
+        """  
         #CLEANUP VERSION Put everything in the right order
-        data_xls = data_xls[['Hyperlinked Case #','Office','Primary Advocate','Client Name','Special Legal Problem Code','Level of Service','Needs DHCI?','Exclude due to Income?','Needs Substantial Activity?','Country of Origin','Language','Outcome To Report','HRA Case Coding','IOI Was client apprehended at border? (IOI 2&3)']]
+        data_xls = data_xls[['Hyperlinked Case #','Office','Primary Advocate','Client Name','Special Legal Problem Code','Level of Service','Needs DHCI?','Exclude due to Income?','Needs Substantial Activity?','Country of Origin','Language','Outcome To Report','IOI Was client apprehended at border? (IOI 2&3)','Deliverable Tally']]
+        
+        #sorting by borough and advocate
+        data_xls = data_xls.sort_values(by=['Office','Primary Advocate'])
         
         """
         #REPORTING VERSION Put everything in the right order
         data_xls = data_xls[['Unique_ID','Last_Initial','First_Initial','Year_of_Birth','Gender','Country of Origin','Borough','Zip Code','Language','Household_Size','Number_of_Children','Annual_Income','Income_Eligible','Waiver_Type','Waiver_Approval_Date','Eligibility_Date','Referral_Source','Service_Type_Code','Proceeding_Type_Code','Outcome','Outcome_Date','Seized_at_Border','Group','Prior_Enrollment_FY','Pro_Bono','Special Legal Problem Code','HRA Level of Service','HRA Case Coding','Hyperlinked Case #','Office','Primary Advocate','Client Name','Special Legal Problem Code','Level of Service','Needs DHCI?','Exclude due to Income?','Needs Substantial Activity?','Country of Origin','Outcome To Report','HRA Case Coding','IOI Was client apprehended at border? (IOI 2&3)']]
         
         #substantial activities filter - need to totally review what makes a case non-reportable, get rid of stacking cap, income, dhci form, no service entries... that's it? etc.
-        """
+        
         
         #Preparing Excel Document
         
@@ -2629,14 +2637,14 @@ def upload_IOIimm():
     return '''
     <!doctype html>
     <title>IOI Immigration</title>
-    <link rel="stylesheet" href="/static/css/main.css">
+    <link rel="stylesheet" href="/static/css/main.css">  
     <h1>Check your IOI Immigration Cases:</h1>
     <form action="" method=post enctype=multipart/form-data>
     <p><input type=file name=file><input type=submit value=IOI-ify!>
     </form>
     <h3>Instructions:</h3>
     <ul type="disc">
-    <li>This tool is meant to be used in conjunction with the LegalServer report called "Grants Management IOI 2 (3459) Report".</li>
+    <li>This tool is meant to be used in conjunction with the LegalServer report called <a href="https://lsnyc.legalserver.org/report/dynamic?load=1918" target="_blank">Grants Management IOI 2 (3459) Report</a>.</li>
     <li>Browse your computer using the field above to find the LegalServer excel document that you want to process for IOI.</li> 
     <li>Once you have identified this file, click ‘IOI-ify!’ and you should shortly be given a prompt to either open the file directly or save the file to your computer.</li> 
     <li>When you first open the file, all case numbers will display as ‘0’ until you click “Enable Editing” in excel, this will populate the fields.</li> </ul>
