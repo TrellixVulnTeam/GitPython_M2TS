@@ -246,7 +246,7 @@ def upload_BrownsvilleTRCclean():
             else:
                 return 'Needs Correct PA # Format'
                 
-        data_xls['PA Tester'] = data_xls.apply(lambda x: PATester(x['Housing Income Verification'],x['Gen Pub Assist Case Number']), axis=1)
+        data_xls['PA # Tester'] = data_xls.apply(lambda x: PATester(x['Housing Income Verification'],x['Gen Pub Assist Case Number']), axis=1)
         
         #Test if case number is correct format
         def CaseNum (CaseNum):
@@ -273,6 +273,24 @@ def upload_BrownsvilleTRCclean():
                 return "Needs Correct Case # Format"
                 
         data_xls['Case Number Tester'] = data_xls.apply(lambda x: CaseNum(x['Gen Case Index Number']), axis=1)
+        
+        #Test if social security number is correct format
+        def SSNum (CaseNum):
+            CaseNum = str(CaseNum)
+            First3 = CaseNum[0:3]
+            Middle2 = CaseNum[4:6]
+            Last4 = CaseNum[7:11]
+            FirstDash = CaseNum[3:4]
+            SecondDash = CaseNum[6:7]
+            
+            if str.isnumeric(First3) == True and str.isnumeric(Middle2) == True and str.isnumeric(Last4) == True and FirstDash == '-' and SecondDash == '-': 
+                return ''
+            elif CaseNum == '000-00-0000':
+                return 'Needs SS #'
+            else:
+                return "Needs Correct SS # Format"
+                
+        data_xls['SS # Tester'] = data_xls.apply(lambda x: SSNum(x['Social Security #']), axis=1)
         
         #Test Housing Activity Indicator - can't be blank for closed cases that are full rep state or full rep federal(housing level of service) and eviction cases(housing type of case: non-payment holdover illegal lockout nycha housing termination)
         
@@ -321,7 +339,7 @@ def upload_BrownsvilleTRCclean():
             else:
                 return 'Case Needs Attention'
             
-        data_xls['Tester Tester'] = data_xls.apply(lambda x: TesterTester(x['HRA Release Tester'],x['Housing Type Tester'],x['Housing Level Tester'],x['Building Case Tester'],x['Referral Tester'],x['Rent Tester'],x['Unit Tester'],x[ 'Regulation Tester'],x['Subsidy Tester'],x['Years in Apartment Tester'],x['Language Tester'],x['Posture Tester'],x['Income Verification Tester'],x['PA Tester'],x['Case Number Tester'],x['Housing Activity Tester'],x['Housing Services Tester'],x['Outcome Tester']),axis=1)
+        data_xls['Tester Tester'] = data_xls.apply(lambda x: TesterTester(x['HRA Release Tester'],x['Housing Type Tester'],x['Housing Level Tester'],x['Building Case Tester'],x['Referral Tester'],x['Rent Tester'],x['Unit Tester'],x[ 'Regulation Tester'],x['Subsidy Tester'],x['Years in Apartment Tester'],x['Language Tester'],x['Posture Tester'],x['Income Verification Tester'],x['PA # Tester'],x['Case Number Tester'],x['Housing Activity Tester'],x['Housing Services Tester'],x['Outcome Tester']),axis=1)
         
 
         #(delete if so?)
@@ -335,7 +353,29 @@ def upload_BrownsvilleTRCclean():
         
         #Put everything in the right order
         
-        data_xls = data_xls[['Hyperlinked Case #','Primary Advocate',
+        data_xls = data_xls[['Hyperlinked Case #','Primary Advocate',"Assigned Branch/CC",
+        "Date Opened",
+        "Date Closed",
+        "Client First Name",
+        "Client Last Name",
+        "Street Address",
+        "Apt#/Suite#",
+        "City",
+        "Zip Code",
+        "Close Reason",
+        "Secondary Funding Codes",
+        "Legal Problem Code",
+        "Date of Birth",
+        "Number of People 18 and Over",
+        "Number of People under 18",
+        "Percentage of Poverty",
+        "Housing Date Of Waiver Approval",
+        "Housing TRC HRA Waiver Categories",
+        "Total Annual Income ",
+        "Housing Funding Note",
+        "Total Time For Case",
+        "Service Date",
+        "Caseworker Name",
         'HRA Release Tester',"HRA Release?","HAL Eligibility Date",
         'Housing Type Tester',"Housing Type Of Case",
         'Housing Level Tester',"Housing Level of Service",
@@ -349,35 +389,13 @@ def upload_BrownsvilleTRCclean():
         'Language Tester',"Language",
         'Posture Tester',"Housing Posture of Case on Eligibility Date",
         'Income Verification Tester',"Housing Income Verification",
-        'PA Tester',"Gen Pub Assist Case Number",
+        'PA # Tester',"Gen Pub Assist Case Number",
+        "SS # Tester","Social Security #",
         'Case Number Tester',"Gen Case Index Number",
         'Housing Activity Tester',"Housing Activity Indicators",
         'Housing Services Tester',"Housing Services Rendered to Client",
         'Outcome Tester',"Case Disposition","Housing Outcome","Housing Outcome Date",
-        "Assigned Branch/CC",
-        "Date Opened",
-        "Date Closed",
-        "Client First Name",
-        "Client Last Name",
-        "Street Address",
-        "Apt#/Suite#",
-        "City",
-        "Zip Code",
-        "Close Reason",
-        "Secondary Funding Codes",
-        "Legal Problem Code",
-        "Date of Birth",
-        "Social Security #",
-        "Number of People 18 and Over",
-        "Number of People under 18",
-        "Percentage of Poverty",
-        "Housing Date Of Waiver Approval",
-        "Housing TRC HRA Waiver Categories",
-        "Total Annual Income ",
-        "Housing Funding Note",
-        "Total Time For Case",
-        "Service Date",
-        "Caseworker Name"
+        
 ]]      
         
         #Preparing Excel Document
@@ -392,11 +410,16 @@ def upload_BrownsvilleTRCclean():
         link_format = workbook.add_format({'font_color':'blue', 'bold':True, 'underline':True})
         regular_format = workbook.add_format({'font_color':'black'})
         problem_format = workbook.add_format({'bg_color':'yellow'})
+        bad_problem_format = workbook.add_format({'bg_color':'red'})
         
         
         worksheet.set_column('A:A',20,link_format)
         worksheet.set_column('B:BL',25)
         worksheet.freeze_panes(1, 2)
+        worksheet.conditional_format('C2:AM100000',{'type': 'text',
+                                                 'criteria': 'containing',
+                                                 'value': 'No Release - Remove Elig Date',
+                                                 'format': bad_problem_format})
         worksheet.conditional_format('C2:AM100000',{'type': 'text',
                                                  'criteria': 'containing',
                                                  'value': 'Needs',
