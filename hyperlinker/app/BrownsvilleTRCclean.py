@@ -416,16 +416,16 @@ def upload_BrownsvilleTRCclean():
         worksheet.set_column('A:A',20,link_format)
         worksheet.set_column('B:BL',25)
         worksheet.freeze_panes(1, 2)
-        worksheet.conditional_format('C2:AM100000',{'type': 'text',
+        worksheet.conditional_format('C2:BO100000',{'type': 'text',
                                                  'criteria': 'containing',
                                                  'value': 'No Release - Remove Elig Date',
                                                  'format': bad_problem_format})
-        worksheet.conditional_format('C2:AM100000',{'type': 'text',
+        worksheet.conditional_format('C2:BO100000',{'type': 'text',
                                                  'criteria': 'containing',
                                                  'value': 'Needs',
                                                  'format': problem_format})
         
-        worksheet.conditional_format('C1:AM1',{'type': 'text',
+        worksheet.conditional_format('C1:BO1',{'type': 'text',
                                                  'criteria': 'containing',
                                                  'value': 'Tester',
                                                  'format': problem_format})
