@@ -210,15 +210,21 @@ def upload_BrownsvilleTRCclean():
                 return ''
         data_xls['Posture Tester'] = data_xls.apply(lambda x: Posture(x['Housing Posture of Case on Eligibility Date'],x['HAL Eligibility Date']), axis=1)
         
-        #Housing Income Verification can't be blank or none
-        def IncomeVerification (IncomeVerification):
-            if IncomeVerification == '':
+        #Housing Income Verification can't be blank or none and other stuff with kids and poverty level and you just give up if it's closed
+        def IncomeVerification (IncomeVerification, Children, PovertyPercent, Disposition):
+            if Children > 0 and PovertyPercent <= 200.99 and IncomeVerification == '':
+                return 'Must Have DHCI or PA#'
+            elif Children > 0 and PovertyPercent <= 200.99 and IncomeVerification == 'None':
+                return 'Must Have DHCI or PA#'
+            elif Disposition == 'Closed' and IncomeVerification =='None':
+                return ''
+            elif IncomeVerification == '':
                 return 'Needs Income Verification'
-            if IncomeVerification == 'None':
+            elif IncomeVerification == 'None':
                 return 'Needs Income Verification'
             else:
                 return ''
-        data_xls['Income Verification Tester'] = data_xls.apply(lambda x: IncomeVerification(x['Housing Income Verification']), axis=1)
+        data_xls['Income Verification Tester'] = data_xls.apply(lambda x: IncomeVerification(x['Housing Income Verification'], x['Number of People under 18'], x['Percentage of Poverty'],x['Case Disposition']), axis=1)
        
         #PA Tester (need to be correct format as well)
         def PATester (IncomeVerification,PANumber):
@@ -373,6 +379,7 @@ def upload_BrownsvilleTRCclean():
         "Service Date",
         "Caseworker Name",
         'HRA Release Tester',"HRA Release?","HAL Eligibility Date",
+        'Income Verification Tester',"Housing Income Verification",        
         'Housing Type Tester',"Housing Type Of Case",
         'Housing Level Tester',"Housing Level of Service","Close Reason",
         'Building Case Tester',"Housing Building Case?",
@@ -384,7 +391,6 @@ def upload_BrownsvilleTRCclean():
         'Years in Apartment Tester',"Housing Years Living In Apartment",
         'Language Tester',"Language",
         'Posture Tester',"Housing Posture of Case on Eligibility Date",
-        'Income Verification Tester',"Housing Income Verification",
         'PA # Tester',"Gen Pub Assist Case Number",
         "SS # Tester","Social Security #",
         'Case Number Tester',"Gen Case Index Number",
@@ -410,6 +416,7 @@ def upload_BrownsvilleTRCclean():
         regular_format = workbook.add_format({'font_color':'black'})
         problem_format = workbook.add_format({'bg_color':'yellow'})
         bad_problem_format = workbook.add_format({'bg_color':'red'})
+        medium_problem_format = workbook.add_format({'bg_color':'orange'})
         
         
         worksheet.set_column('A:A',20,link_format)
@@ -428,6 +435,11 @@ def upload_BrownsvilleTRCclean():
                                                  'criteria': 'containing',
                                                  'value': 'Tester',
                                                  'format': problem_format})
+        worksheet.conditional_format('C2:BO100000',{'type': 'text',
+                                                 'criteria': 'containing',
+                                                 'value': 'Must Have DHCI or PA#',
+                                                 'format': medium_problem_format})                                         
+                                                 
         
         writer.save()
         

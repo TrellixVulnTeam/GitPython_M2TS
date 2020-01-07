@@ -167,15 +167,21 @@ def upload_TRCclean():
                 return ''
         data_xls['Posture Tester'] = data_xls.apply(lambda x: Posture(x['Housing Posture of Case on Eligibility Date'],x['HAL Eligibility Date']), axis=1)
         
-        #Housing Income Verification can't be blank or none
-        def IncomeVerification (IncomeVerification):
-            if IncomeVerification == '':
+        #Housing Income Verification can't be blank or none and other stuff with kids and poverty level and you just give up if it's closed
+        def IncomeVerification (IncomeVerification, Children, PovertyPercent, Disposition):
+            if Children > 0 and PovertyPercent <= 200.99 and IncomeVerification == '':
+                return 'Must Have DHCI or PA#'
+            elif Children > 0 and PovertyPercent <= 200.99 and IncomeVerification == 'None':
+                return 'Must Have DHCI or PA#'
+            elif Disposition == 'Closed' and IncomeVerification =='None':
+                return ''
+            elif IncomeVerification == '':
                 return 'Needs Income Verification'
-            if IncomeVerification == 'None':
+            elif IncomeVerification == 'None':
                 return 'Needs Income Verification'
             else:
                 return ''
-        data_xls['Income Verification Tester'] = data_xls.apply(lambda x: IncomeVerification(x['Housing Income Verification']), axis=1)
+        data_xls['Income Verification Tester'] = data_xls.apply(lambda x: IncomeVerification(x['Housing Income Verification'], x['Number of People under 18'], x['Percentage of Poverty'],x['Case Disposition']), axis=1)
        
         #PA Tester (need to be correct format as well)
         def PATester (IncomeVerification,PANumber):
@@ -330,6 +336,7 @@ def upload_TRCclean():
         "Service Date",
         "Caseworker Name",
         'HRA Release Tester',"HRA Release?","HAL Eligibility Date",
+        'Income Verification Tester',"Housing Income Verification",        
         'Housing Type Tester',"Housing Type Of Case",
         'Housing Level Tester',"Housing Level of Service","Close Reason",
         'Building Case Tester',"Housing Building Case?",
@@ -341,7 +348,6 @@ def upload_TRCclean():
         'Years in Apartment Tester',"Housing Years Living In Apartment",
         'Language Tester',"Language",
         'Posture Tester',"Housing Posture of Case on Eligibility Date",
-        'Income Verification Tester',"Housing Income Verification",
         'PA # Tester',"Gen Pub Assist Case Number",
         "SS # Tester","Social Security #",
         'Case Number Tester',"Gen Case Index Number",
@@ -367,6 +373,7 @@ def upload_TRCclean():
         regular_format = workbook.add_format({'font_color':'black'})
         problem_format = workbook.add_format({'bg_color':'yellow'})
         bad_problem_format = workbook.add_format({'bg_color':'red'})
+        medium_problem_format = workbook.add_format({'bg_color':'orange'})
         
         
         worksheet.set_column('A:A',20,link_format)
@@ -385,6 +392,11 @@ def upload_TRCclean():
                                                  'criteria': 'containing',
                                                  'value': 'Tester',
                                                  'format': problem_format})
+        worksheet.conditional_format('C2:BO100000',{'type': 'text',
+                                                 'criteria': 'containing',
+                                                 'value': 'Must Have DHCI or PA#',
+                                                 'format': medium_problem_format})                                         
+                                                 
         
         writer.save()
         
@@ -401,6 +413,7 @@ def upload_TRCclean():
     <h3>Instructions:</h3>
     <ul type="disc">
     <li>This tool is meant to be used in conjunction with the LegalServer report called <a href="https://lsnyc.legalserver.org/report/dynamic?load=1507" target="_blank">TRC Raw Case Data Report</a>.</li>
+    
     <li>Browse your computer using the field above to find the LegalServer excel document that you want to process for TRC cleanup.</li> 
     <li>Once you have identified this file, click ‘Clean!’ and you should shortly be given a prompt to either open the file directly or save the file to your computer.</li> 
     <li>When you first open the file, all case numbers will display as ‘0’ until you click “Enable Editing” in excel, this will populate the fields.</li> </ul>
