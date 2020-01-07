@@ -4,3 +4,5 @@ hyperlinker/run.py
 hyperlinker/__pycache__/
 
 hyperlinker/app/__pycache__/
+
+*.log
