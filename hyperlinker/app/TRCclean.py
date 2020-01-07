@@ -17,19 +17,19 @@ def upload_TRCclean():
         
         test.fillna('',inplace=True)
         
-        
         #Cleaning
         if test.iloc[0][0] == '':
             data_xls = pd.read_excel(f,skiprows=2)
         else:
             data_xls = pd.read_excel(f)
         
+        data_xls.fillna('',inplace=True)
         last7 = data_xls['Matter/Case ID#'].apply(lambda x: x[3:])
         CaseNum = data_xls['Matter/Case ID#']
         data_xls['Temp Hyperlinked Case #']='=HYPERLINK("https://lsnyc.legalserver.org/matter/dynamic-profile/view/'+last7+'",'+ '"' + CaseNum +'"' +')'
         del data_xls['Matter/Case ID#']
         move=data_xls['Temp Hyperlinked Case #']
-        data_xls.insert(0,'Case #', move)           
+        data_xls.insert(0,'Hyperlinked Case #', move)           
         del data_xls['Temp Hyperlinked Case #']
         
         data_xls['Assigned Branch/CC'] = data_xls['Assigned Branch/CC'].str.replace('Bronx Legal Services','BxLS')
@@ -38,168 +38,372 @@ def upload_TRCclean():
         data_xls['Assigned Branch/CC'] = data_xls['Assigned Branch/CC'].str.replace('Manhattan Legal Services','MLS')
         data_xls['Assigned Branch/CC'] = data_xls['Assigned Branch/CC'].str.replace('Staten Island Legal Services','SILS')
         data_xls['Assigned Branch/CC'] = data_xls['Assigned Branch/CC'].str.replace('Legal Support Unit','LSU')
+
+
+            
+
+        #Has to have an HRA Release
         
-        #Needs HRA Release?
-        
-        def Release_Needed(HRA_Release):
-            if HRA_Release == 'Yes':
+        def HRARelease (HRARelease,EligibilityDate):
+            if HRARelease == 'No' and EligibilityDate != '':
+                return 'No Release - Remove Elig Date'
+            elif HRARelease == '' and EligibilityDate != '':
+                return 'No Release - Remove Elig Date'
+            elif HRARelease == 'Yes':
                 return ''
             else:
                 return 'Needs HRA Release'
+        data_xls['HRA Release Tester'] = data_xls.apply(lambda x: HRARelease(x['HRA Release?'],x['HAL Eligibility Date']), axis=1)
         
-        data_xls['Needs Release?'] = data_xls.apply(lambda x: Release_Needed(x['HRA Release?']), axis=1)
+        #Has to have a Housing Type of Case
         
-        #Needs Level of Service?
-        
-        def Needs_LOS(Level_of_Service):
-            if Level_of_Service == 'Advice' or Level_of_Service == 'Hold For Review' or Level_of_Service == 'Brief Service' or Level_of_Service == 'Representation - State Court' or Level_of_Service == 'Out-of-Court Advocacy' or Level_of_Service == 'Representation - Admin. Agency' or Level_of_Service == 'Representation - Federal Court'  :
-                return ''
+        def HousingType (HousingType):
+            if HousingType == '':
+                return 'Needs Housing Type of Case'
             else:
+                return ''
+        data_xls['Housing Type Tester'] = data_xls.apply(lambda x: HousingType(x['Housing Type Of Case']), axis=1)
+        
+        
+        #Has to have a Housing Level of Service - and if DHCR case has to be admin proceeding or rep - admin agency 
+        
+        
+        def HousingLevel (HousingLevel,HousingType):
+            if HousingLevel == '':
                 return 'Needs Level of Service'
-        
-        data_xls['Needs Level of Service?'] = data_xls.apply(lambda x: Needs_LOS(x['Housing Level of Service']), axis=1)
-        
-        #Eligibility Date Within Current Fiscal Year?
-        
-        data_xls['Eligibility Month'] = data_xls['HAL Eligibility Date'].apply(lambda x: str(x)[:2])
-        data_xls['Eligibility Day'] = data_xls['HAL Eligibility Date'].apply(lambda x: str(x)[3:5])
-        data_xls['Eligibility Year'] = data_xls['HAL Eligibility Date'].apply(lambda x: str(x)[6:])
-        data_xls['Eligibility Construct'] = data_xls['Eligibility Year'] + data_xls['Eligibility Month'] + data_xls['Eligibility Day']
-        
-        
-        def Current_Year(Eligibility_Construct):
-            if Eligibility_Construct == 'na':
-                return 'No Eligibility Date'            
-            elif int(Eligibility_Construct) > 20180701 and int(Eligibility_Construct) < 20190630:
-                return ''
-            else:
-                return 'Wrong Fiscal Year'
-        
-        data_xls['Eligibility Date in Current Fiscal Year?'] = data_xls.apply(lambda x: Current_Year(x['Eligibility Construct']), axis=1)
-        
-        #Income Verified
-        
-        def Income_Verified(DHCI_form,Housing_Verification):
-            if DHCI_form == 'Yes':
-                return ''
-            elif Housing_Verification == 'DHCI Form' or Housing_Verification == 'Active CA/SNAP':
-                return ''
-            else:
-                return 'Needs Income Verified'
-        
-        data_xls['Income Verified?'] = data_xls.apply(lambda x: Income_Verified(x['Housing Signed DHCI Form'], x['Housing Income Verification']), axis=1)
-        
-        #Social Security or Public Assistance #
-        
-        def ValidSSN(SSN):
-            if len(str(SSN)) < 11:
-                return 'Invalid SSN'
-            elif SSN == '000-00-0000' or SSN == '999-99-9999':
-                return 'Invalid SSN'
             else:
                 return ''
+        data_xls['Housing Level Tester'] = data_xls.apply(lambda x: HousingLevel(x['Housing Level of Service'],x['Housing Type Of Case']), axis=1)
+        
+        #Has to say whether or not it's a building case 
+        
+        def BuildingCase (BuildingCase):
+            if BuildingCase == '':
+                return 'Needs Building Case Answer'
+            if BuildingCase == 'Prefer Not To Answer':
+                return 'Needs Building Case Answer'
+            else:
+                return ''
+        data_xls['Building Case Tester'] = data_xls.apply(lambda x: BuildingCase(x['Housing Building Case?']), axis=1)
+        
+        #Referral Source Can't Be Blank
+        
+        def Referral (Referral,FundingSource):
+            if Referral == '':
+                return 'Needs Referral Source'
+            elif FundingSource == '3011 TRC FJC Initiative' and Referral != 'FJC Housing Intake':
+                return 'Must be FJC'
+            else:
+                return ''
+        data_xls['Referral Tester'] = data_xls.apply(lambda x: Referral(x['Referral Source'],x['Primary Funding Code']), axis=1)
+        
+        #monthly rent can't be 0
+        
+        def Rent (Rent):
+            if Rent == 0:
+                return 'Needs Rent Amount'
+            else:
+                return ''
+        data_xls['Rent Tester'] = data_xls.apply(lambda x: Rent(x['Housing Total Monthly Rent']), axis=1)
+        
+        #number of units in building can't be 0
+        
+        def Units (Units):
             
-        data_xls['Valid SSN?'] = data_xls.apply(lambda x: ValidSSN(x['Social Security #']),axis=1)
-        
-        def ValidPA(PA):
-            if len(str(PA)) < 8:
-                return 'Invalid PA#'
-            elif PA == '000-00-0000':
-                return 'Invalid PA#'
+            Units = str(Units)
+            if Units == '0':
+                return 'Needs Units'
+            elif any(c.isalpha() for c in Units) == True:
+                return 'Needs To Be Number'
             else:
                 return ''
-            
-        data_xls['Valid PA#?'] = data_xls.apply(lambda x: ValidPA(x['Gen Pub Assist Case Number']),axis=1)
+        data_xls['Unit Tester'] = data_xls.apply(lambda x: Units(x['Housing Number Of Units In Building']), axis=1)
         
-        def NeedsSSNorPA(ValidSSN,ValidPA):
-            if ValidSSN == 'Invalid SSN' and ValidPA == 'Invalid PA#':
-                return 'Needs SSN or PA#'
+        #Housing form of regulation can't be blank
+        
+        def Regulation (Regulation):
+            if Regulation == '':
+                return 'Needs Form of Regulation'
             else:
                 return ''
+        data_xls['Regulation Tester'] = data_xls.apply(lambda x: Regulation(x['Housing Form Of Regulation']), axis=1)
+        
+        #Housing subsidy can't be blank (can be none)
+        
+        def Subsidy (Subsidy):
+            if Subsidy == '':
+                return 'Needs Type of Subsidy'
+            else:
+                return ''
+        data_xls['Subsidy Tester'] = data_xls.apply(lambda x: Subsidy(x['Housing Subsidy Type']), axis=1)
+        
+        #Years in Apartment Can't be 0 (can be -1)
+        
+        def Years (Years):
+            if Years == 0:
+                return 'Needs Years In Apartment'
+            elif Years < -1:
+                return 'Needs Valid Number'
+            else:
+                return ''
+        data_xls['Years in Apartment Tester'] = data_xls.apply(lambda x: Years(x['Housing Years Living In Apartment']), axis=1)
+        
+        #Language Can't be Blank
+        
+        def Language (Language):
+            if Language == '':
+                return 'Needs Language'
+            else:
+                return ''
+        data_xls['Language Tester'] = data_xls.apply(lambda x: Language(x['Language']), axis=1)
+        
+        
+        #Housing Posture of Case can't be blank if there is an eligibility date
+        
+        def Posture (Posture,EligibilityDate):
+            if EligibilityDate  == '' and Posture == '':
+                return 'Needs Posture of Case'
+            else:
+                return ''
+        data_xls['Posture Tester'] = data_xls.apply(lambda x: Posture(x['Housing Posture of Case on Eligibility Date'],x['HAL Eligibility Date']), axis=1)
+        
+        #Housing Income Verification can't be blank or none
+        def IncomeVerification (IncomeVerification):
+            if IncomeVerification == '':
+                return 'Needs Income Verification'
+            if IncomeVerification == 'None':
+                return 'Needs Income Verification'
+            else:
+                return ''
+        data_xls['Income Verification Tester'] = data_xls.apply(lambda x: IncomeVerification(x['Housing Income Verification']), axis=1)
+       
+        #PA Tester (need to be correct format as well)
+        def PATester (IncomeVerification,PANumber):
+                        
+            PANumber = str(PANumber)
+            LastCharacter = PANumber[-1:]
+            PenultimateCharater = PANumber[-2:-1]
+            SecondCharacter = PANumber [1:2]
+            if PANumber == '':
+                return ''
+            elif PANumber == 'None':
+                return ''
+            elif SecondCharacter == 'o':
+                return ''
+            elif SecondCharacter == 'n':
+                return ''
+            elif len(PANumber) == 10 and str.isalpha(LastCharacter) == True and str.isalpha(PenultimateCharater) == False and PenultimateCharater != '-' and PenultimateCharater != ' ':
+                return ''
+            elif len(PANumber) == 12 and str.isalpha(LastCharacter) == True and str.isalpha(PenultimateCharater) == False and PenultimateCharater != '-' and PenultimateCharater != ' ':
+                return ''
+            elif len(PANumber) == 9 and str.isalpha(LastCharacter) == False and PenultimateCharater != '-' and PenultimateCharater != ' ':
+                return ''
+            elif SecondCharacter == 'o':
+                return 'Needs PA Number'
+            else:
+                return 'Needs Correct PA # Format'
                 
-        data_xls['Needs SSN or PA#?'] = data_xls.apply(lambda x: NeedsSSNorPA(x['Valid SSN?'],x['Valid PA#?']),axis=1)
+        data_xls['PA # Tester'] = data_xls.apply(lambda x: PATester(x['Housing Income Verification'],x['Gen Pub Assist Case Number']), axis=1)
         
-        #Do cases have any problems?
-        
-        def AnyProblems(NeedsRelease,EligibilityDate,IncomeVerified,NeedsSSNorPA,NeedsLoS):
-            if NeedsRelease == '' and EligibilityDate == '' and IncomeVerified == '' and NeedsSSNorPA == '' and NeedsLoS == '':
-                return 'No Problems'
+        #Test if case number is correct format
+        def CaseNum (CaseNum):
+            CaseNum = str(CaseNum)
+            First3 = CaseNum[0:3]
+            ThirdFromEnd = CaseNum[-3:-2]
+            SecondFromEnd = CaseNum[-2:-1]
+            First6 = CaseNum[0:6]
+            First2 = CaseNum[0:2]
+            #City LT Case format LT-123456-19/XX
+            if len(CaseNum) == 15 and First3 == 'LT-' and ThirdFromEnd == '/':
+                return ''
+            elif len(CaseNum) == 15 and First3 == 'CV-' and ThirdFromEnd == '/':
+                return ''
+            #DHCR format AA-123456-S (or 2 letters at end)
+            elif str.isalpha(First2) == True and len(CaseNum) == 11 and SecondFromEnd == '-':
+                return ''
+            elif str.isalpha(First2) == True and len(CaseNum) == 12 and ThirdFromEnd == '-':
+                return ''
+            #Federal/Supreme format 123456/2019
+            elif len(CaseNum) == 11 and str.isdigit(First6) == True:
+                return ''
             else:
-                return 'Case Has Problems'
+                return "Needs Correct Case # Format"
+                
+        data_xls['Case Number Tester'] = data_xls.apply(lambda x: CaseNum(x['Gen Case Index Number']), axis=1)
         
-        data_xls['Any Problems?'] = data_xls.apply(lambda x: AnyProblems(x['Needs Release?'],x['Eligibility Date in Current Fiscal Year?'],x['Income Verified?'],x['Needs SSN or PA#?'],x['Needs Level of Service?']),axis=1)
+        #Test if social security number is correct format
+        def SSNum (CaseNum):
+            CaseNum = str(CaseNum)
+            First3 = CaseNum[0:3]
+            Middle2 = CaseNum[4:6]
+            Last4 = CaseNum[7:11]
+            FirstDash = CaseNum[3:4]
+            SecondDash = CaseNum[6:7]
+            
+            if str.isnumeric(First3) == True and str.isnumeric(Middle2) == True and str.isnumeric(Last4) == True and FirstDash == '-' and SecondDash == '-': 
+                return ''
+            elif CaseNum == '000-00-0000':
+                return 'Needs SS #'
+            else:
+                return "Needs Correct SS # Format"
+                
+        data_xls['SS # Tester'] = data_xls.apply(lambda x: SSNum(x['Social Security #']), axis=1)
         
-        #replace commas with semicolons - currently unused
-        data_xls['Housing Activity Indicators'] = data_xls['Housing Activity Indicators'].str.replace(',',';')
+        #Test Housing Activity Indicator - can't be blank for closed cases that are full rep state or full rep federal(housing level of service) and eviction cases(housing type of case: non-payment holdover illegal lockout nycha housing termination)
         
-        data_xls['Housing Services Rendered to Client'] = data_xls['Housing Services Rendered to Client'].str.replace(',',';')
+        evictiontypes = ['Holdover','Non-payment','Illegal Lockout','NYCHA Housing Termination']
+        leveltypes = ['Representation - State Court','Representation - Federal Court']
+        
+        def ActivityTester(HousingActivity,Disposition,Level,Type,EvictionTypes,LevelTypes):
+            if Disposition == 'Closed' and Level in LevelTypes and Type in EvictionTypes and HousingActivity == '':
+                return 'Needs Activity Indicator'
+            else:
+                return ''
+        
+       
+        data_xls['Housing Activity Tester'] = data_xls.apply(lambda x: ActivityTester(x['Housing Activity Indicators'],x['Case Disposition'],x['Housing Level of Service'],x['Housing Type Of Case'],evictiontypes,leveltypes), axis = 1)
+        
+        #Test Housing Services Rendered - can't be blank for closed cases that are full rep state or full rep federal(housing level of service)
+        
+        def ServicesTester(HousingServices,Disposition,Level,Type,EvictionTypes,LevelTypes):
+            if Disposition == 'Closed' and Level in LevelTypes and HousingServices == '':
+                return 'Needs Services Rendered'
+            elif Level == 'Representation - Admin. Agency' and Disposition == 'Closed':
+                return 'Needs Services Rendered'
+            else:
+                return ''
+               
+        data_xls['Housing Services Tester'] = data_xls.apply(lambda x: ServicesTester(x['Housing Services Rendered to Client'],x['Case Disposition'],x['Housing Level of Service'],x['Housing Type Of Case'],evictiontypes,leveltypes), axis = 1)
+        
+        #Outcome Tester - needs outcome and date for eviction cases that are full rep at state or federal level (not admin)
+        
+        def OutcomeTester (Disposition,Outcome,OutcomeDate,Level,Type,EvictionTypes,LevelTypes):
+            if Disposition == 'Closed' and Level in LevelTypes and Type in EvictionTypes and Outcome == '' and OutcomeDate == '':
+                return 'Needs Outcome & Date'
+            elif Disposition == 'Closed' and Level in LevelTypes and Type in EvictionTypes and Outcome == '':
+                return 'Needs Outcome'
+            elif Disposition == 'Closed' and Level in LevelTypes and Type in EvictionTypes and OutcomeDate == '':
+                return 'Needs Outcome Date'
+            else:
+                return ''
+        data_xls['Outcome Tester'] = data_xls.apply(lambda x: OutcomeTester(x['Case Disposition'],x['Housing Outcome'],x['Housing Outcome Date'],x['Housing Level of Service'],x['Housing Type Of Case'],evictiontypes,leveltypes), axis = 1)
+        
+        #Is everything okay with a case? (delete if so?)
+
+        def TesterTester (ReleaseTester,TypeTester,LevelTester,BuildingTester,ReferralTester,RentTester,UnitTester,RegulationTester,SubsidyTester,YearsTester,LanguageTester,PostureTester,IncomeVerification,PATester,CaseNumberTester,ActivityTester,ServicesTester,OutcomeTester):
+            if ReleaseTester == '' and TypeTester == '' and LevelTester == '' and BuildingTester == '' and ReferralTester == '' and RentTester == '' and UnitTester == '' and RegulationTester == '' and SubsidyTester == '' and YearsTester == '' and LanguageTester == '' and PostureTester == '' and IncomeVerification == '' and PATester == '' and CaseNumberTester == '' and ActivityTester == '' and ServicesTester == '' and OutcomeTester == '':
+                return 'All Good!'
+            else:
+                return 'Case Needs Attention'
+            
+        data_xls['Tester Tester'] = data_xls.apply(lambda x: TesterTester(x['HRA Release Tester'],x['Housing Type Tester'],x['Housing Level Tester'],x['Building Case Tester'],x['Referral Tester'],x['Rent Tester'],x['Unit Tester'],x[ 'Regulation Tester'],x['Subsidy Tester'],x['Years in Apartment Tester'],x['Language Tester'],x['Posture Tester'],x['Income Verification Tester'],x['PA # Tester'],x['Case Number Tester'],x['Housing Activity Tester'],x['Housing Services Tester'],x['Outcome Tester']),axis=1)
+        
+
+        #(delete if so?)
+        
+        data_xls = data_xls[data_xls['Tester Tester'] != 'All Good!']
+
+        #sort by case handler
+        
+        data_xls = data_xls.sort_values(by=['Primary Advocate'])
+
         
         #Put everything in the right order
-        data_xls = data_xls[['Case #','Assigned Branch/CC','Needs Release?','Eligibility Date in Current Fiscal Year?','Income Verified?','Needs SSN or PA#?','Needs Level of Service?','Any Problems?']]
         
-        #Construct Summary Tables
-        problems_pivot = pd.pivot_table(data_xls,index=['Assigned Branch/CC'],values=['Case #'], columns=['Any Problems?'],aggfunc=len,fill_value=0)
+        data_xls = data_xls[['Hyperlinked Case #','Primary Advocate',"Assigned Branch/CC",
+        "Date Opened",
+        "Date Closed",
+        "Client First Name",
+        "Client Last Name",
+        "Street Address",
+        "Apt#/Suite#",
+        "City",
+        "Zip Code",
+        "Close Reason",
+        "Secondary Funding Codes",
+        "Legal Problem Code",
+        "Date of Birth",
+        "Number of People 18 and Over",
+        "Number of People under 18",
+        "Percentage of Poverty",
+        "Housing Date Of Waiver Approval",
+        "Housing TRC HRA Waiver Categories",
+        "Total Annual Income ",
+        "Housing Funding Note",
+        "Total Time For Case",
+        "Service Date",
+        "Caseworker Name",
+        'HRA Release Tester',"HRA Release?","HAL Eligibility Date",
+        'Housing Type Tester',"Housing Type Of Case",
+        'Housing Level Tester',"Housing Level of Service",
+        'Building Case Tester',"Housing Building Case?",
+        'Referral Tester',"Referral Source","Primary Funding Code",
+        'Rent Tester',"Housing Total Monthly Rent",
+        'Unit Tester',"Housing Number Of Units In Building",
+        'Regulation Tester',"Housing Form Of Regulation",
+        'Subsidy Tester',"Housing Subsidy Type",
+        'Years in Apartment Tester',"Housing Years Living In Apartment",
+        'Language Tester',"Language",
+        'Posture Tester',"Housing Posture of Case on Eligibility Date",
+        'Income Verification Tester',"Housing Income Verification",
+        'PA # Tester',"Gen Pub Assist Case Number",
+        "SS # Tester","Social Security #",
+        'Case Number Tester',"Gen Case Index Number",
+        'Housing Activity Tester',"Housing Activity Indicators",
+        'Housing Services Tester',"Housing Services Rendered to Client",
+        'Outcome Tester',"Case Disposition","Housing Outcome","Housing Outcome Date",
         
-        release_pivot = pd.pivot_table(data_xls,index=['Assigned Branch/CC'],values=['Case #'], columns=['Needs Release?'],aggfunc=len,fill_value=0)
+]]      
         
-        LOS_pivot = pd.pivot_table(data_xls,index=['Assigned Branch/CC'],values=['Case #'], columns=['Needs Level of Service?'],aggfunc=len,fill_value=0)
+        #Preparing Excel Document
         
-        income_pivot = pd.pivot_table(data_xls,index=['Assigned Branch/CC'],values=['Case #'],columns=['Income Verified?'],aggfunc=len,fill_value=0)
-        
-        eligibility_pivot = pd.pivot_table(data_xls,index=['Assigned Branch/CC'],values=['Case #'],columns=['Eligibility Date in Current Fiscal Year?'],aggfunc=len,fill_value=0)
-        
-        SSNPA_pivot = pd.pivot_table(data_xls,index=['Assigned Branch/CC'],values=['Case #'],columns=['Needs SSN or PA#?'],aggfunc=len,fill_value=0)
-        
-        #Bounce to a new excel file        
         output_filename = f.filename     
         writer = pd.ExcelWriter("app\\sheets\\"+output_filename, engine = 'xlsxwriter')
-        data_xls.to_excel(writer, sheet_name='Case List',index=False)
-        problems_pivot.to_excel(writer, sheet_name='Cases Summary')
-        release_pivot.to_excel(writer, sheet_name='Needs Release Summary')
-        income_pivot.to_excel(writer, sheet_name='Income Verified Summary')
-        eligibility_pivot.to_excel(writer, sheet_name='Eligibility Date Summary')
-        SSNPA_pivot.to_excel(writer, sheet_name='SSA PA Summary')
-        LOS_pivot.to_excel(writer, sheet_name='Level of Service Summary')
+        data_xls.to_excel(writer, sheet_name='Sheet1',index=False)
 
         workbook = writer.book
-        CaseList = writer.sheets['Case List']
-        CaseSummary = writer.sheets['Cases Summary']
-        ReleaseSummary = writer.sheets['Needs Release Summary']
-        IncomeSummary = writer.sheets['Income Verified Summary']
-        EligibilitySummary = writer.sheets['Eligibility Date Summary']
-        SSAPASummary  = writer.sheets['SSA PA Summary']
-        LOSSummary = writer.sheets['Level of Service Summary']
+        worksheet = writer.sheets['Sheet1']
 
         link_format = workbook.add_format({'font_color':'blue', 'bold':True, 'underline':True})
-
-        CaseList.set_column('A:A',20,link_format)
-        CaseList.set_column('B:H',22)
-        CaseSummary.set_column('A:C',20)
-        ReleaseSummary.set_column('A:C',20)
-        IncomeSummary.set_column('A:C',20)
-        CaseSummary.set_column('A:C',20)
-        EligibilitySummary.set_column('A:A',34)
-        EligibilitySummary.set_column('B:D',20)
-        SSAPASummary.set_column('A:C',20)
-        LOSSummary.set_column('A:C',20)
-
+        regular_format = workbook.add_format({'font_color':'black'})
+        problem_format = workbook.add_format({'bg_color':'yellow'})
+        bad_problem_format = workbook.add_format({'bg_color':'red'})
+        
+        
+        worksheet.set_column('A:A',20,link_format)
+        worksheet.set_column('B:BL',25)
+        worksheet.freeze_panes(1, 2)
+        worksheet.conditional_format('C2:BO100000',{'type': 'text',
+                                                 'criteria': 'containing',
+                                                 'value': 'No Release - Remove Elig Date',
+                                                 'format': bad_problem_format})
+        worksheet.conditional_format('C2:BO100000',{'type': 'text',
+                                                 'criteria': 'containing',
+                                                 'value': 'Needs',
+                                                 'format': problem_format})
+        
+        worksheet.conditional_format('C1:BO1',{'type': 'text',
+                                                 'criteria': 'containing',
+                                                 'value': 'Tester',
+                                                 'format': problem_format})
+        
         writer.save()
         
         return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = "Cleaned " + f.filename)
 
     return '''
     <!doctype html>
-    <title>TRC Cleaner</title>
-    <link rel="stylesheet" href="/static/css/main.css">
-    <h1>Check for Problems in TRC cases:</h1>
+    <title>TRCTester</title>
+    <link rel="stylesheet" href="/static/css/main.css">  
+    <h1>TRC Cleanup Report:</h1>
     <form action="" method=post enctype=multipart/form-data>
-    <p><input type=file name=file><input type=submit value=TRC-ify!>
+    <p><input type=file name=file><input type=submit value=Clean!>
     </form>
     <h3>Instructions:</h3>
     <ul type="disc">
     <li>This tool is meant to be used in conjunction with the LegalServer report called <a href="https://lsnyc.legalserver.org/report/dynamic?load=1507" target="_blank">TRC Raw Case Data Report</a>.</li>
-    <li>Browse your computer using the field above to find the LegalServer excel document that you want to process for TRC.</li> 
-    <li>Once you have identified this file, click ‘TRC-ify!’ and you should shortly be given a prompt to either open the file directly or save the file to your computer.</li> 
+    <li>Browse your computer using the field above to find the LegalServer excel document that you want to process for TRC cleanup.</li> 
+    <li>Once you have identified this file, click ‘Clean!’ and you should shortly be given a prompt to either open the file directly or save the file to your computer.</li> 
     <li>When you first open the file, all case numbers will display as ‘0’ until you click “Enable Editing” in excel, this will populate the fields.</li> </ul>
     </br>
     <a href="/">Home</a>
