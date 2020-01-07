@@ -5,4 +5,6 @@ hyperlinker/__pycache__/
 
 hyperlinker/app/__pycache__/
 
+hyperlinker/app/sheets/
+
 *.log
