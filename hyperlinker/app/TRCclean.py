@@ -319,14 +319,11 @@ def upload_TRCclean():
         "Apt#/Suite#",
         "City",
         "Zip Code",
-        "Secondary Funding Codes",
         "Legal Problem Code",
         "Date of Birth",
         "Number of People 18 and Over",
         "Number of People under 18",
         "Percentage of Poverty",
-        "Housing Date Of Waiver Approval",
-        "Housing TRC HRA Waiver Categories",
         "Total Annual Income ",
         "Housing Funding Note",
         "Total Time For Case",
@@ -351,6 +348,9 @@ def upload_TRCclean():
         'Housing Activity Tester',"Housing Activity Indicators",
         'Housing Services Tester',"Housing Services Rendered to Client",
         'Outcome Tester',"Case Disposition","Housing Outcome","Housing Outcome Date",
+        "Housing Date Of Waiver Approval",
+        "Housing TRC HRA Waiver Categories",
+        "Secondary Funding Codes"
         
 ]]      
         
