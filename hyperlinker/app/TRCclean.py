@@ -220,7 +220,7 @@ def upload_TRCclean():
             First6 = CaseNum[0:6]
             First2 = CaseNum[0:2]
             
-            if Level == 'Advice' or Level == 'Brief Service' or Level == 'Out-of-Court Advocacy':
+            if Level == 'Advice' or Level == 'Brief Service' or Level == 'Out-of-Court Advocacy' or Level == 'Hold For Review':
                 return ''            
             #City LT Case format LT-123456-19/XX
             elif len(CaseNum) == 15 and First3 == 'LT-' and ThirdFromEnd == '/':
