@@ -211,16 +211,19 @@ def upload_TRCclean():
                 
         data_xls['PA # Tester'] = data_xls.apply(lambda x: PATester(x['Housing Income Verification'],x['Gen Pub Assist Case Number']), axis=1)
         
-        #Test if case number is correct format
-        def CaseNum (CaseNum):
+        #Test if case number is correct format (don't need one if it's brief, advice, or out-of-court)
+        def CaseNum (CaseNum,Level):
             CaseNum = str(CaseNum)
             First3 = CaseNum[0:3]
             ThirdFromEnd = CaseNum[-3:-2]
             SecondFromEnd = CaseNum[-2:-1]
             First6 = CaseNum[0:6]
             First2 = CaseNum[0:2]
+            
+            if Level == 'Advice' or Level == 'Brief Service' or Level == 'Out-of-Court Advocacy':
+                return ''            
             #City LT Case format LT-123456-19/XX
-            if len(CaseNum) == 15 and First3 == 'LT-' and ThirdFromEnd == '/':
+            elif len(CaseNum) == 15 and First3 == 'LT-' and ThirdFromEnd == '/':
                 return ''
             elif len(CaseNum) == 15 and First3 == 'CV-' and ThirdFromEnd == '/':
                 return ''
@@ -235,7 +238,7 @@ def upload_TRCclean():
             else:
                 return "Needs Correct Case # Format"
                 
-        data_xls['Case Number Tester'] = data_xls.apply(lambda x: CaseNum(x['Gen Case Index Number']), axis=1)
+        data_xls['Case Number Tester'] = data_xls.apply(lambda x: CaseNum(x['Gen Case Index Number'],x['Housing Level of Service']), axis=1)
         
         #Test if social security number is correct format
         def SSNum (CaseNum):
@@ -316,49 +319,45 @@ def upload_TRCclean():
         
         #Put everything in the right order
         
-        data_xls = data_xls[['Hyperlinked Case #','Primary Advocate',"Assigned Branch/CC",
+        data_xls = data_xls[['Hyperlinked Case #','Primary Advocate',
         "Date Opened",
         "Date Closed",
         "Client First Name",
         "Client Last Name",
         "Street Address",
-        "Apt#/Suite#",
         "City",
         "Zip Code",
-        "Legal Problem Code",
-        "Date of Birth",
-        "Number of People 18 and Over",
+        "HRA Release?",'HRA Release Tester',
+        "Housing Income Verification",'Income Verification Tester',
+        'Case Number Tester',"Gen Case Index Number",        
+        "Housing Type Of Case",'Housing Type Tester',
+        "Housing Level of Service",'Housing Level Tester',"Close Reason",
+        "Housing Building Case?",'Building Case Tester',
+        "HAL Eligibility Date","Housing Posture of Case on Eligibility Date",'Posture Tester',
+        "Primary Funding Code",
+        "Housing Total Monthly Rent",'Rent Tester',
+        "Housing Number Of Units In Building",'Unit Tester',
+        "Housing Form Of Regulation",'Regulation Tester',
+        "Housing Subsidy Type",'Subsidy Tester',
+        "Housing Years Living In Apartment",'Years in Apartment Tester',
+        "Language",'Language Tester',
+        "Gen Pub Assist Case Number",'PA # Tester',
+        "Social Security #","SS # Tester",
+        "Referral Source",'Referral Tester',
+        'Housing Activity Tester',"Housing Activity Indicators",
+        "Housing Services Rendered to Client",'Housing Services Tester',
+        "Housing Outcome",'Outcome Tester',"Housing Outcome Date",
         "Number of People under 18",
+        "Number of People 18 and Over",
         "Percentage of Poverty",
         "Total Annual Income ",
         "Housing Funding Note",
-        "Total Time For Case",
-        "Service Date",
-        "Caseworker Name",
-        'HRA Release Tester',"HRA Release?","HAL Eligibility Date",
-        'Income Verification Tester',"Housing Income Verification",        
-        'Housing Type Tester',"Housing Type Of Case",
-        'Housing Level Tester',"Housing Level of Service","Close Reason",
-        'Building Case Tester',"Housing Building Case?",
-        'Referral Tester',"Referral Source","Primary Funding Code",
-        'Rent Tester',"Housing Total Monthly Rent",
-        'Unit Tester',"Housing Number Of Units In Building",
-        'Regulation Tester',"Housing Form Of Regulation",
-        'Subsidy Tester',"Housing Subsidy Type",
-        'Years in Apartment Tester',"Housing Years Living In Apartment",
-        'Language Tester',"Language",
-        'Posture Tester',"Housing Posture of Case on Eligibility Date",
-        'PA # Tester',"Gen Pub Assist Case Number",
-        "SS # Tester","Social Security #",
-        'Case Number Tester',"Gen Case Index Number",
-        'Housing Activity Tester',"Housing Activity Indicators",
-        'Housing Services Tester',"Housing Services Rendered to Client",
-        'Outcome Tester',"Case Disposition","Housing Outcome","Housing Outcome Date",
         "Housing Date Of Waiver Approval",
         "Housing TRC HRA Waiver Categories",
-        "Secondary Funding Codes"
-        
-]]      
+        "Date of Birth",
+        "Apt#/Suite#","Legal Problem Code","Case Disposition",
+        "Assigned Branch/CC"
+        ]]
         
         #Preparing Excel Document
         

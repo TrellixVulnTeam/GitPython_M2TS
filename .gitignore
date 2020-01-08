@@ -8,3 +8,5 @@ hyperlinker/app/__pycache__/
 hyperlinker/app/sheets/
 
 *.log
+
+hyperlinker/logs/
