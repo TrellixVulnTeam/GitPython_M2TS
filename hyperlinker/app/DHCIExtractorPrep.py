@@ -80,9 +80,15 @@ def DHCIPrep():
         
         ForPrep_xls = data_xls[data_xls['Extractor Ready?'] == 'Ready for Extractor!']
         
+        
+        
+        
         data_xls = data_xls[['Hyperlinked Case #',
         'Primary Advocate',
         "Assigned Branch/CC",
+        "Client First Name",
+        "Client Last Name",
+        'Extractor Ready?',
         'Child & Poverty Tester',
         "Number of People 18 and Over",
         "Number of People under 18",
@@ -92,12 +98,12 @@ def DHCIPrep():
         "Social Security #",
         "PA Tester",
         "Gen Pub Assist Case Number",
-        'Extractor Ready?',
-        "Client Full Name",
         "Street Address",
         "Apt#/Suite#",
         "City",
         "Zip Code"]]
+        
+        ForReference_xls = data_xls[data_xls['Extractor Ready?'] == 'Ready for Extractor!']
         
         ForPrep_xls = ForPrep_xls[['Matter/Case ID#', 
         "Client Full Name",
@@ -111,13 +117,17 @@ def DHCIPrep():
         writer = pd.ExcelWriter("app\\sheets\\"+output_filename, engine = 'xlsxwriter')
         data_xls.to_excel(writer, sheet_name='Sheet1',index=False)
         ForPrep_xls.to_excel(writer, sheet_name = 'Prepped for Extraction',index=False)
+        ForReference_xls.to_excel(writer, sheet_name='For Reference',index=False)
         workbook = writer.book
         worksheet = writer.sheets['Sheet1']
         worksheet2 = writer.sheets['Prepped for Extraction']
+        worksheet3 = writer.sheets['For Reference']
         
         link_format = workbook.add_format({'font_color':'blue', 'bold':True, 'underline':True})
         worksheet.set_column('A:A',20,link_format)
         worksheet.set_column('B:ZZ',30)
+        worksheet3.set_column('A:A',20,link_format)
+        worksheet3.set_column('B:ZZ',30)
         worksheet2.set_column('A:C',30)
         writer.save()
         
