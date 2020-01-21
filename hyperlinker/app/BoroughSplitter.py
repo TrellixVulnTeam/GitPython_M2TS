@@ -76,7 +76,12 @@ def split_by_borough():
         
         link_format = workbook.add_format({'font_color':'blue', 'bold':True, 'underline':True})
         
-        
+        worksheetBkLS.freeze_panes(1, 0)
+        worksheetQLS.freeze_panes(1, 0)
+        worksheetMLS.freeze_panes(1, 0)
+        worksheetBxLS.freeze_panes(1, 0)
+        worksheetSILS.freeze_panes(1, 0)
+        worksheetLSU.freeze_panes(1, 0)
         worksheetBkLS.set_column('A:A',20,link_format)
         worksheetQLS.set_column('A:A',20,link_format)
         worksheetMLS.set_column('A:A',20,link_format)

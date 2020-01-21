@@ -26,6 +26,9 @@ def upload_hyperlink():
         else:
             data_xls = pd.read_excel(f)
 
+        if 'Matter/Case ID#' not in data_xls.columns:
+            data_xls['Matter/Case ID#'] = data_xls['id']
+            
         
         #separate last 7 digits from Case ID# so that it can be used for the link
         last7 = data_xls['Matter/Case ID#'].apply(lambda x: x[-7:])
