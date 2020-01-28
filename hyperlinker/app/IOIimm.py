@@ -2561,7 +2561,7 @@ def upload_IOIimm():
         data_xls['Seized_at_Border'] = data_xls['IOI Was client apprehended at border? (IOI 2&3)']
         data_xls['Group'] = ''
         data_xls['Prior_Enrollment_FY'] = 'Jay does this manually later'
-        
+        """
           
         #CLEANUP VERSION Put everything in the right order
         data_xls = data_xls[['Hyperlinked Case #','Office','Primary Advocate','Client Name','Special Legal Problem Code','Level of Service','Needs DHCI?','Exclude due to Income?','Needs Substantial Activity?','Country of Origin','Language','Outcome To Report','HRA Case Coding','IOI Was client apprehended at border? (IOI 2&3)']]
@@ -2571,7 +2571,7 @@ def upload_IOIimm():
         data_xls = data_xls[['Unique_ID','Last_Initial','First_Initial','Year_of_Birth','Gender','Country of Origin','Borough','Zip Code','Language','Household_Size','Number_of_Children','Annual_Income','Income_Eligible','Waiver_Type','Waiver_Approval_Date','Eligibility_Date','Referral_Source','Service_Type_Code','Proceeding_Type_Code','Outcome','Outcome_Date','Seized_at_Border','Group','Prior_Enrollment_FY','Pro_Bono','Special Legal Problem Code','HRA Level of Service','HRA Case Coding','Hyperlinked Case #','Office','Primary Advocate','Client Name','Special Legal Problem Code','Level of Service','Needs DHCI?','Exclude due to Income?','Needs Substantial Activity?','Country of Origin','Outcome To Report','HRA Case Coding','IOI Was client apprehended at border? (IOI 2&3)']]
         
         #substantial activities filter - need to totally review what makes a case non-reportable, get rid of stacking cap, income, dhci form, no service entries... that's it? etc.
-        """
+        
         
         #Preparing Excel Document
         
@@ -2589,7 +2589,7 @@ def upload_IOIimm():
         worksheet.set_column('A:A',20,link_format)
         worksheet.set_column('B:B',19)
         worksheet.set_column('C:BL',30)
-        
+        """
         worksheet.conditional_format('E1:F100000',{'type': 'cell',
                                                  'criteria': '==',
                                                  'value': '""',
@@ -2622,6 +2622,7 @@ def upload_IOIimm():
                                                  'criteria': '==',
                                                  'value': '"*Needs Outcome Date*"',
                                                  'format': problem_format})
+        """
         writer.save()
         
         return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = "Cleaned " + f.filename)

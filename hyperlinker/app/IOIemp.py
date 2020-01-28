@@ -808,6 +808,7 @@ def upload_IOIemp():
         
         data_xls['Prior_Enrollment_FY'] = 'Jay to do manually'
         
+        """
         #Cleaning Output
         
         data_xls = data_xls[['Hyperlinked Case #','Office','Primary Advocate','Client Name','Level of Service','Special Legal Problem Code','Exclude due to Income?','Needs DHCI?','Needs Substantial Activity?','Language','HRA Outcome','HRA_Case_Coding']]
@@ -819,7 +820,7 @@ def upload_IOIemp():
         """
         #REPORTING VERSION Put everything in the right order
         data_xls = data_xls[['Unique_ID','Last_Initial','First_Initial','Year_of_Birth','Gender','Country of Origin','Borough','Zip Code','Language','Household_Size','Number_of_Children','Annual_Income','Income_Eligible','Waiver_Type','Waiver_Approval_Date','Eligibility_Date','Referral_Source','Service_Type_Code','Proceeding_Type_Code','Outcome','Outcome_Date','Seized_at_Border','Group','Prior_Enrollment_FY','Pro_Bono','Hyperlinked Case #','Office','Primary Advocate','Client Name','Level of Service','Legal Problem Code','Special Legal Problem Code','HRA_Case_Coding','Exclude due to Income?','Needs DHCI?','Needs Substantial Activity?']]
-        """
+        
         
         
         output_filename = f.filename     

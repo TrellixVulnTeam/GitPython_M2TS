@@ -24,6 +24,7 @@ def index():
     <ul type="disc">
     <li><a href="/upload">Hyperlinker</a></li>
     <li><a href="/BoroughSplitter">Borough Splitter</a></li>
+    <li><a href="/SuperSplitter">MLS Supervisor Splitter</a></li>
     </ul>
     
     <b>Housing Tools:</b>
