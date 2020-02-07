@@ -40,7 +40,8 @@ def index():
     
     <b>IOI:</b>
     <ul type="disc">
-    <li><a href="/IOIimm">IOI Immigration</a></li>
+    <li><a href="/IOIimmMonthly">Monthly IOI Immigration</a></li>
+    <li><a href="/IOIimmQuarterly">Quarterly IOI Immigration</a></li>
     <li><a href="/IOIemp">IOI Employment</a></li>
     </ul>
 

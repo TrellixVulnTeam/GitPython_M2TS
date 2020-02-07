@@ -2121,8 +2121,8 @@ ReportedFY19= [
                     
                     ]
 
-@app.route("/IOIimm", methods=['GET', 'POST'])
-def upload_IOIimm():
+@app.route("/IOIimmMonthly", methods=['GET', 'POST'])
+def upload_IOIimmMonthly():
     if request.method == 'POST':
         print(request.files['file'])
         f = request.files['file']
@@ -2564,7 +2564,7 @@ def upload_IOIimm():
         
           
         #CLEANUP VERSION Put everything in the right order
-        data_xls = data_xls[['Hyperlinked Case #','Office','Primary Advocate','Client Name','Special Legal Problem Code','Level of Service','Needs DHCI?','Exclude due to Income?','Needs Substantial Activity?','Country of Origin','Language','Outcome To Report','HRA Case Coding','IOI Was client apprehended at border? (IOI 2&3)','Deliverable Tally']]
+        data_xls = data_xls[['Hyperlinked Case #','Office','Primary Advocate','Client Name','Special Legal Problem Code','Level of Service','Needs DHCI?','Exclude due to Income?','Needs Substantial Activity?','Country of Origin','Language','Outcome To Report','IOI Was client apprehended at border? (IOI 2&3)','Deliverable Tally']]
         
         """
         #REPORTING VERSION Put everything in the right order
@@ -2590,7 +2590,7 @@ def upload_IOIimm():
         worksheet.set_column('A:A',20,link_format)
         worksheet.set_column('B:B',19)
         worksheet.set_column('C:BL',30)
-        """
+        
         worksheet.conditional_format('E1:F100000',{'type': 'cell',
                                                  'criteria': '==',
                                                  'value': '""',
@@ -2623,22 +2623,22 @@ def upload_IOIimm():
                                                  'criteria': '==',
                                                  'value': '"*Needs Outcome Date*"',
                                                  'format': problem_format})
-        """
+        
         writer.save()
         
         return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = "Cleaned " + f.filename)
 
     return '''
     <!doctype html>
-    <title>IOI Immigration</title>
+    <title>IOI Immigration Monthly</title>
     <link rel="stylesheet" href="/static/css/main.css">
-    <h1>Check your IOI Immigration Cases:</h1>
+    <h1>Monthly Cleanup for IOI Immigration:</h1>
     <form action="" method=post enctype=multipart/form-data>
     <p><input type=file name=file><input type=submit value=IOI-ify!>
     </form>
     <h3>Instructions:</h3>
     <ul type="disc">
-    <li>This tool is meant to be used in conjunction with the LegalServer report called "Grants Management IOI 2 (3459) Report".</li>
+    <li>This tool is meant to be used in conjunction with the LegalServer report called <a href="https://lsnyc.legalserver.org/report/dynamic?load=1918" target="_blank">"Grants Management IOI 2 (3459) Report"</a>.</li>
     <li>Browse your computer using the field above to find the LegalServer excel document that you want to process for IOI.</li> 
     <li>Once you have identified this file, click ‘IOI-ify!’ and you should shortly be given a prompt to either open the file directly or save the file to your computer.</li> 
     <li>When you first open the file, all case numbers will display as ‘0’ until you click “Enable Editing” in excel, this will populate the fields.</li> </ul>

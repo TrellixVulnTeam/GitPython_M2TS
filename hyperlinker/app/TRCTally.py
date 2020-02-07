@@ -251,7 +251,7 @@ def upload_TRCtally():
         
         #put sheets in right order
         
-        data_xls = data_xls[['id','city','zip','Service Area','Primary Advocate','service_type','waiver','referral_source','Eligibility Month','Case Value']]
+        data_xls = data_xls[['id','city','street_number','Street','zip','Service Area','Primary Advocate','service_type','waiver','referral_source','Eligibility Month','Case Value']]
         city_pivot = city_pivot[['city','Case Value','Proportional Goal','Proportional Percentage','Annual Goal','Annual Percentage']]
         area_pivot = area_pivot[['Service Area','Case Value','Proportional Goal','Proportional Percentage','Annual Goal','Annual Percentage']]
         

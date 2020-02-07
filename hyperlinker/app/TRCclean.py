@@ -184,7 +184,7 @@ def upload_TRCclean():
         data_xls['Income Verification Tester'] = data_xls.apply(lambda x: IncomeVerification(x['Housing Income Verification'], x['Number of People under 18'], x['Percentage of Poverty'],x['Case Disposition']), axis=1)
        
         #PA Tester (need to be correct format as well)
-        def PATester (IncomeVerification,PANumber):
+        def PATester (PANumber):
                         
             PANumber = str(PANumber)
             LastCharacter = PANumber[-1:]
@@ -204,12 +204,10 @@ def upload_TRCclean():
                 return ''
             elif len(PANumber) == 9 and str.isalpha(LastCharacter) == False and PenultimateCharater != '-' and PenultimateCharater != ' ':
                 return ''
-            elif SecondCharacter == 'o':
-                return 'Needs PA Number'
             else:
                 return 'Needs Correct PA # Format'
                 
-        data_xls['PA # Tester'] = data_xls.apply(lambda x: PATester(x['Housing Income Verification'],x['Gen Pub Assist Case Number']), axis=1)
+        data_xls['PA # Tester'] = data_xls.apply(lambda x: PATester(x['Gen Pub Assist Case Number']), axis=1)
         
         #Test if case number is correct format (don't need one if it's brief, advice, or out-of-court)
         def CaseNum (CaseNum,Level):
@@ -241,22 +239,32 @@ def upload_TRCclean():
         data_xls['Case Number Tester'] = data_xls.apply(lambda x: CaseNum(x['Gen Case Index Number'],x['Housing Level of Service']), axis=1)
         
         #Test if social security number is correct format
-        def SSNum (CaseNum):
+        def SSNum (CaseNum, PANumber):
             CaseNum = str(CaseNum)
             First3 = CaseNum[0:3]
             Middle2 = CaseNum[4:6]
             Last4 = CaseNum[7:11]
             FirstDash = CaseNum[3:4]
             SecondDash = CaseNum[6:7]
+            PANumber = str(PANumber)
+            LastCharacter = PANumber[-1:]
+            PenultimateCharater = PANumber[-2:-1]
+            SecondCharacter = PANumber [1:2]
             
-            if str.isnumeric(First3) == True and str.isnumeric(Middle2) == True and str.isnumeric(Last4) == True and FirstDash == '-' and SecondDash == '-': 
+            if First3 == '000' and Middle2 == '00':
+                return 'Needs  Full SS#'
+            elif str.isnumeric(First3) == True and str.isnumeric(Middle2) == True and str.isnumeric(Last4) == True and FirstDash == '-' and SecondDash == '-': 
                 return ''
-            elif CaseNum == '000-00-0000':
-                return 'Needs SS #'
+            elif len(PANumber) == 10 and str.isalpha(LastCharacter) == True and str.isalpha(PenultimateCharater) == False and PenultimateCharater != '-' and PenultimateCharater != ' ':
+                return ''
+            elif len(PANumber) == 12 and str.isalpha(LastCharacter) == True and str.isalpha(PenultimateCharater) == False and PenultimateCharater != '-' and PenultimateCharater != ' ':
+                return ''
+            elif len(PANumber) == 9 and str.isalpha(LastCharacter) == False and PenultimateCharater != '-' and PenultimateCharater != ' ':
+                return '' 
             else:
                 return "Needs Correct SS # Format"
                 
-        data_xls['SS # Tester'] = data_xls.apply(lambda x: SSNum(x['Social Security #']), axis=1)
+        data_xls['SS # Tester'] = data_xls.apply(lambda x: SSNum(x['Social Security #'],x['Gen Pub Assist Case Number']), axis=1)
         
         #Test Housing Activity Indicator - can't be blank for closed cases that are full rep state or full rep federal(housing level of service) and eviction cases(housing type of case: non-payment holdover illegal lockout nycha housing termination)
         
@@ -293,29 +301,29 @@ def upload_TRCclean():
                 return 'Needs Outcome'
             elif Disposition == 'Closed' and Level in LevelTypes and Type in EvictionTypes and OutcomeDate == '':
                 return 'Needs Outcome Date'
+            elif (Disposition != 'Closed' or Level not in LevelTypes or Type not in EvictionTypes) and OutcomeDate != '':
+                return 'Remove Outcome Date'
             else:
                 return ''
+            
         data_xls['Outcome Tester'] = data_xls.apply(lambda x: OutcomeTester(x['Case Disposition'],x['Housing Outcome'],x['Housing Outcome Date'],x['Housing Level of Service'],x['Housing Type Of Case'],evictiontypes,leveltypes), axis = 1)
         
-        #Is everything okay with a case? (delete if so?)
+        #Is everything okay with a case? 
 
-        def TesterTester (ReleaseTester,TypeTester,LevelTester,BuildingTester,ReferralTester,RentTester,UnitTester,RegulationTester,SubsidyTester,YearsTester,LanguageTester,PostureTester,IncomeVerification,PATester,CaseNumberTester,ActivityTester,ServicesTester,OutcomeTester):
-            if ReleaseTester == '' and TypeTester == '' and LevelTester == '' and BuildingTester == '' and ReferralTester == '' and RentTester == '' and UnitTester == '' and RegulationTester == '' and SubsidyTester == '' and YearsTester == '' and LanguageTester == '' and PostureTester == '' and IncomeVerification == '' and PATester == '' and CaseNumberTester == '' and ActivityTester == '' and ServicesTester == '' and OutcomeTester == '':
-                return 'All Good!'
+        def TesterTester (ReleaseTester,TypeTester,LevelTester,BuildingTester,ReferralTester,RentTester,UnitTester,RegulationTester,SubsidyTester,YearsTester,LanguageTester,PostureTester,IncomeVerification,PATester,CaseNumberTester,SSTester,ActivityTester,ServicesTester,OutcomeTester):
+            if ReleaseTester == '' and TypeTester == '' and LevelTester == '' and BuildingTester == '' and ReferralTester == '' and RentTester == '' and UnitTester == '' and RegulationTester == '' and SubsidyTester == '' and YearsTester == '' and LanguageTester == '' and PostureTester == '' and IncomeVerification == '' and PATester == '' and CaseNumberTester == '' and SSTester == '' and ActivityTester == '' and ServicesTester == '' and OutcomeTester == '':
+                return 'No Cleanup Necessary'
             else:
                 return 'Case Needs Attention'
             
-        data_xls['Tester Tester'] = data_xls.apply(lambda x: TesterTester(x['HRA Release Tester'],x['Housing Type Tester'],x['Housing Level Tester'],x['Building Case Tester'],x['Referral Tester'],x['Rent Tester'],x['Unit Tester'],x[ 'Regulation Tester'],x['Subsidy Tester'],x['Years in Apartment Tester'],x['Language Tester'],x['Posture Tester'],x['Income Verification Tester'],x['PA # Tester'],x['Case Number Tester'],x['Housing Activity Tester'],x['Housing Services Tester'],x['Outcome Tester']),axis=1)
+        data_xls['Tester Tester'] = data_xls.apply(lambda x: TesterTester(x['HRA Release Tester'],x['Housing Type Tester'],x['Housing Level Tester'],x['Building Case Tester'],x['Referral Tester'],x['Rent Tester'],x['Unit Tester'],x[ 'Regulation Tester'],x['Subsidy Tester'],x['Years in Apartment Tester'],x['Language Tester'],x['Posture Tester'],x['Income Verification Tester'],x['PA # Tester'],x['Case Number Tester'],x['SS # Tester'],x['Housing Activity Tester'],x['Housing Services Tester'],x['Outcome Tester']),axis=1)
         
-
-        #(delete if so?)
-        
-        data_xls = data_xls[data_xls['Tester Tester'] != 'All Good!']
 
         #sort by case handler
         
         data_xls = data_xls.sort_values(by=['Primary Advocate'])
-
+        data_xls = data_xls.sort_values(by=['Assigned Branch/CC'])
+        
         
         #Put everything in the right order
         
@@ -329,7 +337,7 @@ def upload_TRCclean():
         "Zip Code",
         "HRA Release?",'HRA Release Tester',
         "Housing Income Verification",'Income Verification Tester',
-        'Case Number Tester',"Gen Case Index Number",        
+        "Gen Case Index Number",'Case Number Tester',        
         "Housing Type Of Case",'Housing Type Tester',
         "Housing Level of Service",'Housing Level Tester',"Close Reason",
         "Housing Building Case?",'Building Case Tester',
@@ -344,7 +352,7 @@ def upload_TRCclean():
         "Gen Pub Assist Case Number",'PA # Tester',
         "Social Security #","SS # Tester",
         "Referral Source",'Referral Tester',
-        'Housing Activity Tester',"Housing Activity Indicators",
+        "Housing Activity Indicators",'Housing Activity Tester',
         "Housing Services Rendered to Client",'Housing Services Tester',
         "Housing Outcome",'Outcome Tester',"Housing Outcome Date",
         "Number of People under 18",
@@ -356,49 +364,55 @@ def upload_TRCclean():
         "Housing TRC HRA Waiver Categories",
         "Date of Birth",
         "Apt#/Suite#","Legal Problem Code","Case Disposition",
-        "Assigned Branch/CC"
-        ]]
+        "Assigned Branch/CC",
+        "Tester Tester"
+        ]]      
         
         #Preparing Excel Document
         
-        output_filename = f.filename     
-        writer = pd.ExcelWriter("app\\sheets\\"+output_filename, engine = 'xlsxwriter')
-        data_xls.to_excel(writer, sheet_name='Sheet1',index=False)
-
-        workbook = writer.book
-        worksheet = writer.sheets['Sheet1']
-
-        link_format = workbook.add_format({'font_color':'blue', 'bold':True, 'underline':True})
-        regular_format = workbook.add_format({'font_color':'black'})
-        problem_format = workbook.add_format({'bg_color':'yellow'})
-        bad_problem_format = workbook.add_format({'bg_color':'red'})
-        medium_problem_format = workbook.add_format({'bg_color':'orange'})
+        #Split into different tabs
+        allgood_dictionary = dict(tuple(data_xls.groupby('Tester Tester')))
         
-        
-        worksheet.set_column('A:A',20,link_format)
-        worksheet.set_column('B:BL',25)
-        worksheet.freeze_panes(1, 2)
-        worksheet.conditional_format('C2:BO100000',{'type': 'text',
+        def save_xls(dict_df, path):
+            writer = pd.ExcelWriter(path, engine = 'xlsxwriter')
+            for i in dict_df:
+                dict_df[i].to_excel(writer, i, index = False)
+                workbook = writer.book
+                ws = writer.sheets[i]
+                link_format = workbook.add_format({'font_color':'blue','bold':True,'underline':True})
+                regular_format = workbook.add_format({'font_color':'black'})
+                problem_format = workbook.add_format({'bg_color':'yellow'})
+                bad_problem_format = workbook.add_format({'bg_color':'red'})
+                medium_problem_format = workbook.add_format({'bg_color':'orange'})
+                ws.set_column('A:A',20,link_format)
+                ws.set_column('B:ZZ',25)
+                ws.freeze_panes(1, 2)
+                ws.conditional_format('C2:BO100000',{'type': 'text',
                                                  'criteria': 'containing',
                                                  'value': 'No Release - Remove Elig Date',
                                                  'format': bad_problem_format})
-        worksheet.conditional_format('C2:BO100000',{'type': 'text',
+                ws.conditional_format('C2:BO100000',{'type': 'text',
                                                  'criteria': 'containing',
                                                  'value': 'Needs',
                                                  'format': problem_format})
-        
-        worksheet.conditional_format('C1:BO1',{'type': 'text',
+                ws.conditional_format('C2:BO100000',{'type': 'text',
+                                                 'criteria': 'containing',
+                                                 'value': 'Remove Outcome Date',
+                                                 'format': bad_problem_format})
+                ws.conditional_format('C1:BO1',{'type': 'text',
                                                  'criteria': 'containing',
                                                  'value': 'Tester',
                                                  'format': problem_format})
-        worksheet.conditional_format('C2:BO100000',{'type': 'text',
+                ws.conditional_format('C2:BO100000',{'type': 'text',
                                                  'criteria': 'containing',
                                                  'value': 'Must Have DHCI or PA#',
-                                                 'format': medium_problem_format})                                         
-                                                 
+                                                 'format': medium_problem_format})            
+            writer.save()
         
-        writer.save()
+        output_filename = f.filename
         
+        save_xls(dict_df = allgood_dictionary, path = "app\\sheets\\" + output_filename)
+       
         return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = "Cleaned " + f.filename)
 
     return '''
