@@ -508,8 +508,8 @@ ReportedFY19= ["All Cases Reported FY19",
                 ]
 
 
-@app.route("/IOIemp", methods=['GET', 'POST'])
-def upload_IOIemp():
+@app.route("/IOIempMonthly", methods=['GET', 'POST'])
+def upload_IOIempMonthly():
     if request.method == 'POST':
         print(request.files['file'])
         f = request.files['file']
@@ -816,24 +816,62 @@ def upload_IOIemp():
         #sorting by borough and advocate
         data_xls = data_xls.sort_values(by=['Office','Primary Advocate'])
         
+        borough_dictionary = dict(tuple(data_xls.groupby('Office')))
+           
+        def save_xls(dict_df, path):
+            writer = pd.ExcelWriter(path, engine = 'xlsxwriter')
+            for i in dict_df:
+                dict_df[i].to_excel(writer, i, index = False)
+                workbook = writer.book
+                link_format = workbook.add_format({'font_color':'blue','bold':True,'underline':True})
+                problem_format = workbook.add_format({'bg_color':'yellow'})
+                worksheet = writer.sheets[i]
+                worksheet.set_column('A:A',20,link_format)
+                worksheet.set_column('B:B',19)
+                worksheet.set_column('C:BL',30)
+                worksheet.freeze_panes(1,1)
+                
+                
+                worksheet.conditional_format('E1:E100000',{'type': 'cell',
+                                                 'criteria': '==',
+                                                 'value': '""',
+                                                 'format': problem_format})
+                worksheet.conditional_format('F1:F100000',{'type': 'cell',
+                                                 'criteria': '==',
+                                                 'value': '"***Needs SPLC***"',
+                                                 'format': problem_format})
+                worksheet.conditional_format('G1:G100000',{'type': 'cell',
+                                                 'criteria': '==',
+                                                 'value': '"Needs Income Waiver"',
+                                                 'format': problem_format})
+                worksheet.conditional_format('H1:H100000',{'type': 'cell',
+                                                 'criteria': '==',
+                                                 'value': '"Needs DHCI"',
+                                                 'format': problem_format})
+                worksheet.conditional_format('I1:I100000',{'type': 'cell',
+                                                 'criteria': '==',
+                                                 'value': '"Needs Substantial Activity in FY20"',
+                                                 'format': problem_format})
+                worksheet.conditional_format('J1:J100000',{'type': 'cell',
+                                                 'criteria': '==',
+                                                 'value': '""',
+                                                 'format': problem_format})
+                worksheet.conditional_format('K1:K100000',{'type': 'cell',
+                                                 'criteria': '==',
+                                                 'value': '"**Needs Outcome**"',
+                                                 'format': problem_format})
+                worksheet.conditional_format('K1:K100000',{'type': 'cell',
+                                                 'criteria': '==',
+                                                 'value': '"**Needs Outcome Date**"',
+                                                 'format': problem_format})
+            writer.save()
         
+        output_filename = f.filename
+        
+        save_xls(dict_df = borough_dictionary, path = "app\\sheets\\" + output_filename)
+           
         """
-        #REPORTING VERSION Put everything in the right order
-        data_xls = data_xls[['Unique_ID','Last_Initial','First_Initial','Year_of_Birth','Gender','Country of Origin','Borough','Zip Code','Language','Household_Size','Number_of_Children','Annual_Income','Income_Eligible','Waiver_Type','Waiver_Approval_Date','Eligibility_Date','Referral_Source','Service_Type_Code','Proceeding_Type_Code','Outcome','Outcome_Date','Seized_at_Border','Group','Prior_Enrollment_FY','Pro_Bono','Hyperlinked Case #','Office','Primary Advocate','Client Name','Level of Service','Legal Problem Code','Special Legal Problem Code','HRA_Case_Coding','Exclude due to Income?','Needs DHCI?','Needs Substantial Activity?']]
-        """
-        
-        
-        output_filename = f.filename     
-        writer = pd.ExcelWriter("app\\sheets\\"+output_filename, engine = 'xlsxwriter')
-        data_xls.to_excel(writer, sheet_name='Sheet1',index=False)
-
-        workbook = writer.book
-        worksheet = writer.sheets['Sheet1']
-
-        link_format = workbook.add_format({'font_color':'blue', 'bold':True, 'underline':True})
-        problem_format = workbook.add_format({'bg_color':'yellow'})
-        
-        
+       
         worksheet.set_column('A:A',20,link_format)
         worksheet.set_column('C:BL',30)
         worksheet.conditional_format('E1:E100000',{'type': 'cell',
@@ -869,20 +907,20 @@ def upload_IOIemp():
                                                  'value': '"**Needs Outcome Date**"',
                                                  'format': problem_format})
         writer.save()
-        
+        """
         return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = "Cleaned " + f.filename)
 
     return '''
     <!doctype html>
-    <title>IOI Employment</title>
+    <title>IOI Employment Monthly</title>
     <link rel="stylesheet" href="/static/css/main.css">
-    <h1>Check your IOI Employment Cases:</h1>
+    <h1>Monthly Cleanup for IOI Employment Cases:</h1>
     <form action="" method=post enctype=multipart/form-data>
     <p><input type=file name=file><input type=submit value=IOI-ify!>
     </form>
     <h3>Instructions:</h3>
     <ul type="disc">
-    <li>This tool is meant to be used in conjunction with the LegalServer report called "Grants Management IOI Employment (3474) Report".</li>
+    <li>This tool is meant to be used in conjunction with the LegalServer report called <a href="https://lsnyc.legalserver.org/report/dynamic?load=2020" target="_blank">"Grants Management IOI Employment (3474) Report"</a>.</li>
     <li>Browse your computer using the field above to find the LegalServer excel document that you want to process for IOI.</li> 
     <li>Once you have identified this file, click ‘IOI-ify!’ and you should shortly be given a prompt to either open the file directly or save the file to your computer.</li> 
     <li>When you first open the file, all case numbers will display as ‘0’ until you click “Enable Editing” in excel, this will populate the fields.</li> </ul>

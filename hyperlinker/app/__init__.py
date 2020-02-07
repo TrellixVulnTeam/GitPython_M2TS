@@ -24,7 +24,7 @@ moment = Moment(app)
 
 from app import routes, models, errors, app
 
-from app import IOIimmMonthly, Hyperlink, IOIemp, TRCclean, TRCTally, UAHPLP, BrownsvilleTRCclean, BoroughSplitter, DHCIExtractorPrep, SuperSplitter, AdvocateSplitter
+from app import IOIimmMonthly, IOIimmQuarterly, Hyperlink, IOIempMonthly, IOIempQuarterly, TRCclean, TRCTally, UAHPLP, BrownsvilleTRCclean, BoroughSplitter, DHCIExtractorPrep, SuperSplitter, AdvocateSplitter
 
 if not app.debug:
     if app.config['MAIL_SERVER']:

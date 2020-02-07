@@ -2121,8 +2121,8 @@ ReportedFY19= [
                     
                     ]
 
-@app.route("/IOIimmMonthly", methods=['GET', 'POST'])
-def upload_IOIimmMonthly():
+@app.route("/IOIimmQuarterly", methods=['GET', 'POST'])
+def upload_IOIimmQuarterly():
     if request.method == 'POST':
         print(request.files['file'])
         f = request.files['file']
@@ -2553,6 +2553,14 @@ def upload_IOIimmMonthly():
                 
         data_xls['Pro_Bono'] = data_xls.apply(lambda x:ProBonoCase(x['Assigned Branch/CC'], x['PAI Case?']), axis = 1)
         
+        #Prior Enrollment
+        
+        def PriorEnrollment (casenumber):
+            if casenumber in ReportedFY19:
+                return 'FY 19'
+                
+        data_xls['Prior_Enrollment_FY'] = data_xls.apply(lambda x:PriorEnrollment(x['Matter/Case ID#']), axis = 1)
+        
         #Other Cleanup
         data_xls['Service_Type_Code'] = data_xls['HRA Service Type']
         data_xls['Proceeding_Type_Code'] = data_xls['HRA Proceeding Type']
@@ -2560,19 +2568,14 @@ def upload_IOIimmMonthly():
         data_xls['Outcome_Date'] = data_xls['Outcome Date To Report']
         data_xls['Seized_at_Border'] = data_xls['IOI Was client apprehended at border? (IOI 2&3)']
         data_xls['Group'] = ''
-        data_xls['Prior_Enrollment_FY'] = 'Jay does this manually later'
         
           
-        #CLEANUP VERSION Put everything in the right order
-        data_xls = data_xls[['Hyperlinked Case #','Office','Primary Advocate','Client Name','Special Legal Problem Code','Level of Service','Needs DHCI?','Exclude due to Income?','Needs Substantial Activity?','Country of Origin','Language','Outcome To Report','IOI Was client apprehended at border? (IOI 2&3)','Deliverable Tally']]
-        
-        """
+                
         #REPORTING VERSION Put everything in the right order
         data_xls = data_xls[['Unique_ID','Last_Initial','First_Initial','Year_of_Birth','Gender','Country of Origin','Borough','Zip Code','Language','Household_Size','Number_of_Children','Annual_Income','Income_Eligible','Waiver_Type','Waiver_Approval_Date','Eligibility_Date','Referral_Source','Service_Type_Code','Proceeding_Type_Code','Outcome','Outcome_Date','Seized_at_Border','Group','Prior_Enrollment_FY','Pro_Bono','Special Legal Problem Code','HRA Level of Service','HRA Case Coding','Hyperlinked Case #','Office','Primary Advocate','Client Name','Special Legal Problem Code','Level of Service','Needs DHCI?','Exclude due to Income?','Needs Substantial Activity?','Country of Origin','Outcome To Report','HRA Case Coding','IOI Was client apprehended at border? (IOI 2&3)']]
-        """
+            
         
-        #substantial activities filter - need to totally review what makes a case non-reportable, get rid of stacking cap, income, dhci form, no service entries... that's it? etc.
-        
+                
         
         #Preparing Excel Document
         
@@ -2587,7 +2590,7 @@ def upload_IOIimmMonthly():
         problem_format = workbook.add_format({'bg_color':'yellow'})
         
         
-        worksheet.set_column('A:A',20,link_format)
+        
         worksheet.set_column('B:B',19)
         worksheet.set_column('C:BL',30)
         
@@ -2626,13 +2629,13 @@ def upload_IOIimmMonthly():
         
         writer.save()
         
-        return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = "Cleaned " + f.filename)
+        return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = "Formatted " + f.filename)
 
     return '''
     <!doctype html>
-    <title>IOI Immigration Monthly</title>
+    <title>IOI Immigration Quarterly</title>
     <link rel="stylesheet" href="/static/css/main.css">
-    <h1>Monthly Cleanup for IOI Immigration:</h1>
+    <h1>Quarterly Formatting for IOI Immigration:</h1>
     <form action="" method=post enctype=multipart/form-data>
     <p><input type=file name=file><input type=submit value=IOI-ify!>
     </form>

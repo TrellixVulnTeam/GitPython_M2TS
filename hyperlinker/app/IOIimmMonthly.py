@@ -2577,67 +2577,49 @@ def upload_IOIimmMonthly():
                 dict_df[i].to_excel(writer, i, index = False)
                 workbook = writer.book
                 link_format = workbook.add_format({'font_color':'blue','bold':True,'underline':True})
-                ws = writer.sheets[i]
-                ws.set_column('A:A',20,link_format)
-                ws.set_column('B:ZZ',25)
+                problem_format = workbook.add_format({'bg_color':'yellow'})
+                worksheet = writer.sheets[i]
+                worksheet.set_column('A:A',20,link_format)
+                worksheet.set_column('B:B',19)
+                worksheet.set_column('C:BL',30)
+                worksheet.freeze_panes(1,1)
+                worksheet.conditional_format('E1:F100000',{'type': 'cell',
+                                                 'criteria': '==',
+                                                 'value': '""',
+                                                 'format': problem_format})
+                worksheet.conditional_format('F1:F100000',{'type': 'cell',
+                                                 'criteria': '==',
+                                                 'value': '"Hold for Review"',
+                                                 'format': problem_format})
+                worksheet.conditional_format('G1:G100000',{'type': 'cell',
+                                                 'criteria': '==',
+                                                 'value': '"Needs DHCI Form"',
+                                                 'format': problem_format})                                 
+                worksheet.conditional_format('H1:H100000',{'type': 'cell',
+                                                 'criteria': '==',
+                                                 'value': '"Needs Income Waiver"',
+                                                 'format': problem_format})
+                worksheet.conditional_format('I1:I100000',{'type': 'cell',
+                                                 'criteria': '==',
+                                                 'value': '"Needs Substantial Activity in FY20"',
+                                                 'format': problem_format})
+                worksheet.conditional_format('J1:K100000',{'type': 'cell',
+                                                 'criteria': '==',
+                                                 'value': '""',
+                                                 'format': problem_format})
+                worksheet.conditional_format('L1:L100000',{'type': 'cell',
+                                                 'criteria': '==',
+                                                 'value': '"*Needs Outcome*"',
+                                                 'format': problem_format})                                         
+                worksheet.conditional_format('L1:L100000',{'type': 'cell',
+                                                 'criteria': '==',
+                                                 'value': '"*Needs Outcome Date*"',
+                                                 'format': problem_format})
             writer.save()
         
         output_filename = f.filename
         
         save_xls(dict_df = borough_dictionary, path = "app\\sheets\\" + output_filename)
-        
-        """
-        output_filename = f.filename     
-        writer = pd.ExcelWriter("app\\sheets\\"+output_filename, engine = 'xlsxwriter')
-        data_xls.to_excel(writer, sheet_name='Sheet1',index=False)
-
-        workbook = writer.book
-        worksheet = writer.sheets['Sheet1']
-
-        link_format = workbook.add_format({'font_color':'blue', 'bold':True, 'underline':True})
-        problem_format = workbook.add_format({'bg_color':'yellow'})
-        
-        
-        worksheet.set_column('A:A',20,link_format)
-        worksheet.set_column('B:B',19)
-        worksheet.set_column('C:BL',30)
-        
-        worksheet.conditional_format('E1:F100000',{'type': 'cell',
-                                                 'criteria': '==',
-                                                 'value': '""',
-                                                 'format': problem_format})
-        worksheet.conditional_format('F1:F100000',{'type': 'cell',
-                                                 'criteria': '==',
-                                                 'value': '"Hold for Review"',
-                                                 'format': problem_format})
-        worksheet.conditional_format('G1:G100000',{'type': 'cell',
-                                                 'criteria': '==',
-                                                 'value': '"Needs DHCI Form"',
-                                                 'format': problem_format})                                 
-        worksheet.conditional_format('H1:H100000',{'type': 'cell',
-                                                 'criteria': '==',
-                                                 'value': '"Needs Income Waiver"',
-                                                 'format': problem_format})
-        worksheet.conditional_format('I1:I100000',{'type': 'cell',
-                                                 'criteria': '==',
-                                                 'value': '"Needs Substantial Activity in FY20"',
-                                                 'format': problem_format})
-        worksheet.conditional_format('J1:K100000',{'type': 'cell',
-                                                 'criteria': '==',
-                                                 'value': '""',
-                                                 'format': problem_format})
-        worksheet.conditional_format('L1:L100000',{'type': 'cell',
-                                                 'criteria': '==',
-                                                 'value': '"*Needs Outcome*"',
-                                                 'format': problem_format})                                         
-        worksheet.conditional_format('L1:L100000',{'type': 'cell',
-                                                 'criteria': '==',
-                                                 'value': '"*Needs Outcome Date*"',
-                                                 'format': problem_format})
-        
-        writer.save()
-        
-        """
         
         return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = "Cleaned " + f.filename)
 
