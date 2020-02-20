@@ -44,8 +44,11 @@ def index():
     <li><a href="/IOIimmQuarterly">Quarterly IOI Immigration</a></li>
     <li><a href="/IOIempMonthly">Monthly IOI Employment</a></li>
     <li><a href="/IOIempQuarterly">Quarterly IOI Employment</a></li>
+    <li><a href="/IOIimmCentral">Tool for Central Monthly Immigration Reports</a></li>
+    <li><a href="/IOIempCentral">Tool for Central Monthly Employment Reports</a></li>
     </ul>
-
-    
+    <br>
+    <br>
+    <p>If you have any questions or concerns about these tools (or ideas for new ones!) please reach out to <a href="mailto:jackley@lsnyc.org?Subject=Hi Jay! (Idea for Python tool!)" target="_top">Jay Ackley</a></p>
     
     '''

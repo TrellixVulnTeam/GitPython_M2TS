@@ -77,7 +77,7 @@ def upload_hyperlink():
     <li>Browse your computer using the field above to find the LegalServer excel document that you want to add case hyperlinks to.</li> 
     <li>Once you have identified this file, click ‘Hyperlink!’ and you should shortly be given a prompt to either open the file directly or save the file to your computer.</li> 
     <li>When you first open the file, all case numbers will display as ‘0’ until you click “Enable Editing” in excel, this will populate the fields.</li> 
-    <li>Note, the column with your case ID numbers in it must be titled "Matter/Case ID#" for this to work.</li>
+    <li>Note, the column with your case ID numbers in it must be titled "Matter/Case ID#" or "id" for this to work.</li>
     </ul>
     </br>
     <a href="/">Home</a>

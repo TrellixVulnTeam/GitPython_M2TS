@@ -2121,8 +2121,8 @@ ReportedFY19= [
                     
                     ]
 
-@app.route("/IOIimmMonthly", methods=['GET', 'POST'])
-def upload_IOIimmMonthly():
+@app.route("/IOIimmCentral", methods=['GET', 'POST'])
+def upload_IOIimmCentral():
     if request.method == 'POST':
         print(request.files['file'])
         f = request.files['file']
@@ -2569,66 +2569,30 @@ def upload_IOIimmMonthly():
         
         #Preparing Excel Document
         
-        borough_dictionary = dict(tuple(data_xls.groupby('Office')))
-        
-        def save_xls(dict_df, path):
-            writer = pd.ExcelWriter(path, engine = 'xlsxwriter')
-            for i in dict_df:
-                dict_df[i].to_excel(writer, i, index = False)
-                workbook = writer.book
-                link_format = workbook.add_format({'font_color':'blue','bold':True,'underline':True})
-                problem_format = workbook.add_format({'bg_color':'yellow'})
-                worksheet = writer.sheets[i]
-                worksheet.set_column('A:A',20,link_format)
-                worksheet.set_column('B:B',19)
-                worksheet.set_column('C:BL',30)
-                worksheet.freeze_panes(1,1)
-                worksheet.write_comment('E1', 'All Cases Must Have a Special Legal Problem Code')
-                worksheet.conditional_format('E1:F100000',{'type': 'cell',
-                                                 'criteria': '==',
-                                                 'value': '""',
-                                                 'format': problem_format})
-                worksheet.conditional_format('F1:F100000',{'type': 'cell',
-                                                 'criteria': '==',
-                                                 'value': '"Hold for Review"',
-                                                 'format': problem_format})
-                worksheet.conditional_format('G1:G100000',{'type': 'cell',
-                                                 'criteria': '==',
-                                                 'value': '"Needs DHCI Form"',
-                                                 'format': problem_format})                                 
-                worksheet.conditional_format('H1:H100000',{'type': 'cell',
-                                                 'criteria': '==',
-                                                 'value': '"Needs Income Waiver"',
-                                                 'format': problem_format})
-                worksheet.conditional_format('I1:I100000',{'type': 'cell',
-                                                 'criteria': '==',
-                                                 'value': '"Needs Substantial Activity in FY20"',
-                                                 'format': problem_format})
-                worksheet.conditional_format('J1:K100000',{'type': 'cell',
-                                                 'criteria': '==',
-                                                 'value': '""',
-                                                 'format': problem_format})
-                worksheet.conditional_format('L1:L100000',{'type': 'cell',
-                                                 'criteria': '==',
-                                                 'value': '"*Needs Outcome*"',
-                                                 'format': problem_format})                                         
-                worksheet.conditional_format('L1:L100000',{'type': 'cell',
-                                                 'criteria': '==',
-                                                 'value': '"*Needs Outcome Date*"',
-                                                 'format': problem_format})
-            writer.save()
-        
         output_filename = f.filename
+
+        writer = pd.ExcelWriter("app\\sheets\\"+output_filename, engine = 'xlsxwriter')
+            
+        data_xls.to_excel(writer, sheet_name='Sheet1', index = False)
+        workbook = writer.book
+        link_format = workbook.add_format({'font_color':'blue','bold':True,'underline':True})
+        worksheet = writer.sheets['Sheet1']
+        worksheet.set_column('A:A',20,link_format)
+        worksheet.set_column('B:B',19)
+        worksheet.set_column('C:BL',30)
+                
+        writer.save()
         
-        save_xls(dict_df = borough_dictionary, path = "app\\sheets\\" + output_filename)
+        
+        
         
         return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = "Cleaned " + f.filename)
 
     return '''
     <!doctype html>
-    <title>IOI Immigration Monthly</title>
+    <title>IOI Immigration for Central</title>
     <link rel="stylesheet" href="/static/css/main.css">
-    <h1>Monthly Cleanup for IOI Immigration:</h1>
+    <h1>IOI Immigration for Central:</h1>
     <form action="" method=post enctype=multipart/form-data>
     <p><input type=file name=file><input type=submit value=IOI-ify!>
     </form>

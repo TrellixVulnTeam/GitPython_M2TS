@@ -26,7 +26,12 @@ def split_by_supervisor():
         
         if 'Primary Assignment' not in data_xls.columns:
             data_xls['Primary Assignment'] = data_xls['Primary Advocate']
-
+        
+        if 'Matter/Case ID#' not in data_xls.columns:
+            data_xls['Matter/Case ID#'] = data_xls['Hyperlinked Case #']
+        
+        del data_xls['Hyperlinked Case #']
+        
         #apply hyperlink methodology with splicing and concatenation
       
         def NoIDDelete(CaseID):
@@ -334,7 +339,8 @@ def split_by_supervisor():
     <ul type="disc">
     <li>Browse your computer using the field above to find the LegalServer excel document that you want to split into different documents by supervisor.</li> 
     <li>Once you have identified this file, click ‘Split!’ and you should shortly be given a prompt to either open the file directly or save the file to your computer.</li> 
-    <li>When you first open the file, all case numbers will display as ‘0’ until you click “Enable Editing” in excel, this will populate the fields.</li> 
+    <li>When you first open the file, all case numbers will display as ‘0’ until you click “Enable Editing” in excel, this will populate the fields.</li>
+    <li>Note, the column with your case ID numbers in it must be titled "Matter/Case ID#" or "id" for this to work.</li>
     </ul>
     </br>
     <a href="/">Home</a>
