@@ -2232,8 +2232,8 @@ def upload_IOIimmMonthly():
                 return 'T2-FED'    
             elif SLPC == "EOIR-29 BIA Appeal" or SLPC.startswith("I-290B") == True or SLPC == "N-336":
                 return 'T2-APO'
-            elif SLPC == "EOIR-26":
-                return 'FED'
+            elif SLPC == "EOIR-26" or SLPC == "EOIR-27":
+                return 'T2-FED'
             elif SLPC == "EOIR-26A":
                 return 'T2-REPO_EOIR26a'
             elif SLPC == "EOIR-33/BIA" or SLPC == 'EOIR-33/IC':
@@ -2298,6 +2298,8 @@ def upload_IOIimmMonthly():
                 return 'T1-EMP'
             elif SLPC == 'AOS (Not I-130)' or SLPC == "I-485 Affirmative" :
                 return 'T1-AOS'
+            elif SLPC == "Mandamus Action": 
+                return 'T2-FED'
             else:
                 return 'Something is wrong'
     

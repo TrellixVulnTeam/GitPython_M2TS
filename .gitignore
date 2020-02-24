@@ -10,3 +10,7 @@ hyperlinker/app/sheets/
 *.log
 
 hyperlinker/logs/
+
+Lib/__pycache__/
+
+Lib/encodings/__pycache__/

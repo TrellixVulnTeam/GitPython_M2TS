@@ -613,6 +613,10 @@ def upload_IOIempQuarterly():
                 return "T2-WB"
             elif LoS.startswith('Rep'):
                 return "T1-EMPOTH_"
+            elif SLPC == "Mandamus Action": 
+                return 'T2-FED'
+            elif SLPC == "EOIR-26" or SLPC == "EOIR-27":
+                return 'T2-FED'
             else:
                 return "***Needs Cleanup***"
         
