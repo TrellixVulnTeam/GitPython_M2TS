@@ -301,8 +301,6 @@ def upload_TRCclean():
                 return 'Needs Outcome'
             elif Disposition == 'Closed' and Level in LevelTypes and Type in EvictionTypes and OutcomeDate == '':
                 return 'Needs Outcome Date'
-            elif (Disposition != 'Closed' or Level not in LevelTypes or Type not in EvictionTypes) and OutcomeDate != '':
-                return 'Remove Outcome Date'
             else:
                 return ''
             
@@ -395,10 +393,6 @@ def upload_TRCclean():
                                                  'criteria': 'containing',
                                                  'value': 'Needs',
                                                  'format': problem_format})
-                ws.conditional_format('C2:BO100000',{'type': 'text',
-                                                 'criteria': 'containing',
-                                                 'value': 'Remove Outcome Date',
-                                                 'format': bad_problem_format})
                 ws.conditional_format('C1:BO1',{'type': 'text',
                                                  'criteria': 'containing',
                                                  'value': 'Tester',
