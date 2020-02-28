@@ -2211,15 +2211,15 @@ def upload_IOIimmMonthly():
             elif SLPC == "Parental Designation Form":
                 return 'B -OTH_Parental Designation Form'
             elif Crim == "Yes":
-                return 'T2-REPO_CRIM'    
-            elif SLPC == "I-589 Affirmative":
+                return 'T2-OTH_CRM'
+            elif SLPC == "I-589 Affirmative" or SLPC == "I-730":
                 return 'T2-AR'
             elif SLPC == "I-589 Defensive" or SLPC == "Removal Defense" or SLPC == "EOIR-40" or SLPC == "EOIR-42A"or SLPC == "EOIR-42B" or SLPC == "I-212" or SLPC == "I-485 Defensive":
                 return 'T2-RD'
             elif SLPC == "I-912":
                 return 'T1-OTH_I-912'
             elif SLPC == "I-130 (spouse)":
-                return 'T1-MAR'
+                return 'T2-MAR'
             elif SLPC == "I-129F" or SLPC == "I-130" or SLPC == "I-751" or SLPC == "I-864"or SLPC == "I-864EZ" or SLPC == "AOS I-130":
                 return 'T1-FAM'
             elif SLPC == "204(L)":
@@ -2228,28 +2228,18 @@ def upload_IOIimmMonthly():
                 return 'T1-OTH_AR-11'    
             elif SLPC == "DS-160" or SLPC == "DS-260":
                 return 'T1-CON'
-            elif SLPC == "EOIR 27":
+            elif SLPC == "EOIR 27" or SLPC == "Mandamus Action" or SLPC == "EOIR-26":
                 return 'T2-FED'    
             elif SLPC == "EOIR-29 BIA Appeal" or SLPC.startswith("I-290B") == True or SLPC == "N-336":
                 return 'T2-APO'
-            elif SLPC == "EOIR-26" or SLPC == "EOIR-27":
-                return 'T2-FED'
-            elif SLPC == "EOIR-26A":
-                return 'T2-REPO_EOIR26a'
-            elif SLPC == "EOIR-33/BIA" or SLPC == 'EOIR-33/IC':
-                return 'T2-REPO_EOIR33'
             elif SLPC == "G-639":
                 return 'T1-OTH_G639'
             elif SLPC == "I-102":
                 return 'T1-OTH_I102'
             elif SLPC.startswith("I-131") == True:
                 return 'T1-TRV'
-            elif SLPC == "I-134":
-                return 'T2-REPO_I134'
             elif SLPC == "I-192":
                 return 'T2-OTH_I-192'
-            elif SLPC == "EOIR-26A":
-                return 'T2-REPO_EOIR26a'
             elif SLPC == "I-360 SIJS" or LPC == "44 Minor Guardianship / Conservatorship" or LPC == "42 Neglected/Abused/Dependent":
                 return 'T2-SIJS'
             elif SLPC == "I-360 VAWA Self-Petition":
@@ -2258,10 +2248,6 @@ def upload_IOIimmMonthly():
                 return 'T1-OTH_I539'
             elif SLPC == "I-601" or SLPC == "I-601A":
                 return 'T2-WOI'
-            elif SLPC == "I-730":
-                return 'T2-AR'
-            elif SLPC == "EOIR-26A":
-                return 'T2-REPO_EOIR26a'
             elif SLPC == "I-765":
                 return 'T1-EAD'
             elif SLPC == "I-821":
@@ -2298,8 +2284,12 @@ def upload_IOIimmMonthly():
                 return 'T1-EMP'
             elif SLPC == 'AOS (Not I-130)' or SLPC == "I-485 Affirmative" :
                 return 'T1-AOS'
-            elif SLPC == "Mandamus Action": 
-                return 'T2-FED'
+            elif SLPC == "EOIR-26A":
+                return 'T2-OTH_EOIR26a'
+            elif SLPC == "EOIR-33/BIA" or SLPC == 'EOIR-33/IC':
+                return 'T2-OTH_EOIR33'
+            elif SLPC == "I-134":
+                return 'T2-OTH_I134'
             else:
                 return 'Something is wrong'
     
