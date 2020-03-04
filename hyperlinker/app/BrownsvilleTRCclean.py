@@ -43,6 +43,19 @@ def upload_BrownsvilleTRCclean():
         #only brownsville advocates
         
         brownsville_advocates = [
+                    "McCowen, Tamella L.",
+                    "Henriquez, Luis A",
+                    "Katnani, Samar A",
+                    "Landry-Reyes, Jane M.",
+                    "Costa, Stephanie A",
+                    "Crisona, Kathryn M",
+                    "McCormick, James H",
+                    "Patel, Mona R",
+                    "Roman, Melissa M.",
+                    "Rubin, Jenn S",
+                    "Wong, Humbert T.",
+                    "Chew, Thomas F",
+                    "DeLong, Sarah L",
                     "McCowen, Tamella",
                     "Farrell, Emily",
                     "Goncharov-Cruickshnk, Natalie",
