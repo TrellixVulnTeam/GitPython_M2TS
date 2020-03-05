@@ -47,6 +47,11 @@ def index():
     <li><a href="/IOIimmCentral">Tool for Central Monthly Immigration Reports</a></li>
     <li><a href="/IOIempCentral">Tool for Central Monthly Employment Reports</a></li>
     </ul>
+    
+    <b>DAP Tools:</b>
+    <ul type="disc">
+    <li><a href="/DAPException">DAP Exception Report Tool</a></li>
+    </ul>
     <br>
     <br>
     <p>If you have any questions or concerns about these tools (or ideas for new ones!) please reach out to <a href="mailto:jackley@lsnyc.org?cc=rstump@lsnyc.org&Subject=Hi Jay! (Idea for Python tool!)" target="_top">Jay Ackley</a></p>
