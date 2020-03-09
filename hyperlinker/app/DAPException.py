@@ -119,7 +119,65 @@ def DAPException():
                 return ''
         data_xls ['Retro Award Tester'] = data_xls.apply(lambda x : RetroAwardTester(x['Retro Recovery On Closing Page'],x['Custom - DAP Retro Total']), axis = 1)          
                 
-        #Ordering Spreadsheet Correctly
+       
+        
+        #OutcomeTester
+                                
+        def DAPOutcomeTester (DAPOutcome):
+            if DAPOutcome == '':
+               return 'Needs Outcome'
+            else :
+               return ''
+        data_xls ['DAPOutcome'] = data_xls.apply(lambda x : DAPOutcomeTester(x['DAP Outcome']), axis = 1)
+        
+        #this line of code is not showing the desire results in the cleaned version. I suspect that I am using the same column-outcome for several functions hence the discrepancy. 
+        def DAPOutcomeTester (DAPOutcome,ClosingRetro,DAPRetro,DAPInterim,ClosingRecovered):
+            if DAPOutcome == 'Short or other services' and ClosingRetro and DAPRetro and DAPInterim and ClosingRecovered >= 0:
+                return 'Needs to change Outcome'
+            else :
+                return ''
+        data_xls ['DAPOutcome'] = data_xls.apply(lambda x : DAPOutcomeTester(x['Retro Recovery On Closing Page'],x['DAPOutcome'],x['Custom - DAP Retro Total'],x['Custom - DAP Interim Deduction'],x['Recovered Monthly On Closing Page']), axis = 1)
+          
+        '''
+        def DAPOutcomeTester (DAPOutcome,CustomDAPMonthlySocialSecurity):
+            if DAPOutcome == 'Short or other services' and CustomDAPMonthlySocialSecurity > 0:
+                return 'Needs to Confirm SS Amount'
+            else :
+                return ''
+        data_xls ['DAPOutcome'] = data_xls.apply(lambda x : DAPOutcomeTester(x['Custom - DAP Monthly Social Security'],x ['DAP Outcome']), axis = 1)
+          
+        def DAPOutcomeTester (Custom - DAP Monthly Social Security):
+            if DAPOutcome == 'Short or other services' and CustomDAPMonthlyySocialSecurity and Custom - DAPMonhtlyDisability - Title II and Retro Recovery On Closing Page and Custom - DAP Retro Total and Custom - DAP Interim Deduction  >= 0 and RecoveredMonthlyonClosing > 0:
+                return 'Needs New Outcome'
+            else :
+                return ''
+          data_xls ['DAPOutcome'] = data_xls.apply(lambda x : DAPOutcomeTester(x['DAP Outcome']), x [' Custom - DAPMonthlyySocialSecurity'], x ['Custom - DAPMonhtlyDisability -Title II'], x ['Retro Recovery On Closing Page'], x ['Custom - DAP Retro Tota'], x ['Custom - DAP Interim Deduction'], x ['RecoveredMonthlyonClosing']), axis = 1) 
+        def DAPOutcomeTester (DAPOutcome,DAPMonthlySocialSecurity,DAPMonthlyDisability,RetroRecovery,DAPRetro,DAPInterimDeduction,RecoveredMonthlyonClosing):
+            if DAPOutcome == 'Short or other services' and DAPMonthlyySocialSecurity and DAPMonhtlyDisability and RetroRecovery and DAPRetro >= 0 and RecoveredMonthlyonClosing > 0:
+                return 'Needs New Outcome'
+            else :
+                return ''        
+            if DAPOutcome == 'Client won/received retained monthly benefits' and DAPMonthlyySocialSecurity and DAPMonhtlyDisability and RetroRecovery and DAPRetro >= 0 and RecoveredMonthlyonClosing > 0:
+                return 'Needs $ Amount'
+            else :
+                return ''
+            if DAPOutcome == 'Client won/did not received monthly benefits' and DAPMonthlyySocialSecurity and DAPMonhtlyDisability and RetroRecovery and DAPRetro >= 0 and RecoveredMonthlyonClosing > 0:
+                return ''
+            else:
+                return ''
+            if DAPOutcome == 'Client Withdrew' and DAPMonthlyySocialSecurity and DAPMonhtlyDisability and RetroRecovery and DAPRetro and RecoveredMonthlyonClosing == '':
+                return ''
+            elif DAPOutcome == 'Client Withdrew' and DAPMonthlyySocialSecurity and DAPMonhtlyDisability and RetroRecovery and DAPRetro and RecoveredMonthlyonClosing <=0: 
+                return ''
+            elif DAPOutcome == 'Client Withdrew' and DAPMonthlyySocialSecurity and DAPMonhtlyDisability and RetroRecovery and DAPRetro and RecoveredMonthlyonClosing >=0:
+                return 'Something is wrong'
+            else :
+                 return ''
+             
+         
+        data_xls ['DAPOutcome'] = data_xls.apply(lambda x : DAPOutcomeTester(x[ 'DAPMonthlySocialSecurity'], x ['DAPMOnthlyDisability'], x ['RetroRecovery'], x ['DAPRetro'],x ['DAPInterimDeduction'],x['RecoveredMonthlyonClosingD']), axis = 1)          
+        '''
+         #Ordering Spreadsheet Correctly
         
         data_xls = data_xls[['Hyperlinked Case #','Assigned Branch/CC','Primary Advocate','Client Name',
         'S.S.N.','SS # Tester',
@@ -128,11 +186,9 @@ def DAPException():
         'DAP Level Of Representation','DAP Level of Representation Tester',
         'Custom - DAP DAP ALJ Name','DAP ALJ Name Tester',
         'Custom - DAP Monthly Social Security','Custom - DAP Monthly Disability','Monthly Award Tester',
-        'Retro Recovery On Closing Page','Custom - DAP Retro Total','Retro Award Tester'
+        'Retro Recovery On Closing Page','Custom - DAP Retro Total','Retro Award Tester','DAPOutcome'
         
-        ]]
-        
-        
+        ]]        
         #bounce worksheets back to excel
         output_filename = f.filename     
         writer = pd.ExcelWriter("app\\sheets\\"+output_filename, engine = 'xlsxwriter')
