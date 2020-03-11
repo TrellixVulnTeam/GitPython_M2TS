@@ -26,7 +26,7 @@ def IOLADollarCleaner():
         if 'Matter/Case ID#' not in data_xls.columns:
             data_xls['Matter/Case ID#'] = data_xls['id']
         
-        
+        data_xls.fillna('',inplace=True)
         #MAKE THIS WORK!!
         def NoIDDelete(CaseID):
             if CaseID == '' or CaseID == 'nan':
@@ -35,6 +35,8 @@ def IOLADollarCleaner():
                 return str(CaseID)
         data_xls['Matter/Case ID#'] = data_xls.apply(lambda x: NoIDDelete(x['Matter/Case ID#']), axis=1)
         data_xls = data_xls[data_xls['Matter/Case ID#'] != 'No Case ID']
+        
+        
         
         last7 = data_xls['Matter/Case ID#'].apply(lambda x: x[-7:])
         data_xls['Hyperlinked Case #']='=HYPERLINK("https://lsnyc.legalserver.org/matter/dynamic-profile/view/'+last7+'",'+ '"' + data_xls['Matter/Case ID#'] +'"' +')'
@@ -118,11 +120,24 @@ def IOLADollarCleaner():
                 return ''
         data_xls ["Large Award Tester"] = data_xls.apply(lambda x : BigAwardTester(x['Custom Retro Recovery (Retroactive Award/Settlement)'],x['Custom Recovered Monthly (Monthly Benefit)']),axis = 1)
         
+        #flag any dap retro awards that are greater than $100k
+        #flag any monthly awards greater than $3k
+        def DAPBigAwardTester (DAPAward,DAPMonthlySSI,DAPMonthlySSD):
+            DAPMonthlySSI = float(DAPMonthlySSI[1:].replace(",",""))
+            DAPMonthlySSD = float(DAPMonthlySSD[1:].replace(",",""))
+            DAPAward = float(DAPAward[1:].replace(",",""))
+        
+            if DAPAward > 100000 or DAPMonthlySSI > 3000 or DAPMonthlySSD > 3000:
+                return 'This is an unusually large DAP award, please confirm accuracy'
+            else:
+                return ''
+        data_xls ["DAP Large Award Tester"] = data_xls.apply(lambda x : DAPBigAwardTester(x['DAP Retro To Client'],x['DAP Monthly XVI -- SSI'],x['DAP Monthly SSD -- Title II']),axis = 1)
+
         
         
         
         #Putting columns in the right order
-        data_xls = data_xls[['Hyperlinked Case #','Assigned Branch/CC','Primary Advocate','Client First Name','Client Last Name','Date Closed','DAP Monthly $ Tester','DAP Monthly XVI -- SSI','DAP Monthly SSD -- Title II','Custom Recovered Monthly (Monthly Benefit)','Monthly Higher than Retro Tester','Custom Retro Recovery (Retroactive Award/Settlement)','Education Award Tester','Legal Problem Code','Monthly Tester','IOLA Direct Dollar Benefits to Clients','IOLA Dollar Savings to Clients','Avoided Tester','Custom Avoid (Lump Sum Avoid)','Large Award Tester']] 
+        data_xls = data_xls[['Hyperlinked Case #','Assigned Branch/CC','Primary Advocate','Date Closed','DAP Monthly $ Tester','DAP Monthly XVI -- SSI','DAP Monthly SSD -- Title II','Custom Recovered Monthly (Monthly Benefit)','Monthly Higher than Retro Tester','Custom Retro Recovery (Retroactive Award/Settlement)','Education Award Tester','Legal Problem Code','Monthly Tester','IOLA Direct Dollar Benefits to Clients','IOLA Dollar Savings to Clients','Avoided Tester','Custom Avoid (Lump Sum Avoid)','Large Award Tester','DAP Large Award Tester']] 
         
         
         #bounce worksheets back to excel
@@ -131,12 +146,20 @@ def IOLADollarCleaner():
         data_xls.to_excel(writer, sheet_name='Sheet1',index=False)
         workbook = writer.book
         worksheet = writer.sheets['Sheet1']
+        worksheet.freeze_panes(1,1)
+        worksheet.autofilter('A1:Z1')
         
         #create format that will make case #s look like links
         link_format = workbook.add_format({'font_color':'blue', 'bold':True, 'underline':True})
+        problem_format = workbook.add_format({'bg_color':'yellow'})
         
         #assign new format to column A
         worksheet.set_column('A:A',20,link_format)
+        worksheet.set_column('B:Z',40)
+        worksheet.conditional_format('C1:BO1',{'type': 'text',
+                                             'criteria': 'containing',
+                                             'value': 'Tester',
+                                             'format': problem_format})        
         
         writer.save()
         
@@ -151,15 +174,14 @@ def IOLADollarCleaner():
     <link rel="stylesheet" href="/static/css/main.css"> 
     <h1>Flag Potential Problems with IOLA $:</h1>
     <form action="" method=post enctype=multipart/form-data>
-    <p><input type=file name=file><input type=submit value=Hyperlink!>
+    <p><input type=file name=file><input type=submit value=Clean!>
     </form>
     <h3>Instructions:</h3>
     <ul type="disc">
     <li>This tool is meant to be used in conjunction with the LegalServer report called <a href="https://lsnyc.legalserver.org/report/dynamic?load=1725" target="_blank">"Pascale Big Base Report"</a>.</li>
     <li>Browse your computer using the field above to find the LegalServer excel document that you want to add case hyperlinks to.</li> 
-    <li>Once you have identified this file, click ‘Hyperlink!’ and you should shortly be given a prompt to either open the file directly or save the file to your computer.</li> 
+    <li>Once you have identified this file, click ‘Clean!’ and you should shortly be given a prompt to either open the file directly or save the file to your computer.</li> 
     <li>When you first open the file, all case numbers will display as ‘0’ until you click “Enable Editing” in excel, this will populate the fields.</li> 
-    <li>Note, the column with your case ID numbers in it must be titled "Matter/Case ID#" or "id" for this to work.</li>
     </ul>
     </br>
     <a href="/">Home</a>
