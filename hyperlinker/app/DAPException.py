@@ -8,7 +8,6 @@ from datetime import datetime
 import pandas as pd
 import os
 
-
 @app.route("/DAPException", methods=['GET', 'POST'])
 def DAPException():
     #upload file from computer
@@ -99,7 +98,17 @@ def DAPException():
                 return 'Needs ALJ Name'
             else:
                 ''
-        data_xls ['DAP ALJ Name Tester'] = data_xls.apply(lambda x : ALJNameTester(x['DAP Level Of Representation'],x['Custom - DAP DAP ALJ Name']), axis = 1)
+        data_xls['DAP ALJ Name Tester'] = data_xls.apply(lambda x : ALJNameTester(x['DAP Level Of Representation'],x['Custom - DAP DAP ALJ Name']), axis = 1)
+        
+        #Convert LegalServer Names into Comprehensible Column Headers
+        
+        data_xls['Received DIB?'] = data_xls['Custom - DAP Disability - Title II']
+        data_xls['Received SSI?'] = data_xls['Custom - DAP SSI Title XVI']
+        data_xls['Monthly DIB Award'] = data_xls['Custom - DAP Monthly Disability']
+        data_xls['Monthly SSI Award'] = data_xls['Custom - DAP Monthly Social Security']
+        data_xls['Retroactive Award'] = data_xls['Custom - DAP Retro Total']
+        data_xls['Interim Assistance'] = data_xls['Custom - DAP Interim Deduction']
+        
         
         #Test Monthly Award Amounts over 3k?
         
@@ -121,62 +130,56 @@ def DAPException():
                 
        
         
-        #OutcomeTester
+        #BlankOutcomeTester
                                 
-        def DAPOutcomeTester (DAPOutcome):
+        def BlankOutcomeTester (DAPOutcome):
             if DAPOutcome == '':
                return 'Needs Outcome'
             else :
                return ''
-        data_xls ['DAPOutcome'] = data_xls.apply(lambda x : DAPOutcomeTester(x['DAP Outcome']), axis = 1)
+        data_xls ['Blank Outcome Tester'] = data_xls.apply(lambda x : BlankOutcomeTester(x['DAP Outcome']), axis = 1)
         
-        #this line of code is not showing the desire results in the cleaned version. I suspect that I am using the same column-outcome for several functions hence the discrepancy. 
-        def DAPOutcomeTester (DAPOutcome,ClosingRetro,DAPRetro,DAPInterim,ClosingRecovered):
-            if DAPOutcome == 'Short or other services' and ClosingRetro and DAPRetro and DAPInterim and ClosingRecovered >= 0:
-                return 'Needs to change Outcome'
+        
+        
+        #If case has benefits, then it can't have short service as an outcome
+        
+        no_benefits_outcomes = ['Short or other services','Client did not receive / retain benefits','Client withdrew/failed to return','Client won/did not receive any benefits']
+        
+        def DAPOutcomeTester (DAPOutcome,ClosingRetro,DAPRetro,DAPInterim,ClosingRecovered,no_benefits_outcomes):
+            if DAPOutcome in no_benefits_outcomes and ClosingRetro >= 0:
+                return 'Needs Higher Level Outcome'
+            elif DAPOutcome in no_benefits_outcomes and DAPRetro >= 0:
+                return 'Needs Higher Level Outcome'
+            elif DAPOutcome in no_benefits_outcomes and DAPInterim >= 0:
+                return 'Needs Higher Level Outcome'
+            elif DAPOutcome in no_benefits_outcomes and ClosingRecovered >= 0:
+                return 'Needs Higher Level Outcome'
             else :
                 return ''
-        data_xls ['DAPOutcome'] = data_xls.apply(lambda x : DAPOutcomeTester(x['Retro Recovery On Closing Page'],x['DAPOutcome'],x['Custom - DAP Retro Total'],x['Custom - DAP Interim Deduction'],x['Recovered Monthly On Closing Page']), axis = 1)
-          
-        '''
-        def DAPOutcomeTester (DAPOutcome,CustomDAPMonthlySocialSecurity):
-            if DAPOutcome == 'Short or other services' and CustomDAPMonthlySocialSecurity > 0:
-                return 'Needs to Confirm SS Amount'
-            else :
-                return ''
-        data_xls ['DAPOutcome'] = data_xls.apply(lambda x : DAPOutcomeTester(x['Custom - DAP Monthly Social Security'],x ['DAP Outcome']), axis = 1)
-          
-        def DAPOutcomeTester (Custom - DAP Monthly Social Security):
-            if DAPOutcome == 'Short or other services' and CustomDAPMonthlyySocialSecurity and Custom - DAPMonhtlyDisability - Title II and Retro Recovery On Closing Page and Custom - DAP Retro Total and Custom - DAP Interim Deduction  >= 0 and RecoveredMonthlyonClosing > 0:
-                return 'Needs New Outcome'
-            else :
-                return ''
-          data_xls ['DAPOutcome'] = data_xls.apply(lambda x : DAPOutcomeTester(x['DAP Outcome']), x [' Custom - DAPMonthlyySocialSecurity'], x ['Custom - DAPMonhtlyDisability -Title II'], x ['Retro Recovery On Closing Page'], x ['Custom - DAP Retro Tota'], x ['Custom - DAP Interim Deduction'], x ['RecoveredMonthlyonClosing']), axis = 1) 
-        def DAPOutcomeTester (DAPOutcome,DAPMonthlySocialSecurity,DAPMonthlyDisability,RetroRecovery,DAPRetro,DAPInterimDeduction,RecoveredMonthlyonClosing):
-            if DAPOutcome == 'Short or other services' and DAPMonthlyySocialSecurity and DAPMonhtlyDisability and RetroRecovery and DAPRetro >= 0 and RecoveredMonthlyonClosing > 0:
-                return 'Needs New Outcome'
-            else :
-                return ''        
-            if DAPOutcome == 'Client won/received retained monthly benefits' and DAPMonthlyySocialSecurity and DAPMonhtlyDisability and RetroRecovery and DAPRetro >= 0 and RecoveredMonthlyonClosing > 0:
-                return 'Needs $ Amount'
-            else :
-                return ''
-            if DAPOutcome == 'Client won/did not received monthly benefits' and DAPMonthlyySocialSecurity and DAPMonhtlyDisability and RetroRecovery and DAPRetro >= 0 and RecoveredMonthlyonClosing > 0:
-                return ''
+        data_xls ['DAP Outcome Tester'] = data_xls.apply(lambda x : DAPOutcomeTester(x['DAP Outcome'],x['Retro Recovery On Closing Page'],x['Custom - DAP Retro Total'],x['Custom - DAP Interim Deduction'],x['Recovered Monthly On Closing Page'],no_benefits_outcomes), axis = 1)
+        
+        #if the outcome is monthly benefits then either DAP Monthly or SSI Monthly has to have $
+        def MonthlyBenefitsTester  (DAPOutcome,DAPMonthlyDisability,DAPMonthlySSI):
+            DAPMonthlyDisability = int(DAPMonthlyDisability)
+            DAPMonthlySSI = int(DAPMonthlySSI)
+            
+            if DAPOutcome == 'Client won/ received  retained monthly benefits' and DAPMonthlyDisability == 0 and DAPMonthlyDisability == 0:
+                return 'Needs Monthly Benefits'
             else:
                 return ''
-            if DAPOutcome == 'Client Withdrew' and DAPMonthlyySocialSecurity and DAPMonhtlyDisability and RetroRecovery and DAPRetro and RecoveredMonthlyonClosing == '':
-                return ''
-            elif DAPOutcome == 'Client Withdrew' and DAPMonthlyySocialSecurity and DAPMonhtlyDisability and RetroRecovery and DAPRetro and RecoveredMonthlyonClosing <=0: 
-                return ''
-            elif DAPOutcome == 'Client Withdrew' and DAPMonthlyySocialSecurity and DAPMonhtlyDisability and RetroRecovery and DAPRetro and RecoveredMonthlyonClosing >=0:
-                return 'Something is wrong'
-            else :
-                 return ''
-             
-         
-        data_xls ['DAPOutcome'] = data_xls.apply(lambda x : DAPOutcomeTester(x[ 'DAPMonthlySocialSecurity'], x ['DAPMOnthlyDisability'], x ['RetroRecovery'], x ['DAPRetro'],x ['DAPInterimDeduction'],x['RecoveredMonthlyonClosingD']), axis = 1)          
-        '''
+        data_xls ['DAP Monthly Benefits Tester'] = data_xls.apply(lambda x : MonthlyBenefitsTester(x['DAP Outcome'],x['Custom - DAP Monthly Disability'],x['Custom - DAP Monthly Social Security']),axis = 1)
+       
+        #If the outcome says you got retro, must enter retro award $
+       
+        def DAPRetroTester (DAPOutcome,DAPRetro):
+            if DAPOutcome == 'Client won/received only retroactive benefits' and DAPRetro == 0:
+                return "Needs Retro Award $"
+        data_xls ['DAP Retro Tester'] = data_xls.apply(lambda x : DAPRetroTester(x['DAP Outcome'],x['Custom - DAP Retro Total']),axis = 1)
+        
+        #if outcome = no benefits, then there should not be $ benefits
+        
+        
+        
          #Ordering Spreadsheet Correctly
         
         data_xls = data_xls[['Hyperlinked Case #','Assigned Branch/CC','Primary Advocate','Client Name',
@@ -186,7 +189,12 @@ def DAPException():
         'DAP Level Of Representation','DAP Level of Representation Tester',
         'Custom - DAP DAP ALJ Name','DAP ALJ Name Tester',
         'Custom - DAP Monthly Social Security','Custom - DAP Monthly Disability','Monthly Award Tester',
-        'Retro Recovery On Closing Page','Custom - DAP Retro Total','Retro Award Tester','DAPOutcome'
+        'Retro Recovery On Closing Page','Custom - DAP Retro Total','Retro Award Tester',
+        'DAP Outcome','Blank Outcome Tester','DAP Outcome Tester',
+        'Custom - DAP Monthly Disability','Custom - DAP Monthly Social Security','DAP Monthly Benefits Tester',
+        'Custom - DAP Retro Total','DAP Retro Tester'
+        
+        
         
         ]]        
         #bounce worksheets back to excel
@@ -203,9 +211,9 @@ def DAPException():
         #assign new format to column A
         worksheet.set_column('A:A',20,link_format)
         
-        worksheet.set_column('B:Z',30)
+        worksheet.set_column('B:ZZ',30)
         
-        worksheet.conditional_format('B1:Z1000',{'type': 'text',
+        worksheet.conditional_format('B1:ZZ1000',{'type': 'text',
                                                  'criteria': 'containing',
                                                  'value': 'Needs',
                                                  'format': problem_format})

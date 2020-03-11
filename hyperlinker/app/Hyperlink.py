@@ -28,7 +28,17 @@ def upload_hyperlink():
 
         if 'Matter/Case ID#' not in data_xls.columns:
             data_xls['Matter/Case ID#'] = data_xls['id']
-            
+        
+        #delete any rows that don't have case ID#s in them
+        
+        def NoIDDelete(CaseID):
+            if CaseID == '' or CaseID == 'nan':
+                return 'No Case ID'
+            else:
+                return str(CaseID)
+        data_xls['Matter/Case ID#'] = data_xls.apply(lambda x: NoIDDelete(x['Matter/Case ID#']), axis=1)
+        
+        data_xls = data_xls[data_xls['Matter/Case ID#'] != 'No Case ID']
         
         #separate last 7 digits from Case ID# so that it can be used for the link
         last7 = data_xls['Matter/Case ID#'].apply(lambda x: x[-7:])
