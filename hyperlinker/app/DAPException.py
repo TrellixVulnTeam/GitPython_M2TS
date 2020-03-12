@@ -98,35 +98,36 @@ def DAPException():
                 return 'Needs ALJ Name'
             else:
                 ''
-        data_xls['DAP ALJ Name Tester'] = data_xls.apply(lambda x : ALJNameTester(x['DAP Level Of Representation'],x['Custom - DAP DAP ALJ Name']), axis = 1)
+        data_xls['DAP ALJ Name Tester'] = data_xls.apply(lambda x : ALJNameTester(x['DAP Level Of Representation'],x['DAP ALJ Name']), axis = 1)
         
-        #Convert LegalServer Names into Comprehensible Column Headers
         
-        data_xls['Received DIB?'] = data_xls['Custom - DAP Disability - Title II']
-        data_xls['Received SSI?'] = data_xls['Custom - DAP SSI Title XVI']
-        data_xls['Monthly DIB Award'] = data_xls['Custom - DAP Monthly Disability']
-        data_xls['Monthly SSI Award'] = data_xls['Custom - DAP Monthly Social Security']
-        data_xls['Retroactive Award'] = data_xls['Custom - DAP Retro Total']
-        data_xls['Interim Assistance'] = data_xls['Custom - DAP Interim Deduction']
+        #Convert LegalServer Names into Comprehensible Column Headers (only necessary if using old DAP legalserver report)
+        
+        #data_xls['Received DIB?'] = data_xls['Custom - DAP Disability - Title II']
+        #data_xls['Received SSI?'] = data_xls['Custom - DAP SSI Title XVI']
+        #data_xls['Monthly DIB Award'] = data_xls['Custom - DAP Monthly Disability']
+        #data_xls['Monthly SSI Award'] = data_xls['Custom - DAP Monthly Social Security']
+        #data_xls['Retroactive Award'] = data_xls['Custom - DAP Retro Total']
+        #data_xls['Interim Assistance'] = data_xls['Custom - DAP Interim Deduction']
         
         
         #Test Monthly Award Amounts over 3k?
         
-        def MonthlyAwardTester (SSMonthly, DisabilityMonthly):
-            if SSMonthly >= 3000 or DisabilityMonthly >= 3000:
+        def MonthlyAwardTester (SSIMonthly, DIBMonthly):
+            if SSIMonthly >= 3000 or DIBMonthly >= 3000:
                 return 'Needs to Confirm Monthly $ Amount'
             else:
                 return ''
-        data_xls ['Monthly Award Tester'] = data_xls.apply(lambda x : MonthlyAwardTester(x['Custom - DAP Monthly Social Security'],x['Custom - DAP Monthly Disability']), axis = 1)        
+        data_xls ['Monthly Award Tester'] = data_xls.apply(lambda x : MonthlyAwardTester(x['Monthly SSI Award'],x['Monthly DIB Award']), axis = 1)        
         
         #Retro awards testing if they're over $100k
         
-        def RetroAwardTester (ClosingRetro, DAPRetro):
-            if ClosingRetro >= 100000 or DAPRetro >= 100000:
-                return 'Needs to Confirm Retro $ Amount'
+        def RetroAwardTester (DAPRetro):
+            if DAPRetro >= 100000:
+                return 'Needs to Confirm DAP Retro $ Amount'
             else:
                 return ''
-        data_xls ['Retro Award Tester'] = data_xls.apply(lambda x : RetroAwardTester(x['Retro Recovery On Closing Page'],x['Custom - DAP Retro Total']), axis = 1)          
+        data_xls ['Retro Award Tester'] = data_xls.apply(lambda x : RetroAwardTester(x['DAP Retroactive Award']), axis = 1)          
                 
        
         
@@ -143,58 +144,74 @@ def DAPException():
         
         #If case has benefits, then it can't have short service as an outcome
         
-        no_benefits_outcomes = ['Short or other services','Client did not receive / retain benefits','Client withdrew/failed to return','Client won/did not receive any benefits']
+        NoBenefitsList = ['Short or other services','Client did not receive / retain benefits','Client withdrew/failed to return','Client won/did not receive any benefits','Case Remanded']
         
-        def DAPOutcomeTester (DAPOutcome,ClosingRetro,DAPRetro,DAPInterim,ClosingRecovered,no_benefits_outcomes):
-            if DAPOutcome in no_benefits_outcomes and ClosingRetro >= 0:
+        def DAPOutcomeTester (DAPOutcome,DAPRetro,DAPInterim,SSIMonthly,DIBMonthly,NoBenefitsList):
+            if DAPOutcome in NoBenefitsList and DAPRetro > 0:
                 return 'Needs Higher Level Outcome'
-            elif DAPOutcome in no_benefits_outcomes and DAPRetro >= 0:
+            elif DAPOutcome in NoBenefitsList and DAPInterim > 0:
+                return 'Needs Higher Level Outcome'           
+            elif DAPOutcome in NoBenefitsList and SSIMonthly > 0:
                 return 'Needs Higher Level Outcome'
-            elif DAPOutcome in no_benefits_outcomes and DAPInterim >= 0:
-                return 'Needs Higher Level Outcome'
-            elif DAPOutcome in no_benefits_outcomes and ClosingRecovered >= 0:
+            elif DAPOutcome in NoBenefitsList and DIBMonthly > 0:
                 return 'Needs Higher Level Outcome'
             else :
                 return ''
-        data_xls ['DAP Outcome Tester'] = data_xls.apply(lambda x : DAPOutcomeTester(x['DAP Outcome'],x['Retro Recovery On Closing Page'],x['Custom - DAP Retro Total'],x['Custom - DAP Interim Deduction'],x['Recovered Monthly On Closing Page'],no_benefits_outcomes), axis = 1)
+        data_xls ['DAP Outcome Tester'] = data_xls.apply(lambda x : DAPOutcomeTester(x['DAP Outcome'],x['DAP Retroactive Award'],x['Interim Assistance'],x['Monthly SSI Award'],x['Monthly DIB Award'],NoBenefitsList), axis = 1)
+        
         
         #if the outcome is monthly benefits then either DAP Monthly or SSI Monthly has to have $
-        def MonthlyBenefitsTester  (DAPOutcome,DAPMonthlyDisability,DAPMonthlySSI):
-            DAPMonthlyDisability = int(DAPMonthlyDisability)
-            DAPMonthlySSI = int(DAPMonthlySSI)
+        def MonthlyBenefitsTester  (DAPOutcome,DIBMonthly,SSIMonthly):
+            DIBMonthly = int(DIBMonthly)
+            SSIMonthly = int(SSIMonthly)
             
-            if DAPOutcome == 'Client won/ received  retained monthly benefits' and DAPMonthlyDisability == 0 and DAPMonthlyDisability == 0:
+            if DAPOutcome == 'Client won/ received  retained monthly benefits' and DIBMonthly == 0 and SSIMonthly == 0:
                 return 'Needs Monthly Benefits'
             else:
                 return ''
-        data_xls ['DAP Monthly Benefits Tester'] = data_xls.apply(lambda x : MonthlyBenefitsTester(x['DAP Outcome'],x['Custom - DAP Monthly Disability'],x['Custom - DAP Monthly Social Security']),axis = 1)
+        data_xls ['DAP Monthly Benefits Tester'] = data_xls.apply(lambda x : MonthlyBenefitsTester(x['DAP Outcome'],x['Monthly DIB Award'],x['Monthly SSI Award']),axis = 1)
+       
        
         #If the outcome says you got retro, must enter retro award $
        
         def DAPRetroTester (DAPOutcome,DAPRetro):
+            DAPRetro = int(DAPRetro)
             if DAPOutcome == 'Client won/received only retroactive benefits' and DAPRetro == 0:
                 return "Needs Retro Award $"
-        data_xls ['DAP Retro Tester'] = data_xls.apply(lambda x : DAPRetroTester(x['DAP Outcome'],x['Custom - DAP Retro Total']),axis = 1)
+        data_xls ['DAP Retro Tester'] = data_xls.apply(lambda x : DAPRetroTester(x['DAP Outcome'],x['DAP Retroactive Award']),axis = 1)
+        
         
         #if outcome = no benefits, then there should not be $ benefits
         
+        def NoBenefitsTester (DAPOutcome,DAPRetro,DAPInterim,SSIMonthly,DIBMonthly):
+            if DAPOutcome == 'Client won/did not receive any benefits' and DAPRetro > 0:
+                return 'Should Not have $ Benefits with this Outcome'
+            elif DAPOutcome == 'Client won/did not receive any benefits' and DAPInterim > 0:
+                return 'Should Not have $ Benefits with this Outcome'
+            elif DAPOutcome == 'Client won/did not receive any benefits' and SSIMonthly > 0:
+                return 'Should Not have $ Benefits with this Outcome'
+            elif DAPOutcome == 'Client won/did not receive any benefits' and DIBMonthly > 0:
+                return 'Should Not have $ Benefits with this Outcome'
+            else :
+                return ''
+        data_xls ['No Benefits Tester'] = data_xls.apply(lambda x : NoBenefitsTester(x['DAP Outcome'],x['DAP Retroactive Award'],x['Interim Assistance'],x['Monthly SSI Award'],x['Monthly DIB Award']), axis = 1)
         
         
-         #Ordering Spreadsheet Correctly
+        
+        #Ordering Spreadsheet Correctly
         
         data_xls = data_xls[['Hyperlinked Case #','Assigned Branch/CC','Primary Advocate','Client Name',
         'S.S.N.','SS # Tester',
         'DAP Income Type','DAP Income Type Tester',
         'DAP Legal Problem', 'DAP Legal Problem Tester',
         'DAP Level Of Representation','DAP Level of Representation Tester',
-        'Custom - DAP DAP ALJ Name','DAP ALJ Name Tester',
-        'Custom - DAP Monthly Social Security','Custom - DAP Monthly Disability','Monthly Award Tester',
-        'Retro Recovery On Closing Page','Custom - DAP Retro Total','Retro Award Tester',
+        'DAP ALJ Name','DAP ALJ Name Tester',
+        'Monthly SSI Award','Monthly DIB Award','Monthly Award Tester',
+        'DAP Retroactive Award','Retro Award Tester',
         'DAP Outcome','Blank Outcome Tester','DAP Outcome Tester',
-        'Custom - DAP Monthly Disability','Custom - DAP Monthly Social Security','DAP Monthly Benefits Tester',
-        'Custom - DAP Retro Total','DAP Retro Tester'
-        
-        
+        'DAP Monthly Benefits Tester',
+        'DAP Retro Tester',
+        'No Benefits Tester'
         
         ]]        
         #bounce worksheets back to excel
@@ -203,6 +220,8 @@ def DAPException():
         data_xls.to_excel(writer, sheet_name='Sheet1',index=False)
         workbook = writer.book
         worksheet = writer.sheets['Sheet1']
+        worksheet.freeze_panes(1,1)
+        worksheet.autofilter('A1:Z1')
         
         #create format that will make case #s look like links
         link_format = workbook.add_format({'font_color':'blue', 'bold':True, 'underline':True})
@@ -230,13 +249,13 @@ def DAPException():
     <title>DAP Exception Report</title>
     <link rel="stylesheet" href="/static/css/main.css">  
     <link rel="stylesheet" href="/static/css/main.css"> 
-    <h1>Find Errors in DAP Cases</h1>
+    <h1>DAP Exceptions Finder Tool</h1>
     <form action="" method=post enctype=multipart/form-data>
     <p><input type=file name=file><input type=submit value=Cleanup!>
     </form>
     <h3>Instructions:</h3>
     <ul type="disc">
-    <li>This tool is meant to be used in conjunction with the LegalServer report called <a href="https://lsnyc.legalserver.org/report/dynamic?load=486" target="_blank">"DAP Exceptions"</a>.</li>
+    <li>This tool is meant to be used in conjunction with the LegalServer report called <a href="https://lsnyc.legalserver.org/report/dynamic?load=2288" target="_blank">"DAP Exceptions for Python Tool"</a>.</li>
     <li>Browse your computer using the field above to find the LegalServer excel document that you want to add case hyperlinks to.</li> 
     <li>Once you have identified this file, click ‘Cleanup!’ and you should shortly be given a prompt to either open the file directly or save the file to your computer.</li> 
     <li>When you first open the file, all case numbers will display as ‘0’ until you click “Enable Editing” in excel, this will populate the fields.</li> 

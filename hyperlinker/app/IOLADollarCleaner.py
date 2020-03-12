@@ -164,7 +164,7 @@ def IOLADollarCleaner():
         writer.save()
         
         #send file back to user
-        return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = "Hyperlinked " + f.filename)
+        return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = "Cleaned " + f.filename)
         
 #what the user-facing site looks like
     return '''
