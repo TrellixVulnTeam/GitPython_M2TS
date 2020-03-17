@@ -183,19 +183,45 @@ def DAPException():
         
         #if outcome = no benefits, then there should not be $ benefits
         
-        def NoBenefitsTester (DAPOutcome,DAPRetro,DAPInterim,SSIMonthly,DIBMonthly):
-            if DAPOutcome == 'Client won/did not receive any benefits' and DAPRetro > 0:
+        def NoBenefitsTester (DAPOutcome,DAPRetro,DAPInterim,SSIMonthly,DIBMonthly,NoBenefitsList):
+            if DAPOutcome in NoBenefitsList and DAPRetro > 0:
                 return 'Should Not have $ Benefits with this Outcome'
-            elif DAPOutcome == 'Client won/did not receive any benefits' and DAPInterim > 0:
+            elif DAPOutcome in NoBenefitsList and DAPInterim > 0:
                 return 'Should Not have $ Benefits with this Outcome'
-            elif DAPOutcome == 'Client won/did not receive any benefits' and SSIMonthly > 0:
+            elif DAPOutcome in NoBenefitsList and SSIMonthly > 0:
                 return 'Should Not have $ Benefits with this Outcome'
-            elif DAPOutcome == 'Client won/did not receive any benefits' and DIBMonthly > 0:
+            elif DAPOutcome in NoBenefitsList and DIBMonthly > 0:
                 return 'Should Not have $ Benefits with this Outcome'
             else :
                 return ''
-        data_xls ['No Benefits Tester'] = data_xls.apply(lambda x : NoBenefitsTester(x['DAP Outcome'],x['DAP Retroactive Award'],x['Interim Assistance'],x['Monthly SSI Award'],x['Monthly DIB Award']), axis = 1)
+        data_xls ['No Benefits Tester'] = data_xls.apply(lambda x : NoBenefitsTester(x['DAP Outcome'],x['DAP Retroactive Award'],x['Interim Assistance'],x['Monthly SSI Award'],x['Monthly DIB Award'],NoBenefitsList), axis = 1)
         
+        #Received SSI Tester
+        
+        def SSITester (ReceivedSSI,SSIMonthly):
+            SSIMonthly = int(SSIMonthly)
+            if ReceivedSSI == 'Yes' and SSIMonthly == 0:
+                return 'Needs SSI Award Amount'
+            elif ReceivedSSI == 'No' and SSIMonthly > 0:
+                return 'Needs Received SSI? = Yes'
+            else:
+                return ''
+                
+        data_xls ['SSI Tester'] = data_xls.apply(lambda x : SSITester(x['Received SSI?'],x['Monthly SSI Award']),axis = 1)
+                
+        
+        #Received DIB Tester
+        
+        def DIBTester (ReceivedDIB,DIBMonthly):
+            DIBMonthly = int(DIBMonthly)
+            if ReceivedDIB == 'Yes' and DIBMonthly == 0:
+                return 'Needs DIB Award Amount'
+            elif ReceivedDIB == 'No' and DIBMonthly > 0:
+                return 'Needs Received DIB? = Yes'
+            else:
+                return ''
+                
+        data_xls ['DIB Tester'] = data_xls.apply(lambda x : DIBTester(x['Received DIB?'],x['Monthly DIB Award']),axis = 1)
         
         
         #Ordering Spreadsheet Correctly
@@ -211,7 +237,9 @@ def DAPException():
         'DAP Outcome','Blank Outcome Tester','DAP Outcome Tester',
         'DAP Monthly Benefits Tester',
         'DAP Retro Tester',
-        'No Benefits Tester'
+        'No Benefits Tester',
+        'Received SSI?','SSI Tester',
+        'Received DIB?','DIB Tester'
         
         ]]        
         #bounce worksheets back to excel
@@ -221,7 +249,7 @@ def DAPException():
         workbook = writer.book
         worksheet = writer.sheets['Sheet1']
         worksheet.freeze_panes(1,1)
-        worksheet.autofilter('A1:Z1')
+        worksheet.autofilter('A1:ZZ1')
         
         #create format that will make case #s look like links
         link_format = workbook.add_format({'font_color':'blue', 'bold':True, 'underline':True})
@@ -236,7 +264,10 @@ def DAPException():
                                                  'criteria': 'containing',
                                                  'value': 'Needs',
                                                  'format': problem_format})
-        
+        worksheet.conditional_format('B1:ZZ1000',{'type': 'text',
+                                                 'criteria': 'containing',
+                                                 'value': 'Should',
+                                                 'format': problem_format})
         
         writer.save()
         

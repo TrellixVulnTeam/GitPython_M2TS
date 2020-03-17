@@ -75,7 +75,7 @@ def upload_hyperlink():
 #what the user-facing site looks like
     return '''
     <!doctype html>
-    <title>Hyperlinks (simple)</title>
+    <title>Hyperlinks</title>
     <link rel="stylesheet" href="/static/css/main.css">  
     <link rel="stylesheet" href="/static/css/main.css"> 
     <h1>Add Hyperlinks to Report:</h1>
