@@ -97,7 +97,7 @@ def DAPException():
             if RepresentationLevel == 'ALJ Hearing' and ALJName == '':
                 return 'Needs ALJ Name'
             else:
-                ''
+                return ''
         data_xls['DAP ALJ Name Tester'] = data_xls.apply(lambda x : ALJNameTester(x['DAP Level Of Representation'],x['DAP ALJ Name']), axis = 1)
         
         
@@ -178,6 +178,8 @@ def DAPException():
             DAPRetro = int(DAPRetro)
             if DAPOutcome == 'Client won/received only retroactive benefits' and DAPRetro == 0:
                 return "Needs Retro Award $"
+            else:
+                return ''
         data_xls ['DAP Retro Tester'] = data_xls.apply(lambda x : DAPRetroTester(x['DAP Outcome'],x['DAP Retroactive Award']),axis = 1)
         
         
@@ -224,9 +226,30 @@ def DAPException():
         data_xls ['DIB Tester'] = data_xls.apply(lambda x : DIBTester(x['Received DIB?'],x['Monthly DIB Award']),axis = 1)
         
         
+        """
+        #Tester tester
+        def TesterTester (SSTester, IncomeTypeTester,LegalProblemTester,LevelofRepTester,ALJNameTester):
+            if SSTester == '' and IncomeTypeTester == '' and LegalProblemTester == '' and LevelofRepTester == '' and ALJNameTester == '':
+                return ''
+            else:
+                return 'Case Needs Attention'
+        data_xls ['Case Attention Tester'] = data_xls.apply(lambda x : TesterTester(x['SS # Tester'], x['DAP Income Type Tester'],x['DAP Legal Problem Tester'],x['DAP Level of Representation Tester'],x['DAP ALJ Name Tester']), axis = 1)
+        
+        
+        """
+        def TesterTester (SSTester,IncomeTypeTester,LegalProblemTester,LevelofRepTester,ALJNameTester,MonthlyAwardTester,RetroAwardTester,BlankOutcomeTester,OutcomeTester,MonthlyBenefitsTester,RetroBenefitsTester,NoBenefitsTester,SSITester,DIBTester):
+            if SSTester == '' and IncomeTypeTester == "" and LegalProblemTester  == "" and LevelofRepTester == "" and ALJNameTester == "" and MonthlyAwardTester == "" and RetroAwardTester == "" and BlankOutcomeTester == '' and OutcomeTester == "" and MonthlyBenefitsTester == "" and RetroBenefitsTester == "" and NoBenefitsTester == '' and SSITester == '' and DIBTester == '':
+                return ''
+            else:
+                return 'Case Needs Attention'
+                
+        data_xls ['Case Attention Tester'] = data_xls.apply(lambda x: TesterTester(x['SS # Tester'],x['DAP Income Type Tester'],x['DAP Legal Problem Tester'],x['DAP Level of Representation Tester'],x['DAP ALJ Name Tester'],x['Monthly Award Tester'],x['Retro Award Tester'],x['Blank Outcome Tester'],x['DAP Outcome Tester'],x['DAP Monthly Benefits Tester'],x['DAP Retro Tester'],x['No Benefits Tester'],x['SSI Tester'],x['DIB Tester']), axis = 1)
+               
+        
         #Ordering Spreadsheet Correctly
         
         data_xls = data_xls[['Hyperlinked Case #','Assigned Branch/CC','Primary Advocate','Client Name',
+        'Case Attention Tester',
         'S.S.N.','SS # Tester',
         'DAP Income Type','DAP Income Type Tester',
         'DAP Legal Problem', 'DAP Legal Problem Tester',
@@ -240,7 +263,7 @@ def DAPException():
         'No Benefits Tester',
         'Received SSI?','SSI Tester',
         'Received DIB?','DIB Tester'
-        
+       
         ]]        
         #bounce worksheets back to excel
         output_filename = f.filename     
