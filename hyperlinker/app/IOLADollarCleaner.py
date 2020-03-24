@@ -73,6 +73,20 @@ def IOLADollarCleaner():
                 return ''
         data_xls['Monthly Higher than Retro Tester'] = data_xls.apply(lambda x : MonthlyHigherThanRetroTester(x['Custom Recovered Monthly (Monthly Benefit)'],x['Custom Retro Recovery (Retroactive Award/Settlement)']),axis = 1)
         
+        #Test if DAP Retro + Interim Assistance is Larger than custom Retro
+        
+        def DAPPlusInterimClosingTester (ClosingAward,DAPRetro,DAPInterim):
+            ClosingAward = float(ClosingAward[1:].replace(",",""))
+            DAPRetro = float(DAPRetro[1:].replace(",",""))
+            DAPInterim = float(DAPInterim[1:].replace(",",""))
+            
+            if ClosingAward < DAPRetro +DAPInterim:
+                return 'Closing Award Should be Larger'
+            else:
+                return ''
+                
+        data_xls ['Closing Award Tester'] = data_xls.apply(lambda x : DAPPlusInterimClosingTester(x['Custom Retro Recovery (Retroactive Award/Settlement)'],x['DAP Retro To Client'],x['DAP Interim Assistance Recovery']),axis = 1)
+        
         #Education Cases should generally be $ avoided rather than awarded
         
         def EdTester (LegalProblemCode, ClosingAward):
@@ -137,7 +151,7 @@ def IOLADollarCleaner():
         
         
         #Putting columns in the right order
-        data_xls = data_xls[['Hyperlinked Case #','Assigned Branch/CC','Primary Advocate','Date Closed','DAP Monthly $ Tester','DAP Monthly XVI -- SSI','DAP Monthly SSD -- Title II','Custom Recovered Monthly (Monthly Benefit)','Monthly Higher than Retro Tester','Custom Retro Recovery (Retroactive Award/Settlement)','Education Award Tester','Legal Problem Code','Monthly Tester','IOLA Direct Dollar Benefits to Clients','IOLA Dollar Savings to Clients','Avoided Tester','Custom Avoid (Lump Sum Avoid)','Large Award Tester','DAP Large Award Tester']] 
+        data_xls = data_xls[['Hyperlinked Case #','Assigned Branch/CC','Primary Advocate','Date Closed','DAP Monthly $ Tester','DAP Monthly XVI -- SSI','DAP Monthly SSD -- Title II','Custom Recovered Monthly (Monthly Benefit)','Monthly Higher than Retro Tester','Custom Retro Recovery (Retroactive Award/Settlement)','Closing Award Tester','DAP Retro To Client','DAP Interim Assistance Recovery','Education Award Tester','Legal Problem Code','Monthly Tester','IOLA Direct Dollar Benefits to Clients','IOLA Dollar Savings to Clients','Avoided Tester','Custom Avoid (Lump Sum Avoid)','Large Award Tester','DAP Large Award Tester','Outcome','Result Achieved']] 
         
         
         #bounce worksheets back to excel
