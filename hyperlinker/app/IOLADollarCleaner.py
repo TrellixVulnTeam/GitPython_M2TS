@@ -52,7 +52,7 @@ def IOLADollarCleaner():
             DAPSSIMonthly = float(DAPSSIMonthly[1:].replace(",",""))
             DAPSSDMonthly = float(DAPSSDMonthly[1:].replace(",",""))
             
-            if DAPSSIMonthly + DAPSSDMonthly > ClosingMonthly:
+            if DAPSSIMonthly + DAPSSDMonthly > ClosingMonthly + 100:
                 return "Monthly Award in Closing Screen Should be as Large as in DAP Screen"
             else:
                 return ''
@@ -80,7 +80,7 @@ def IOLADollarCleaner():
             DAPRetro = float(DAPRetro[1:].replace(",",""))
             DAPInterim = float(DAPInterim[1:].replace(",",""))
             
-            if ClosingAward < DAPRetro +DAPInterim:
+            if ClosingAward + 100 < DAPRetro + DAPInterim:
                 return 'Closing Award Should be Larger'
             else:
                 return ''
@@ -118,6 +118,8 @@ def IOLADollarCleaner():
                 return "PA Benefits Should be Awards not Avoided"
             if IOLADollarSavings == "Income Maintenance-Food Stamps" and ClosingAvoid != "$0.00":
                 return "SNAP Benefits Should be Awards not Avoided"
+            else:
+                return ''
         
         data_xls ["Avoided Tester"] = data_xls.apply(lambda x : AvoidedTester(x['IOLA Dollar Savings to Clients'],x['Custom Avoid (Lump Sum Avoid)']),axis = 1)
         
@@ -146,12 +148,19 @@ def IOLADollarCleaner():
             else:
                 return ''
         data_xls ["DAP Large Award Tester"] = data_xls.apply(lambda x : DAPBigAwardTester(x['DAP Retro To Client'],x['DAP Monthly XVI -- SSI'],x['DAP Monthly SSD -- Title II']),axis = 1)
+        
+        #TesterTester 
+        
+        def TesterTester (DAPMonthlyTester,MonthlyHigherThanRetroTester,ClosingAwardTester,EducationAwardTester,MonthlyTester,AvoidedTester,LargeAwardTester,DAPLargeAwardTester):
+            if DAPMonthlyTester == '' and MonthlyHigherThanRetroTester == ''and ClosingAwardTester == '' and EducationAwardTester == '' and MonthlyTester == '' and AvoidedTester == '' and LargeAwardTester == '' and DAPLargeAwardTester == '':
+                return ''
+            else:
+                return 'Case Needs Attention'
+        data_xls ['Tester Tester'] = data_xls.apply (lambda x : TesterTester(x['DAP Monthly $ Tester'],x['Monthly Higher than Retro Tester'],x['Closing Award Tester'],x['Education Award Tester'],x['Monthly Tester'],x['Avoided Tester'],x['Large Award Tester'],x['DAP Large Award Tester']), axis = 1)        
 
         
-        
-        
         #Putting columns in the right order
-        data_xls = data_xls[['Hyperlinked Case #','Assigned Branch/CC','Primary Advocate','Date Closed','DAP Monthly $ Tester','DAP Monthly XVI -- SSI','DAP Monthly SSD -- Title II','Custom Recovered Monthly (Monthly Benefit)','Monthly Higher than Retro Tester','Custom Retro Recovery (Retroactive Award/Settlement)','Closing Award Tester','DAP Retro To Client','DAP Interim Assistance Recovery','Education Award Tester','Legal Problem Code','Monthly Tester','IOLA Direct Dollar Benefits to Clients','IOLA Dollar Savings to Clients','Avoided Tester','Custom Avoid (Lump Sum Avoid)','Large Award Tester','DAP Large Award Tester','Outcome','Result Achieved']] 
+        data_xls = data_xls[['Hyperlinked Case #','Assigned Branch/CC','Primary Advocate','Client First Name','Client Last Name','Date Closed','Tester Tester','DAP Monthly $ Tester','DAP Monthly XVI -- SSI','DAP Monthly SSD -- Title II','Custom Recovered Monthly (Monthly Benefit)','Monthly Higher than Retro Tester','Custom Retro Recovery (Retroactive Award/Settlement)','Closing Award Tester','DAP Retro To Client','DAP Interim Assistance Recovery','Education Award Tester','Legal Problem Code','Monthly Tester','IOLA Direct Dollar Benefits to Clients','IOLA Dollar Savings to Clients','Avoided Tester','Custom Avoid (Lump Sum Avoid)','Large Award Tester','DAP Large Award Tester','Outcome','Result Achieved']] 
         
         
         #bounce worksheets back to excel
