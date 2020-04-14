@@ -81,7 +81,7 @@ def IOLADollarCleaner():
             DAPInterim = float(DAPInterim[1:].replace(",",""))
             
             if ClosingAward + 100 < DAPRetro + DAPInterim:
-                return 'Closing Award Should be Larger'
+                return 'Closing Award Should be Larger then DAP Retro + DAP Interim'
             else:
                 return ''
                 
@@ -160,7 +160,7 @@ def IOLADollarCleaner():
 
         
         #Putting columns in the right order
-        data_xls = data_xls[['Hyperlinked Case #','Assigned Branch/CC','Primary Advocate','Client First Name','Client Last Name','Date Closed','Tester Tester','DAP Monthly $ Tester','DAP Monthly XVI -- SSI','DAP Monthly SSD -- Title II','Custom Recovered Monthly (Monthly Benefit)','Monthly Higher than Retro Tester','Custom Retro Recovery (Retroactive Award/Settlement)','Closing Award Tester','DAP Retro To Client','DAP Interim Assistance Recovery','Education Award Tester','Legal Problem Code','Monthly Tester','IOLA Direct Dollar Benefits to Clients','IOLA Dollar Savings to Clients','Avoided Tester','Custom Avoid (Lump Sum Avoid)','Large Award Tester','DAP Large Award Tester','Outcome','Result Achieved']] 
+        data_xls = data_xls[['Hyperlinked Case #','Assigned Branch/CC','Primary Advocate','Client First Name','Client Last Name','Date Closed','Tester Tester','DAP Monthly $ Tester','DAP Monthly XVI -- SSI','DAP Monthly SSD -- Title II','Custom Recovered Monthly (Monthly Benefit)','Monthly Higher than Retro Tester','Custom Retro Recovery (Retroactive Award/Settlement)','Closing Award Tester','DAP Retro To Client','DAP Interim Assistance Recovery','Education Award Tester','Legal Problem Code','Monthly Tester','IOLA Direct Dollar Benefits to Clients','IOLA Dollar Savings to Clients','Avoided Tester','Custom Avoid (Lump Sum Avoid)','Large Award Tester','Custom Retro Recovery (Retroactive Award/Settlement)','DAP Large Award Tester','Outcome','Result Achieved']] 
         
         
         #bounce worksheets back to excel

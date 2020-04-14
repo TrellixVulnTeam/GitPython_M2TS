@@ -50,7 +50,7 @@ def index():
     
     <b>DAP Tools:</b>
     <ul type="disc">
-    <li><a href="/DAPException">DAP Exception Report Tool</a></li>
+    <li><a href="/DAPException">DAP Exception & Report Prep Tool</a></li>
     </ul>
     
     <b>IOLA Tools:</b>
