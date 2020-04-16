@@ -268,7 +268,7 @@ def DAPException():
         data_xls['Client ethnicity'] = data_xls['Race']
         data_xls['Client county'] = data_xls['County of Residence']
         data_xls['Client ZIP code'] = data_xls['Zip Code']
-        data_xls['Client disabilities'] = 'x'
+        data_xls['Client disabilities'] = ''
         
         #if dap income is DAP eligible w/out PA
         
@@ -289,9 +289,31 @@ def DAPException():
                 return "F"
         
         data_xls['DAP TANF'] = data_xls.apply(lambda x : DAPTANF(x['Primary Funding Codes']),axis = 1)
-       
-        data_xls['PA category'] = data_xls['DAP Income Type']
-        data_xls['Referral source'] = data_xls['DAP Referral Source']
+        
+        def PATranslator(DAPIncomeType):
+            if DAPIncomeType == "TANF":
+                return "1"
+            elif DAPIncomeType == "SN or HASA or PA":
+                return "2"
+            elif DAPIncomeType == "Medicaid":
+                return "3"
+            elif DAPIncomeType == "DAP eligible w/o PA" or DAPIncomeType == "Eligible for but not receiving PA":
+                return "4"
+        data_xls['PA category'] = data_xls.apply(lambda x : PATranslator(x['DAP Income Type']),axis=1)
+        
+        def ReferralTranslator(ReferralType):
+            if ReferralType == "Former Client":
+                return "1"
+            elif ReferralType == "Friend":
+                return "2"
+            elif ReferralType == "Local DSS":
+                return "3"
+            elif ReferralType == "SSA":
+                return "4"
+            else:
+                return "5"
+        data_xls['Referral source'] = data_xls.apply(lambda x : ReferralTranslator(x['DAP Referral Source']),axis=1)
+
         
         #Local DSS placement
       
@@ -303,11 +325,50 @@ def DAPException():
         
         data_xls['DSS region'] = data_xls.apply(lambda x : LocalDSS(x['DAP Referral Source']),axis = 1)
        
+        def ProblemTranslator(DAPLegalProblem):
+            if DAPLegalProblem == "No Problem":
+                return "1"
+            elif DAPLegalProblem == "Claim Denial":
+                return "2"
+            elif DAPLegalProblem == "Termination":
+                return "3"
+            elif DAPLegalProblem == "Other":
+                return "4"
+        data_xls['SSI/SSD problem'] = data_xls.apply(lambda x : PATranslator(x['DAP Legal Problem']),axis=1)
         
-        data_xls['SSI/SSD problem'] = data_xls['DAP Legal Problem']
-        data_xls['Highest level of review'] = data_xls['DAP Level Of Representation']
+        
+        def LevelTranslator(Level):
+            if Level == "Reconsideration'":
+                return "A"
+            elif Level == "ALJ Hearing":
+                return "B"
+            elif Level == "Appeals Council":
+                return "C"
+            elif Level == "District Court":
+                return "D"
+            elif Level == "Other":
+                return "E"
+        data_xls['Highest level of review'] = data_xls.apply(lambda x : LevelTranslator(x['DAP Level Of Representation']),axis=1)
+        
         data_xls['ALJ name'] = data_xls['DAP ALJ Name']
-        data_xls['Outcome'] = data_xls['DAP Outcome']
+        
+        def OutcomeTranslator(DAPOutcome):
+            if DAPOutcome == "Client did not receive / retain benefits":
+                return "1"
+            elif DAPOutcome == "Client withdrew/failed to return":
+                return "2"
+            elif DAPOutcome == "Case Remanded":
+                return "3"
+            elif DAPOutcome == "Short or other services":
+                return "4"
+            elif DAPOutcome == "Client won/ received  retained monthly benefits":
+                return "5"
+            elif DAPOutcome == "Client won/received only retroactive benefits":
+                return "6"
+            elif DAPOutcome == "Client won/did not receive any benefits":
+                return "7"
+        data_xls['Outcome'] = data_xls.apply(lambda x : OutcomeTranslator(x['DAP Outcome']),axis=1)
+        
         
         #Swap Yes for T and No for F
         def ReceivedDIB(ReceivedDIB):
@@ -316,7 +377,7 @@ def DAPException():
             elif ReceivedDIB == "No":
                 return "F"
             else: 
-                return ""
+                return "F"
         data_xls['Received DIB'] = data_xls.apply(lambda x : ReceivedDIB(x['Received DIB?']),axis = 1)
         
         def ReceivedSSI(ReceivedSSI):
@@ -325,7 +386,7 @@ def DAPException():
             elif ReceivedSSI == "No":
                 return "F"
             else: 
-                return ""
+                return "F"
         data_xls['Received SSI'] = data_xls.apply(lambda x : ReceivedSSI(x['Received SSI?']),axis = 1)
         
         
@@ -429,7 +490,7 @@ def DAPException():
         save_xls(dict_df = allgood_dictionary, path = "app\\sheets\\" + output_filename)
         
         #send file back to user
-        return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = "DAPCleanup " + f.filename)
+        return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = "DAPCleaned " + f.filename)
         
 #what the user-facing site looks like
     return '''
