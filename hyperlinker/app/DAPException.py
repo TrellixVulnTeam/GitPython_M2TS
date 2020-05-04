@@ -334,7 +334,7 @@ def DAPException():
                 return "3"
             elif DAPLegalProblem == "Other":
                 return "4"
-        data_xls['SSI/SSD problem'] = data_xls.apply(lambda x : PATranslator(x['DAP Legal Problem']),axis=1)
+        data_xls['SSI/SSD problem'] = data_xls.apply(lambda x : ProblemTranslator(x['DAP Legal Problem']),axis=1)
         
         
         def LevelTranslator(Level):
