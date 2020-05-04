@@ -35,6 +35,7 @@ def index():
     <li><a href="/UAHPLP">UAHPLP Cleaner</a></li>     
     <li><a href="/BrownsvilleTRCclean">Brownsville TRC Cleaner</a></li>
     <li><a href="/DHCIPrep">DHCI Document Extractor Prep</a></li>
+    <li><a href="/TRCExternalPrep">Prepare TRC Reports for Submission to HRA</a></li>
     </ul>
 
     
