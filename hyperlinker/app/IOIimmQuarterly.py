@@ -2447,7 +2447,21 @@ def upload_IOIimmQuarterly():
         
 
         #kind of glitchy - if it has an outcome date but no outcome it doesn't say *Needs Outcome*
-               
+        
+        #add LSNYC to start of case numbers 
+        
+        data_xls['Unique_ID'] = 'LSNYC'+data_xls['Matter/Case ID#']
+        
+        #take second letters of first and last names
+        
+        data_xls['Last_Initial'] = data_xls['Client Last Name'].str[1]
+        data_xls['First_Initial'] = data_xls['Client First Name'].str[1]
+
+        #Year of birth
+        data_xls['Year_of_Birth'] = data_xls['Date of Birth'].str[-4:]
+        
+        #Unique Client ID#
+        data_xls['Unique Client ID#'] = data_xls['First_Initial'] + data_xls['Last_Initial'] + data_xls['Year_of_Birth']       
         
         #Deliverable Categories
         
@@ -2469,18 +2483,39 @@ def upload_IOIimmQuarterly():
 
         data_xls['Deliverable Tally'] = data_xls.apply(lambda x: Deliverable_Category(x['HRA Case Coding'],x['Exclude due to Income?'],x['Age at Intake']), axis=1)
         
+        #make all cases for any client that has a minor removal tally, into also being minor removal cases
         
-        #add LSNYC to start of case numbers 
         
-        data_xls['Unique_ID'] = 'LSNYC'+data_xls['Matter/Case ID#']
         
-        #take second letters of first and last names
         
-        data_xls['Last_Initial'] = data_xls['Client Last Name'].str[1]
-        data_xls['First_Initial'] = data_xls['Client First Name'].str[1]
+        dfs = data_xls.groupby('Unique Client ID#',sort = False)
 
-        #Year of birth
-        data_xls['Year_of_Birth'] = data_xls['Date of Birth'].str[-4:]
+        tdf = pd.DataFrame()
+        for x, y in dfs:
+            for z in y['Deliverable Tally']:
+                if z == 'Tier 2 (minor removal)':
+                    y['Modified Deliverable Tally'] = 'Tier 2 (minor removal)'
+            tdf = tdf.append(y)
+        data_xls = tdf
+        
+        
+        #write function to identify blank 'modified deliverable tallies' and add it back in as the original deliverable tally
+        data_xls.fillna('',inplace= True)
+
+        def fillBlanks(ModifiedTally,Tally):
+            if ModifiedTally == '':
+                return Tally
+            else:
+                return ModifiedTally
+        data_xls['Modified Deliverable Tally'] = data_xls.apply(lambda x: fillBlanks(x['Modified Deliverable Tally'],x['Deliverable Tally']),axis=1)
+
+       
+        
+        #***add code to make it so that it deletes any extra 'brief' cases for clients that have mutliple cases
+        
+        
+        
+        
         
         #gender
         def HRAGender (gender):
@@ -2564,7 +2599,7 @@ def upload_IOIimmQuarterly():
           
                 
         #REPORTING VERSION Put everything in the right order
-        data_xls = data_xls[['Unique_ID','Last_Initial','First_Initial','Year_of_Birth','Gender','Country of Origin','Borough','Zip Code','Language','Household_Size','Number_of_Children','Annual_Income','Income_Eligible','Waiver_Type','Waiver_Approval_Date','Eligibility_Date','Referral_Source','Service_Type_Code','Proceeding_Type_Code','Outcome','Outcome_Date','Seized_at_Border','Group','Prior_Enrollment_FY','Pro_Bono','Special Legal Problem Code','HRA Level of Service','HRA Case Coding','Hyperlinked Case #','Office','Primary Advocate','Client Name','Special Legal Problem Code','Level of Service','Needs DHCI?','Exclude due to Income?','Needs Substantial Activity?','Country of Origin','Outcome To Report','HRA Case Coding','IOI Was client apprehended at border? (IOI 2&3)']]
+        data_xls = data_xls[['Unique_ID','Last_Initial','First_Initial','Year_of_Birth','Gender','Country of Origin','Borough','Zip Code','Language','Household_Size','Number_of_Children','Annual_Income','Income_Eligible','Waiver_Type','Waiver_Approval_Date','Eligibility_Date','Referral_Source','Service_Type_Code','Proceeding_Type_Code','Outcome','Outcome_Date','Seized_at_Border','Group','Prior_Enrollment_FY','Pro_Bono','Special Legal Problem Code','HRA Level of Service','HRA Case Coding','Hyperlinked Case #','Office','Primary Advocate','Client Name','Special Legal Problem Code','Level of Service','Needs DHCI?','Exclude due to Income?','Needs Substantial Activity?','Country of Origin','Outcome To Report','HRA Case Coding','IOI Was client apprehended at border? (IOI 2&3)','Deliverable Tally','Modified Deliverable Tally']]
             
         
                 

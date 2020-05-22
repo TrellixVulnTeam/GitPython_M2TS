@@ -22,8 +22,9 @@ def index():
     
     <b>General Purpose:</b>
     <ul type="disc">
-    <li><a href="/upload">Hyperlinker</a></li>
+    <li><a href="/Hyperlinker">Hyperlinker</a></li>
     <li><a href="/BoroughSplitter">Borough Splitter</a></li>
+    <li><a href="/ComplianceConsolidater">Compliance Consolidater</a></li>
     <li><a href="/SuperSplitter">MLS Supervisor Splitter</a></li>
     <li><a href="/AdvocateSplitter">Advocate Splitter</a></li>
     </ul>
@@ -59,6 +60,10 @@ def index():
     <li><a href="/IOLADollarCleaner">IOLA $ Cleaner</a></li>
     </ul>
     <br>
+    <b>Development Sandbox:</b>
+    <ul type="disc">
+    <li>More Information Coming Soon</li>
+    </ul>
     <br>
     <p>If you have any questions or concerns about these tools (or ideas for new ones!) please reach out to <a href="mailto:jackley@lsnyc.org?cc=rstump@lsnyc.org&Subject=Hi Jay! (Idea for Python tool!)" target="_top">Jay Ackley</a></p>
     
