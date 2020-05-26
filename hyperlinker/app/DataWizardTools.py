@@ -16,8 +16,7 @@ def Hyperlinker(CaseID):
         return hyperlinkedID 
         
 
-#Take a date formatted as MM/DD/YYYY and make it YYYYMMDD so it can be easily compared to other dates
-            
+#Take a date formatted as MM/DD/YYYY and make it YYYYMMDD so it can be easily compared to other dates           
 def DateMaker (Date):
             DateMonth = Date[:2]
             DateDay = Date[3:5]

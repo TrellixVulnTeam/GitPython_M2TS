@@ -2,8 +2,8 @@ from flask import request, send_from_directory
 from app import app, DataWizardTools, HousingTools
 import pandas as pd
 
-@app.route("/TRCExternalPrep", methods=['GET', 'POST'])
-def TRCExternalPrep():
+@app.route("/TRCExternalPrepCovid", methods=['GET', 'POST'])
+def TRCExternalPrepCovid():
     #upload file from computer via browser
     if request.method == 'POST':
         print(request.files['file'])
@@ -116,7 +116,48 @@ def TRCExternalPrep():
         
         df['Pre-3/1/20 Elig Date?'] = df['DateConstruct'].apply(lambda x: "Yes" if x <20200301 else "No")
         
-       
+        
+        
+        ##different guidelines for post 3/1/20 eligibility dates
+        ##If case is advice and has a post-3/1 eligibility date
+        
+        #Sum household in adult column and leave children blank
+        def HousholdSum (ServiceType, PreThreeOne, NumAdults, NumChildren):
+            if ServiceType == "Advice Only" and PreThreeOne == "No":
+                return NumAdults + NumChildren
+            else:
+                return NumAdults
+        df['num_adults'] = df.apply(lambda x: HousholdSum(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['num_adults'], x['num_children']), axis=1)
+        
+        def DeleteChildren (ServiceType, PreThreeOne, NumChildren):
+            if ServiceType == "Advice Only" and PreThreeOne == "No":
+                return ""
+            else:
+                return NumChildren
+        df['num_children'] = df.apply(lambda x: DeleteChildren(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['num_children']), axis=1)
+        
+        #Only have to report birth year 
+        def RedactBirthday(ServiceType, PreThreeOne,DOB):
+            if ServiceType == "Advice Only" and PreThreeOne == "No":
+                return "01/01/"+ DOB[6:]
+            else:
+                return DOB
+        df['DOB'] = df.apply(lambda x: RedactBirthday(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['Date of Birth']), axis=1)
+        
+        #DHCI Blank
+        def RedactAnything(ServiceType, PreThreeOne, ToRedact):
+            if ServiceType == "Advice Only" and PreThreeOne == "No":
+                return ""
+            else:
+                return ToRedact
+        df['DHCI'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['Housing Signed DHCI Form']), axis=1)
+        
+        #No names, (not full date etc.) - or just #give them whole date without name
+        df['first_name'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['Client First Name']), axis=1)
+        df['last_name'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['Client Last Name']), axis=1)
+        
+        
+        
 
         ###Finalizing Report###
         #put columns in correct order

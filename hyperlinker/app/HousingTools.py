@@ -58,7 +58,8 @@ def PostureOnEligibility(Posture):
         return "PJD"
     elif Posture == "Post-Judgment, Tenant in Possession-Judgment Due To Other":
         return "PJO"
-        
+ 
+ 
 #Level of Service becomes Service type - lots of level of service in LS, mapped to Advice Only, Pre-Lit Strategies (brief service, out of court advocacy, hold for review), and Full Rep (mapping to be confirmed)
 def ServiceType(LevelOfService):
     if LevelOfService == "Advice":
@@ -67,3 +68,107 @@ def ServiceType(LevelOfService):
         return "Pre-Litigation Strategies"
     elif LevelOfService == "Representation - Admin. Agency" or LevelOfService == "Representation-EOIR" or LevelOfService == "Representation - Federal Court" or LevelOfService == "Representation - State Court":
         return "Full Rep"
+     
+#Housing Regulation Type: mapping down - we have way more categories, rent regulated, market rate, or other (mapping to be confirmed). can't be blank     
+def HousingType(HousingType):
+    if HousingType == "Low Income Tax Credit" or HousingType == "Tenant-interim-lease" or HousingType == "Mitchell-Lama" or HousingType == "Rent Stabilized" or HousingType == "Rent Controlled" or HousingType == "Project-based Sec. 8" or HousingType == "Other Subsidized Housing" or HousingType == "Supportive Housing":
+        return "Rent-Regulated"
+    elif HousingType == "HDFC" or HousingType == "Unknown":
+        return "Other"
+    elif HousingType == "Unregulated" or HousingType == "Unregulated - Sublet" or HousingType == "Unregulated - Co-Op" or HousingType == "Unregulated - Other" or HousingType == "Market Rate – Sublet" or HousingType == "Market Rate – Co-Op" or HousingType == "Market Rate – Other":
+        return "Market Rate"
+    elif HousingType == "Public Housing" or HousingType == "Public Housing/NYCHA" or HousingType == "NYCHA/NYCHA" or HousingType == "" or HousingType == "" or HousingType == "" or HousingType == "" or HousingType == "" or HousingType == "" or HousingType == "":
+        return "NYCHA"
+        
+#Referrals need to be one of their specific categories
+        
+def ReferralMap(ReferralSource):
+
+    if ReferralSource == "HRA ELS Part F Brooklyn" or ReferralSource == "HRA ELS (Assigned Counsel)" or ReferralSource == "HRA" or ReferralSource == "Documented Documented HRA Referral Referral":
+        return "Documented HRA Referral"
+        
+    elif ReferralSource == "Court Referral-NON HRA" or ReferralSource == "Court": 
+        return "Documented Judicial Referral"
+        
+    elif ReferralSource == "Tenant Support Unit":
+        return "Public Engagement Unit/Tenant Support Unit"
+        
+    elif ReferralSource == "FJC Housing Intake":
+        return "Family Justice Center"
+    
+    elif ReferralSource == "3-1-1" or ReferralSource == "ADP Hotline" or ReferralSource == "Community Organization" or ReferralSource == "Elected Official" or ReferralSource == "Foreclosure" or ReferralSource == "Friends/Family" or ReferralSource == "Home base" or ReferralSource == "In-House" or ReferralSource == "Other City Agency" or ReferralSource == "Outreach" or ReferralSource == "Returning Client" or ReferralSource == "School" or ReferralSource == "Self-referred" or ReferralSource == "Word of mouth" or ReferralSource == "Legal Services":
+        return "Other"
+        
+#Housing Outcomes needs mapping for HRA
+        
+def Outcome(HousingOutcome):
+    if HousingOutcome == "Client Allowed to Remain in Residence":
+        return "Remain"
+    elif HousingOutcome == "Client Required to be Displaced from Residence":
+        return "Displaced"
+    elif HousingOutcome == "Client Discharged Attorney":
+        return "Discharged"
+    elif HousingOutcome == "Attorney Withdrew":
+        return "Withdrew"
+        
+#Outcome related things that need mapping
+def ServicesRendered(ServicesRendered):
+    if ServicesRendered == "Secured Rent Abatement":
+        return "Abatement"
+    elif ServicesRendered == "Secured Rent Reduction":
+        return "Reduction"
+    elif ServicesRendered == "Secured Order or Agreement for Repairs in Apartment/Building":
+        return "Repairs"
+    elif ServicesRendered == "Returned Unit to Rent Regulation":
+        return "Regulation"
+    elif ServicesRendered == "Obtained Renewal of Lease":
+        return "Renewal"
+    elif ServicesRendered == "Obtain Ongoing Rent Subsidy":
+        return "Subsidy"
+    elif ServicesRendered == "Client Security Deposit Returned":
+        return "Deposit"
+    elif ServicesRendered == "Case Discontinued/Dismissed/Landlord Fails to Prosecute":
+        return "Discontinued"
+    elif ServicesRendered == "Case Resolved without Judgment of Eviction Against Client":
+        return "Resolved"
+    elif ServicesRendered == "Secured 6 Months or Longer in Residence":
+        return "6Months"
+    elif ServicesRendered == "Obtained Succession Rights to Residence":
+        return "Succession"
+    elif ServicesRendered == "Obtained Negotiated Buyout":
+        return "Buyout"
+    elif ServicesRendered == "Restored Access to Personal Property":
+        return "Property"
+    elif ServicesRendered == "Overcame Housing Discrimination":
+        return "Discrimination"
+    elif ServicesRendered == "Provided Housing-related Consumer Debt Legal Assistance":
+        return "Debt"
+        
+#Mapped to what HRA wants - some of the options are in LegalServer,
+def Activities(Activity):
+    if Activity == "Counsel Assisted in Filing or Refiling of Answer":
+        return "Answer"
+    elif Activity == "Filed/Argued/Supplemented Dispositive or other Substantive Motion":
+        return "Motion"
+    elif Activity == "Filed for an Emergency Order to Show Cause":
+        return "OSC"
+    elif Activity == "Conducted Traverse Hearing":
+        return "Traverse"
+    elif Activity == "Conducted Evidentiary Hearing":
+        return "Evidentiary"
+    elif Activity == "Commenced Trial":
+        return "Trial"
+    elif Activity == "Filed Appeal":
+        return "Appeal"
+        
+#Subsidy type - if it's not in the HRA list, it has to be 'none' (other is not valid) - they want a smaller list than we record. (mapping to be confirmed)
+        
+def SubsidyType(SubsidyType):
+    if SubsidyType == "LINC" or SubsidyType == "HOMETBRA" or SubsidyType == "FEPS" or SubsidyType == "SEPS" or SubsidyType == "City FEPS" or SubsidyType == "HASA" or SubsidyType == "Pathways Home" or SubsidyType == "SOTA" or SubsidyType == "City HRA Subsidy":
+        return "HRA Subsidy"
+    elif SubsidyType == "HUD VASH":
+        return "Section 8"
+    elif SubsidyType == "ACS Housing Subsidy":
+        return "ACS Subsidy"
+    else:
+        return "None"
