@@ -19,7 +19,6 @@ def upload_hyperlink():
         
         #turn the excel file into a dataframe, but skip the top 2 rows if they are blank
         test = pd.read_excel(f)
-        
         test.fillna('',inplace=True)
         if test.iloc[0][0] == '':
             data_xls = pd.read_excel(f,skiprows=2)

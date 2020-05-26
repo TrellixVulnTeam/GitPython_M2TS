@@ -21,4 +21,7 @@ def DateMaker (Date):
             DateMonth = Date[:2]
             DateDay = Date[3:5]
             DateYear = Date[6:]
-            return int(DateYear + DateMonth + DateDay)
+            if Date == "":
+                return ""            
+            else:
+                return int(DateYear + DateMonth + DateDay)

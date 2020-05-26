@@ -161,8 +161,7 @@ def Activities(Activity):
     elif Activity == "Filed Appeal":
         return "Appeal"
         
-#Subsidy type - if it's not in the HRA list, it has to be 'none' (other is not valid) - they want a smaller list than we record. (mapping to be confirmed)
-        
+#Subsidy type - if it's not in the HRA list, it has to be 'none' (other is not valid) - they want a smaller list than we record. (mapping to be confirmed)        
 def SubsidyType(SubsidyType):
     if SubsidyType == "LINC" or SubsidyType == "HOMETBRA" or SubsidyType == "FEPS" or SubsidyType == "SEPS" or SubsidyType == "City FEPS" or SubsidyType == "HASA" or SubsidyType == "Pathways Home" or SubsidyType == "SOTA" or SubsidyType == "City HRA Subsidy":
         return "HRA Subsidy"
@@ -172,3 +171,14 @@ def SubsidyType(SubsidyType):
         return "ACS Subsidy"
     else:
         return "None"
+
+#Does Client have an eligibility date prior to March 1st, 2020?
+def PreThreeOne(EligibilityDate):
+    if isinstance(EligibilityDate, int) == False:
+        return "No"
+    elif EligibilityDate < 20200301:
+        return "Yes"
+    elif EligibilityDate >= 20200301:
+        return "No"
+        
+    

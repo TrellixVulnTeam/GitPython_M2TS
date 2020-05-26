@@ -9,8 +9,13 @@ def TRCExternalPrep():
         print(request.files['file'])
         f = request.files['file']
         
-        #Import Excel Sheet into dataframe
-        df = pd.read_excel(f,skiprows=2)
+        #turn the excel file into a dataframe, but skip the top 2 rows if they are blank
+        test = pd.read_excel(f)
+        test.fillna('',inplace=True)
+        if test.iloc[0][0] == '':
+            df = pd.read_excel(f,skiprows=2)
+        else:
+            df = pd.read_excel(f)
         
         #Remove Rows without Case ID values
         df.fillna('',inplace = True)
@@ -114,7 +119,7 @@ def TRCExternalPrep():
            
         df['DateConstruct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['HAL Eligibility Date']), axis=1)
         
-        df['Pre-3/1/20 Elig Date?'] = df['DateConstruct'].apply(lambda x: "Yes" if x <20200301 else "No")
+        df['Pre-3/1/20 Elig Date?'] = df.apply(lambda x: HousingTools.PreThreeOne(x['DateConstruct']), axis=1)
         
        
 
