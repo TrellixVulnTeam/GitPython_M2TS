@@ -74,7 +74,7 @@ def PostureOnEligibility(Posture):
 def ServiceType(LevelOfService):
     if LevelOfService == "Advice":
         return "Advice Only"
-    elif LevelOfService == "Brief Service" or LevelOfService == "Out-of-Court Advocacy":
+    elif LevelOfService == "Brief Service" or LevelOfService == "Out-of-Court Advocacy" or LevelOfService == "Hold For Review":
         return "Pre-Litigation Strategies"
     elif LevelOfService == "Representation - Admin. Agency" or LevelOfService == "Representation-EOIR" or LevelOfService == "Representation - Federal Court" or LevelOfService == "Representation - State Court":
         return "Full Rep"
