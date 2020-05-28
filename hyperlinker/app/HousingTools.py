@@ -9,7 +9,7 @@ def ProceedingType(TypeOfCase):
     elif TypeOfCase == "Holdover":
         return "HO"
     elif TypeOfCase == "No Case" or TypeOfCase == "Non-Litigation Advocacy" or TypeOfCase == "Tenant Rights"  or TypeOfCase == "Rent Strike":
-        return "00"
+        return "OO"
     elif TypeOfCase == "Non-payment":
         return "NP"
     elif TypeOfCase == "Section 8 Administrative Proceeding" or TypeOfCase == "Sec. 8 Termination" or TypeOfCase == "Section 8 Grievance" or TypeOfCase == "Section 8 HQS" or TypeOfCase == "" or TypeOfCase == "Section 8 other" or TypeOfCase == "Section 8 share":
@@ -46,19 +46,29 @@ evictionproceedings = ['HO','NP','IL','TT','EA','EJ']
 
 #Case posture on eligibility date (on trial, no stipulation etc.) - transform them into the HRA initials
 def PostureOnEligibility(Posture):
-    if Posture == "No Stipulation; No Judgment":
-        return "NSNJ"
-    elif Posture == "Post-Stipulation, No Judgment":
-        return "PSNJ"
-    elif Posture == "Post-Judgment, Tenant out of Possession":
-        return "PJP"
-    elif Posture == "On for Trial":
-        return "OFT"
-    elif Posture == "Post-Judgment, Tenant in Possession-Judgment Due To Default":
-        return "PJD"
-    elif Posture == "Post-Judgment, Tenant in Possession-Judgment Due To Other":
-        return "PJO"
+    splitpostureeligibilitylist = Posture.split( ", ")
+    recombinedposturelist = list()
+    for x in splitpostureeligibilitylist:
+        if x == "No Stipulation; No Judgment":
+            x = "NSNJ"
+            recombinedposturelist.append(x)
+        elif x == "On for Trial":
+            x = "OFT"
+            recombinedposturelist.append(x)
+        elif x == "Post-Stipulation":
+            x = "PSNJ"
+            recombinedposturelist.append(x)
+        elif x == "Tenant in Possession-Judgment Due to Default":
+            x = "PJD"
+            recombinedposturelist.append(x)
+        elif x == "Tenant in Possession-Judgment Due to Other":
+            x = "PJO"
+            recombinedposturelist.append(x)
+        elif x == "Tenant Out of Possession":
+            x = "PJP"
+            recombinedposturelist.append(x)
  
+    return "; ".join(recombinedposturelist)
  
 #Level of Service becomes Service type - lots of level of service in LS, mapped to Advice Only, Pre-Lit Strategies (brief service, out of court advocacy, hold for review), and Full Rep (mapping to be confirmed)
 def ServiceType(LevelOfService):
@@ -96,7 +106,7 @@ def ReferralMap(ReferralSource):
     elif ReferralSource == "FJC Housing Intake":
         return "Family Justice Center"
     
-    elif ReferralSource == "3-1-1" or ReferralSource == "ADP Hotline" or ReferralSource == "Community Organization" or ReferralSource == "Elected Official" or ReferralSource == "Foreclosure" or ReferralSource == "Friends/Family" or ReferralSource == "Home base" or ReferralSource == "In-House" or ReferralSource == "Other City Agency" or ReferralSource == "Outreach" or ReferralSource == "Returning Client" or ReferralSource == "School" or ReferralSource == "Self-referred" or ReferralSource == "Word of mouth" or ReferralSource == "Legal Services":
+    elif ReferralSource == "3-1-1" or ReferralSource == "ADP Hotline" or ReferralSource == "Community Organization" or ReferralSource == "Elected Official" or ReferralSource == "Foreclosure" or ReferralSource == "Friends/Family" or ReferralSource == "Home base" or ReferralSource == "In-House" or ReferralSource == "Other City Agency" or ReferralSource == "Outreach" or ReferralSource == "Returning Client" or ReferralSource == "School" or ReferralSource == "Self-referred" or ReferralSource == "Word of mouth" or ReferralSource == "Legal Services" or ReferralSource == "Other" or ReferralSource == "":
         return "Other"
         
 #Housing Outcomes needs mapping for HRA
@@ -113,64 +123,80 @@ def Outcome(HousingOutcome):
         
 #Outcome related things that need mapping
 def ServicesRendered(ServicesRendered):
-    if ServicesRendered == "Secured Rent Abatement":
-        return "Abatement"
-    elif ServicesRendered == "Secured Rent Reduction":
-        return "Reduction"
-    elif ServicesRendered == "Secured Order or Agreement for Repairs in Apartment/Building":
-        return "Repairs"
-    elif ServicesRendered == "Returned Unit to Rent Regulation":
-        return "Regulation"
-    elif ServicesRendered == "Obtained Renewal of Lease":
-        return "Renewal"
-    elif ServicesRendered == "Obtain Ongoing Rent Subsidy":
-        return "Subsidy"
-    elif ServicesRendered == "Client Security Deposit Returned":
-        return "Deposit"
-    elif ServicesRendered == "Case Discontinued/Dismissed/Landlord Fails to Prosecute":
-        return "Discontinued"
-    elif ServicesRendered == "Case Resolved without Judgment of Eviction Against Client":
-        return "Resolved"
-    elif ServicesRendered == "Secured 6 Months or Longer in Residence":
-        return "6Months"
-    elif ServicesRendered == "Obtained Succession Rights to Residence":
-        return "Succession"
-    elif ServicesRendered == "Obtained Negotiated Buyout":
-        return "Buyout"
-    elif ServicesRendered == "Restored Access to Personal Property":
-        return "Property"
-    elif ServicesRendered == "Overcame Housing Discrimination":
-        return "Discrimination"
-    elif ServicesRendered == "Provided Housing-related Consumer Debt Legal Assistance":
-        return "Debt"
+    splitserviceslist = ServicesRendered.split(", ")
+    recombinedserviceslist = list()
+    
+    for x in splitserviceslist:
+        if x == "Secured Rent Abatement":
+            x = "Abatement"
+        elif x == "Secured Order or Agreement for Repairs in Apartment/Building":
+            x = "Repairs"
+        elif x == "Returned Unit to Rent Regulation":
+            x = "Regulation"
+        elif x == "Obtained Renewal of Lease":
+            x = "Renewal"
+        elif x == "Obtain Ongoing Rent Subsidy":
+            x = "Subsidy"
+        elif x == "Client Security Deposit Returned":
+            x = "Deposit"
+        elif x == "Case Discontinued/Dismissed/Landlord Fails to Prosecute":
+            x = "Discontinued"
+        elif x == "Case Resolved without Judgment of Eviction Against Client":
+            x = "Resolved"
+        elif x == "Secured 6 Months or Longer in Residence":
+            x = "6months"
+        elif x == "Obtained Succession Rights to Residence":
+            x = "Succession"
+        elif x == "Obtained Negotiated Buyout":
+            x = "Buyout"
+        elif x == "Restored Access to Personal Property":
+            x = "Property"
+        elif x == "Overcame Housing Discrimination":
+            x = "Discrimination"
+        elif x == "Provided Housing-related Consumer Debt Legal Assistance":
+            x = "Debt"
+        recombinedserviceslist.append(x)
+    return "; ".join(recombinedserviceslist)
         
 #Mapped to what HRA wants - some of the options are in LegalServer,
 def Activities(Activity):
-    if Activity == "Counsel Assisted in Filing or Refiling of Answer":
-        return "Answer"
-    elif Activity == "Filed/Argued/Supplemented Dispositive or other Substantive Motion":
-        return "Motion"
-    elif Activity == "Filed for an Emergency Order to Show Cause":
-        return "OSC"
-    elif Activity == "Conducted Traverse Hearing":
-        return "Traverse"
-    elif Activity == "Conducted Evidentiary Hearing":
-        return "Evidentiary"
-    elif Activity == "Commenced Trial":
-        return "Trial"
-    elif Activity == "Filed Appeal":
-        return "Appeal"
+    splitactivitieslist = Activity.split(", ")
+    recombinedactivitieslist = list()  
+    for x in splitactivitieslist:
+        if x == "Counsel Assisted in Filing or Refiling of Answer":
+            x = "Answer"
+        elif x == "Filed/Argued/Supplemented Dispositive or other Substantive Motion":
+            x = "Motion"
+        elif x == "Filed for an Emergency Order to Show Cause":
+            x = "OSC"
+        elif x == "Conducted Traverse Hearing":
+            x = "Traverse"
+        elif x == "Conducted Evidentiary Hearing":
+            x = "Evidentiary"
+        elif x == "Commenced Trial":
+            x = "Trial"
+        elif x == "Filed Appeal":
+            x = "Appeal"        
+        recombinedactivitieslist.append(x)
+    return "; ".join(recombinedactivitieslist)
         
 #Subsidy type - if it's not in the HRA list, it has to be 'none' (other is not valid) - they want a smaller list than we record. (mapping to be confirmed)        
 def SubsidyType(SubsidyType):
-    if SubsidyType == "LINC" or SubsidyType == "HOMETBRA" or SubsidyType == "FEPS" or SubsidyType == "SEPS" or SubsidyType == "City FEPS" or SubsidyType == "HASA" or SubsidyType == "Pathways Home" or SubsidyType == "SOTA" or SubsidyType == "City HRA Subsidy":
-        return "HRA Subsidy"
-    elif SubsidyType == "HUD VASH":
-        return "Section 8"
-    elif SubsidyType == "ACS Housing Subsidy":
-        return "ACS Subsidy"
-    else:
+    splitsubsidytypelist = SubsidyType.split(", ")
+    recombinedsubsidytypelist = list()
+    for x in splitsubsidytypelist:
+        if x == "LINC" or x == "HOMETBRA" or x == "FEPS" or x == "SEPS" or x == "City FEPS" or x == "HASA" or x == "Pathways Home" or x == "SOTA" or x == "City HRA Subsidy":
+            x = "HRA Subsidy"
+        elif x == "HUD VASH":
+            x = "Section 8"
+        elif x == "ACS Housing Subsidy":
+            x = "ACS Subsidy"
+        recombinedsubsidytypelist.append(x)
+        
+    if "; ".join(recombinedsubsidytypelist) == "":
         return "None"
+    else:
+        return "; ".join(recombinedsubsidytypelist)
 
 #Does Client have an eligibility date prior to March 1st, 2020?
 def PreThreeOne(EligibilityDate):

@@ -159,13 +159,56 @@ def TRCExternalPrepCovid():
                 return ToRedact
         df['DHCI'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['Housing Signed DHCI Form']), axis=1)
         
-        #No names, (not full date etc.) - or just #give them whole date without name
+        #No names, (not full date etc.)
         df['first_name'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['Client First Name']), axis=1)
         df['last_name'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['Client Last Name']), axis=1)
         
+        #also redact PA#, SS#, LT#, address, monthly rent, individual or group, years in apt, referral source, annual income, DHCI, posture of case on eligibility, at or below 200%, # of units in buildling, subsidy type, housing type, outcome, outcome date, services renderd to client, activity indicators, 
         
+        df['PA_number'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['PA_number']), axis=1)
         
-
+        df['SSN'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['SSN']), axis=1)
+        
+        df['Street'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['Street']), axis=1)
+         
+        df['Unit'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['Unit']), axis=1)
+          
+        df['city'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['city']), axis=1)
+           
+        df['zip'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['zip']), axis=1)
+            
+        df['rent'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['rent']), axis=1)
+        
+        df['LT_index'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['LT_index']), axis=1)
+         
+        df['proceeding_level'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['proceeding_level']), axis=1)
+          
+        df['years_in_apt'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['years_in_apt']), axis=1)
+           
+        df['referral_source'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['referral_source']), axis=1)
+            
+        df['income'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['income']), axis=1)
+             
+        df['DHCI'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['DHCI']), axis=1)
+        
+        df['posture'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['posture']), axis=1)
+         
+        df['below_200_FPL'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['below_200_FPL']), axis=1)
+          
+        df['units_in_bldg'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['units_in_bldg']), axis=1)
+        
+        df['subsidy_type'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['subsidy_type']), axis=1)
+         
+        df['housing_type'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['housing_type']), axis=1)
+          
+        df['outcome_date'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['outcome_date']), axis=1)
+           
+        df['outcome'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['outcome']), axis=1)
+        
+        df['services_rendered'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['services_rendered']), axis=1)
+           
+        df['activities'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['activities']), axis=1)
+        
         ###Finalizing Report###
         #put columns in correct order
         

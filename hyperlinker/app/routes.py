@@ -33,6 +33,7 @@ def index():
     <ul type="disc">
     <li><a href="/TRCclean">TRC Cleaner</a></li>
     <li><a href="/TRCtally">TRC Tally</a></li>
+    <li><a href="/TRCtallyCovid">TRC Tally [Covid]</a></li>
     <li><a href="/UAHPLP">UAHPLP Cleaner</a></li>     
     <li><a href="/BrownsvilleTRCclean">Brownsville TRC Cleaner</a></li>
     <li><a href="/DHCIPrep">DHCI Document Extractor Prep</a></li>
