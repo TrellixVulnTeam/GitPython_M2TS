@@ -9,8 +9,8 @@ import pandas as pd
 import os
 
 
-@app.route("/upload", methods=['GET', 'POST'])
-@app.route("/hyperlinker", methods=['GET', 'POST'])
+
+@app.route("/Hyperlinker", methods=['GET', 'POST'])
 def upload_hyperlink():
     #upload file from computer
     if request.method == 'POST':

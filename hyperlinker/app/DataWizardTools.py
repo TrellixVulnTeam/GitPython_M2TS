@@ -2,7 +2,7 @@
 
 #Remove extraneous summary rows
 def RemoveNoCaseID(CaseID):
-        if CaseID == '' or CaseID == 'nan':
+        if CaseID == '' or CaseID == 'nan' or CaseID.startswith("Unique") == True:
             return 'No Case ID'
 
         else:
@@ -25,3 +25,54 @@ def DateMaker (Date):
                 return ""            
             else:
                 return int(DateYear + DateMonth + DateDay)
+
+
+#Turn the Queens micro-cities into just saying 'queens'       
+QueensNeighborhoods = ["Arverne",
+                        "Astoria",
+                        "Bayside",
+                        "Bellerose",
+                        "Cambria Heights",
+                        "College Point",
+                        "Corona",
+                        "Elmhurst",
+                        "Far Rockaway",
+                        "Flushing",
+                        "Forest Hills",
+                        "Fresh Meadows",
+                        "Glendale",
+                        "Hollis",
+                        "Jackson Heights",
+                        "Jackson Hts",
+                        "Jamaica",
+                        "Kew Gardens",
+                        "Laurelton",
+                        "Little Neck",
+                        "Long Is City",
+                        "Long Island City",
+                        "Maspeth",
+                        "Middle Village",
+                        "Ozone Park",
+                        "Queens",
+                        "Queens Village",
+                        "Rego Park",
+                        "Richmond Hill",
+                        "Ridgewood",
+                        "Rockaway Beach",
+                        "Rockaway Park",
+                        "Rosedale",
+                        "S Ozone Park",
+                        "Saint Albans",
+                        "South Ozone Park",
+                        "South Richmond Hill",
+                        "Springfield Gardens",
+                        "Sunnyside",
+                        "Whitestone",
+                        "Woodhaven",
+                        "Woodside"]
+       
+def QueensConsolidater(City):
+    if City in QueensNeighborhoods:
+        return "Queens"
+    else:
+        return City

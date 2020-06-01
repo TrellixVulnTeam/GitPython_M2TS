@@ -1,10 +1,7 @@
-from flask import render_template, flash, redirect, url_for, request, Flask, jsonify, send_from_directory
-from app import app, db, DataWizardTools, HousingTools
-from app.models import User, Post
-from app.forms import PostForm
-from werkzeug.urls import url_parse
-from datetime import date
+from flask import request, send_from_directory
+from app import app, DataWizardTools, HousingTools
 import pandas as pd
+from datetime import date
 import numpy
 
 @app.route("/TRCtallyCovid", methods=['GET', 'POST'])
@@ -14,6 +11,8 @@ def upload_TRCtallyCovid():
         f = request.files['file']
         data_xls = pd.read_excel(f)
         data_xls.fillna('',inplace=True)
+        
+        data_xls['city'] = data_xls.apply(lambda x: DataWizardTools.QueensConsolidater(x['city']), axis = 1)
         data_xls['city'] = data_xls['city'].str.upper()
         data_xls['city'] = data_xls['city'].str.replace('NEW YORK','MANHATTAN')
         

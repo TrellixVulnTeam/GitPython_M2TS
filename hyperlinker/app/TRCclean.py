@@ -1,5 +1,5 @@
 from flask import render_template, flash, redirect, url_for, request, Flask, jsonify, send_from_directory
-from app import app, db
+from app import app, db, DataWizardTools
 from app.models import User, Post
 from app.forms import PostForm
 from werkzeug.urls import url_parse
@@ -23,14 +23,13 @@ def upload_TRCclean():
         else:
             data_xls = pd.read_excel(f)
         
-        data_xls.fillna('',inplace=True)
-        last7 = data_xls['Matter/Case ID#'].apply(lambda x: x[3:])
-        CaseNum = data_xls['Matter/Case ID#']
-        data_xls['Temp Hyperlinked Case #']='=HYPERLINK("https://lsnyc.legalserver.org/matter/dynamic-profile/view/'+last7+'",'+ '"' + CaseNum +'"' +')'
-        del data_xls['Matter/Case ID#']
-        move=data_xls['Temp Hyperlinked Case #']
-        data_xls.insert(0,'Hyperlinked Case #', move)           
-        del data_xls['Temp Hyperlinked Case #']
+        #Remove Rows without Case ID values
+        data_xls.fillna('',inplace = True)
+        data_xls['Matter/Case ID#'] = data_xls.apply(lambda x : DataWizardTools.RemoveNoCaseID(x['Matter/Case ID#']),axis=1)        
+        data_xls = data_xls[data_xls['Matter/Case ID#'] != 'No Case ID']
+        
+        #Create Hyperlinks
+        data_xls['Hyperlinked CaseID#'] = data_xls.apply(lambda x : DataWizardTools.Hyperlinker(x['Matter/Case ID#']),axis=1)          
         
         data_xls['Assigned Branch/CC'] = data_xls['Assigned Branch/CC'].str.replace('Bronx Legal Services','BxLS')
         data_xls['Assigned Branch/CC'] = data_xls['Assigned Branch/CC'].str.replace('Brooklyn Legal Services','BkLS')
@@ -325,7 +324,7 @@ def upload_TRCclean():
         
         #Put everything in the right order
         
-        data_xls = data_xls[['Hyperlinked Case #','Primary Advocate',
+        data_xls = data_xls[['Hyperlinked CaseID#','Primary Advocate',
         "Date Opened",
         "Date Closed",
         "Client First Name",
@@ -411,7 +410,7 @@ def upload_TRCclean():
 
     return '''
     <!doctype html>
-    <title>TRCTester</title>
+    <title>TRC Cleaner</title>
     <link rel="stylesheet" href="/static/css/main.css">  
     <h1>TRC Cleanup Report:</h1>
     <form action="" method=post enctype=multipart/form-data>
