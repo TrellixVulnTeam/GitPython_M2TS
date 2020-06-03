@@ -1,5 +1,5 @@
 from flask import request, send_from_directory
-from app import app, DataWizardTools, HousingTools
+from app import app, DataWizardTools, HousingToolBox
 import pandas as pd
 from datetime import date
 import numpy
@@ -29,7 +29,7 @@ def upload_TRCtallyCovid():
         
         data_xls['EligibilityDateConstruct'] = data_xls.apply(lambda x: DataWizardTools.DateMaker(x['eligibility_date']), axis=1)
         
-        data_xls['Pre-3/1/20 Elig Date?'] = data_xls.apply(lambda x: HousingTools.PreThreeOne(x['EligibilityDateConstruct']), axis=1)
+        data_xls['Pre-3/1/20 Elig Date?'] = data_xls.apply(lambda x: HousingToolBox.PreThreeOne(x['EligibilityDateConstruct']), axis=1)
         
         #Value of Case
                      

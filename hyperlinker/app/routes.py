@@ -39,6 +39,7 @@ def index():
     <li><a href="/DHCIPrep">DHCI Document Extractor Prep</a></li>
     <li><a href="/TRCExternalPrep">Prepare TRC Reports for Submission to HRA</a></li>
     <li><a href="/TRCExternalPrepCovid">[Revised for COVID] Prepare TRC Reports for Submission to HRA</a></li>
+    <li><a href="/UAHPLPExternalPrepCovid">[Revised for COVID] Prepare UA/HPLP Reports for Submission to HRA</a></li>
     </ul>
 
     

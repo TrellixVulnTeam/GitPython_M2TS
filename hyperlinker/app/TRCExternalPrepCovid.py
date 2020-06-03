@@ -1,5 +1,5 @@
 from flask import request, send_from_directory
-from app import app, DataWizardTools, HousingTools
+from app import app, DataWizardTools, HousingToolBox
 import pandas as pd
 
 @app.route("/TRCExternalPrepCovid", methods=['GET', 'POST'])
@@ -63,7 +63,7 @@ def TRCExternalPrepCovid():
         df['Street'] = df['Street Address'].str.split(' ',1).str[1]
         
         #Translation based on HRA Specs            
-        df['proceeding'] = df.apply(lambda x: HousingTools.ProceedingType(x['Housing Type Of Case']), axis=1)
+        df['proceeding'] = df.apply(lambda x: HousingToolBox.ProceedingType(x['Housing Type Of Case']), axis=1)
 
         #if it's a multi-tenant/group case? change it from saying Yes/no to say "no = individual" or 'yes = Group'
         #Also, if it's an eviction case, it's individual, otherwise make it "needs review"
@@ -77,51 +77,51 @@ def TRCExternalPrepCovid():
                 return "Individual"
             else:
                 return "Needs Review"
-        df['proceeding_level'] = df.apply(lambda x: ProceedingLevel(x['Housing Building Case?'], x['proceeding'], HousingTools.evictionproceedings), axis=1)
+        df['proceeding_level'] = df.apply(lambda x: ProceedingLevel(x['Housing Building Case?'], x['proceeding'], HousingToolBox.evictionproceedings), axis=1)
         
         #For years in apartment, negative 1 or less = 0.5
         df['years_in_apt'] = df['Housing Years Living In Apartment'].apply(lambda x: .5 if x <= -1 else x)
         
         
         #Case posture on eligibility date (on trial, no stipulation etc.) - transform them into the HRA initials
-        df['posture'] = df.apply(lambda x: HousingTools.PostureOnEligibility(x['Housing Posture of Case on Eligibility Date']), axis=1)
+        df['posture'] = df.apply(lambda x: HousingToolBox.PostureOnEligibility(x['Housing Posture of Case on Eligibility Date']), axis=1)
         
         
         #Level of Service becomes Service type 
-        df['service_type'] = df.apply(lambda x: HousingTools.ServiceType(x['Housing Level of Service']), axis=1)
+        df['service_type'] = df.apply(lambda x: HousingToolBox.TRCServiceType(x['Housing Level of Service']), axis=1)
         
         #if below 201, = 'Yes' otherwise 'No'
         df['below_200_FPL'] = df['Percentage of Poverty'].apply(lambda x: "Yes" if x < 200 else "No")
     
         #Subsidy type - if it's not in the HRA list, it has to be 'none' (other is not valid) - they want a smaller list than we record. (mapping to be confirmed)
                 
-        df['subsidy_type'] = df.apply(lambda x: HousingTools.SubsidyType(x['Housing Subsidy Type']), axis=1)
+        df['subsidy_type'] = df.apply(lambda x: HousingToolBox.SubsidyType(x['Housing Subsidy Type']), axis=1)
         
         
         #Housing Regulation Type: mapping down - we have way more categories, rent regulated, market rate, or other (mapping to be confirmed). can't be blank
 
-        df['housing_type'] = df.apply(lambda x: HousingTools.HousingType(x['Housing Form Of Regulation']), axis=1)
+        df['housing_type'] = df.apply(lambda x: HousingToolBox.HousingType(x['Housing Form Of Regulation']), axis=1)
 
         #Referrals need to be one of their specific categories
             
-        df['referral_source'] = df.apply(lambda x: HousingTools.ReferralMap(x['Referral Source']), axis = 1)
+        df['referral_source'] = df.apply(lambda x: HousingToolBox.ReferralMap(x['Referral Source']), axis = 1)
         
         #Housing Outcomes needs mapping for HRA
-        df['outcome'] = df.apply(lambda x: HousingTools.Outcome(x['Housing Outcome']), axis=1)
+        df['outcome'] = df.apply(lambda x: HousingToolBox.Outcome(x['Housing Outcome']), axis=1)
         
         #Outcome related things that need mapping   
-        df['services_rendered'] = df.apply(lambda x: HousingTools.ServicesRendered(x['Housing Services Rendered to Client']), axis=1)
+        df['services_rendered'] = df.apply(lambda x: HousingToolBox.ServicesRendered(x['Housing Services Rendered to Client']), axis=1)
 
         #Mapped to what HRA wants - some of the options are in LegalServer,
 
-        df['activities'] = df.apply(lambda x: HousingTools.Activities(x['Housing Activity Indicators']), axis=1)
+        df['activities'] = df.apply(lambda x: HousingToolBox.Activities(x['Housing Activity Indicators']), axis=1)
         
         
         #Differentiate pre- and post- 3/1/20 eligibility date cases
            
         df['DateConstruct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['HAL Eligibility Date']), axis=1)
         
-        df['Pre-3/1/20 Elig Date?'] = df.apply(lambda x: HousingTools.PreThreeOne(x['DateConstruct']), axis=1)
+        df['Pre-3/1/20 Elig Date?'] = df.apply(lambda x: HousingToolBox.PreThreeOne(x['DateConstruct']), axis=1)
         
         
         

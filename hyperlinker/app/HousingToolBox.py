@@ -44,6 +44,9 @@ def ProceedingType(TypeOfCase):
 #List of proceeding types that constitute an eviction case
 evictionproceedings = ['HO','NP','IL','TT','EA','EJ']
 
+#List of UAC (RTC) Zip Codes:
+UACZipCodes = ['11207','11216','11221','11225','11226','10453','10457','10462','10467','10468','10025','10026','10027','10029','10031','10034','10302','10303','10310','10314','11373','11385','11433','11434','11691']
+
 #Case posture on eligibility date (on trial, no stipulation etc.) - transform them into the HRA initials
 def PostureOnEligibility(Posture):
     splitpostureeligibilitylist = Posture.split( ", ")
@@ -70,14 +73,35 @@ def PostureOnEligibility(Posture):
  
     return "; ".join(recombinedposturelist)
  
-#Level of Service becomes Service type - lots of level of service in LS, mapped to Advice Only, Pre-Lit Strategies (brief service, out of court advocacy, hold for review), and Full Rep (mapping to be confirmed)
-def ServiceType(LevelOfService):
+#TRC Level of Service becomes Service type - lots of level of service in LS, mapped to Advice Only, Pre-Lit Strategies (brief service, out of court advocacy, hold for review), and Full Rep (mapping to be confirmed)
+def TRCServiceType(LevelOfService):
     if LevelOfService == "Advice":
         return "Advice Only"
     elif LevelOfService == "Brief Service" or LevelOfService == "Out-of-Court Advocacy" or LevelOfService == "Hold For Review":
         return "Pre-Litigation Strategies"
     elif LevelOfService == "Representation - Admin. Agency" or LevelOfService == "Representation-EOIR" or LevelOfService == "Representation - Federal Court" or LevelOfService == "Representation - State Court":
         return "Full Rep"
+
+
+#UAC Level of Service: 
+def UACServiceType(LevelOfService,UAorNonUA):
+    if LevelOfService == "Advice" and UAorNonUA == "UA":
+        return "Brief Legal Assistance"
+    elif LevelOfService == "Brief Service" and UAorNonUA == "UA":
+        return "Brief Legal Assistance"
+    elif LevelOfService == "Out-of-Court Advocacy" and UAorNonUA == "UA":
+        return "Brief Legal Assistance"
+    elif LevelOfService == "Advice" and UAorNonUA == "Non-UA":
+        return "Advice Only"
+    elif LevelOfService == "Brief Service" and UAorNonUA == "Non-UA":
+        return "Advice Only"
+    elif LevelOfService == "Out-of-Court Advocacy" and UAorNonUA == "Non-UA":
+        return "Advice Only"
+    elif LevelOfService == "Hold For Review":
+        return "Hold For Review"
+    elif LevelOfService == "Representation - Admin. Agency" or LevelOfService == "Representation-EOIR" or LevelOfService == "Representation - Federal Court" or LevelOfService == "Representation - State Court":
+        return "Full Rep"
+
      
 #Housing Regulation Type: mapping down - we have way more categories, rent regulated, market rate, or other (mapping to be confirmed). can't be blank     
 def HousingType(HousingType):

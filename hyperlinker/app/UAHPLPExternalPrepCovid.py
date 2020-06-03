@@ -2,12 +2,13 @@ from flask import request, send_from_directory
 from app import app, DataWizardTools, HousingToolBox
 import pandas as pd
 
-@app.route("/TRCExternalPrep", methods=['GET', 'POST'])
-def TRCExternalPrep():
+@app.route("/UAHPLPExternalPrepCovid", methods=['GET', 'POST'])
+def UAHPLPExternalPrepCovid():
     #upload file from computer via browser
     if request.method == 'POST':
         print(request.files['file'])
         f = request.files['file']
+        
         
         #turn the excel file into a dataframe, but skip the top 2 rows if they are blank
         test = pd.read_excel(f)
@@ -16,6 +17,7 @@ def TRCExternalPrep():
             df = pd.read_excel(f,skiprows=2)
         else:
             df = pd.read_excel(f)
+
         
         #Remove Rows without Case ID values
         df.fillna('',inplace = True)
@@ -53,15 +55,27 @@ def TRCExternalPrep():
         df['id'] = 'LSNYC' + df['Matter/Case ID#']
         
         #Turn our funding codes into HRA Program Names
-        #*for trc (3018 and 3011) everything is AHTP - more complicated for UA etc.
-        df['program_name'] = 'AHTP'
+        
+        #Translation based on HRA Specs  (this got moved up cuz it's output is necessary for program name)           
+        df['proceeding'] = df.apply(lambda x: HousingToolBox.ProceedingType(x['Housing Type Of Case']), axis=1)
+        
+        #cases in certain zip codes (RTC zips) that are eviction are UA - everything else is non-UA **Bounce this to housing tools**
+        
+        def UAorNonUA (TypeOfCase,Zip):
+            if TypeOfCase in HousingToolBox.evictionproceedings and str(Zip) in HousingToolBox.UACZipCodes:
+                return "UA"
+            else:
+                return "Non-UA"
+
+        df['program_name'] = df.apply(lambda x: UAorNonUA(x['proceeding'],x['Zip Code']), axis=1)
+        
+        
         
         #Separate out street number from street name (based on first space)
         df['street_number'] = df['Street Address'].str.split(' ').str[0]
         df['Street'] = df['Street Address'].str.split(' ',1).str[1]
         
-        #Translation based on HRA Specs            
-        df['proceeding'] = df.apply(lambda x: HousingToolBox.ProceedingType(x['Housing Type Of Case']), axis=1)
+        
 
         #if it's a multi-tenant/group case? change it from saying Yes/no to say "no = individual" or 'yes = Group'
         #Also, if it's an eviction case, it's individual, otherwise make it "needs review"
@@ -86,7 +100,7 @@ def TRCExternalPrep():
         
         
         #Level of Service becomes Service type 
-        df['service_type'] = df.apply(lambda x: HousingToolBox.TRCServiceType(x['Housing Level of Service']), axis=1)
+        df['service_type'] = df.apply(lambda x: HousingToolBox.UACServiceType(x['Housing Level of Service'],x['program_name']), axis=1)
         
         #if below 201, = 'Yes' otherwise 'No'
         df['below_200_FPL'] = df['Percentage of Poverty'].apply(lambda x: "Yes" if x < 200 else "No")
@@ -121,8 +135,103 @@ def TRCExternalPrep():
         
         df['Pre-3/1/20 Elig Date?'] = df.apply(lambda x: HousingToolBox.PreThreeOne(x['DateConstruct']), axis=1)
         
-       
-
+        
+        
+        ##different guidelines for post 3/1/20 eligibility dates
+        ##If case is advice and has a post-3/1 eligibility date
+        
+        #Sum household in adult column and leave children blank
+        def HousholdSum (ServiceType, PreThreeOne, NumAdults, NumChildren):
+            if ServiceType == "Advice Only" and PreThreeOne == "No":
+                return NumAdults + NumChildren
+            else:
+                return NumAdults
+        df['num_adults'] = df.apply(lambda x: HousholdSum(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['num_adults'], x['num_children']), axis=1)
+        
+        def DeleteChildren (ServiceType, PreThreeOne, NumChildren):
+            if ServiceType == "Advice Only" and PreThreeOne == "No":
+                return ""
+            else:
+                return NumChildren
+        df['num_children'] = df.apply(lambda x: DeleteChildren(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['num_children']), axis=1)
+        
+        #Only have to report birth year 
+        def RedactBirthday(ServiceType, PreThreeOne,DOB):
+            if ServiceType == "Advice Only" and PreThreeOne == "No":
+                return "01/01/"+ DOB[6:]
+            else:
+                return DOB
+        df['DOB'] = df.apply(lambda x: RedactBirthday(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['Date of Birth']), axis=1)
+        
+        #DHCI Blank
+        def RedactAnything(ServiceType, PreThreeOne, ToRedact):
+            if ServiceType == "Advice Only" and PreThreeOne == "No":
+                return ""
+            else:
+                return ToRedact
+        df['DHCI'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['Housing Signed DHCI Form']), axis=1)
+        
+        #No names, (not full date etc.)
+        df['first_name'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['Client First Name']), axis=1)
+        df['last_name'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['Client Last Name']), axis=1)
+        
+        #also redact PA#, SS#, LT#, address, monthly rent, individual or group, years in apt, referral source, annual income, DHCI, posture of case on eligibility, at or below 200%, # of units in buildling, subsidy type, housing type, outcome, outcome date, services renderd to client, activity indicators, 
+        
+        df['PA_number'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['PA_number']), axis=1)
+        
+        df['SSN'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['SSN']), axis=1)
+        
+        df['Street'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['Street']), axis=1)
+         
+        df['Unit'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['Unit']), axis=1)
+          
+        df['city'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['city']), axis=1)
+           
+        df['zip'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['zip']), axis=1)
+            
+        df['rent'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['rent']), axis=1)
+        
+        df['LT_index'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['LT_index']), axis=1)
+         
+        df['proceeding_level'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['proceeding_level']), axis=1)
+          
+        df['years_in_apt'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['years_in_apt']), axis=1)
+           
+        df['referral_source'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['referral_source']), axis=1)
+            
+        df['income'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['income']), axis=1)
+             
+        df['DHCI'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['DHCI']), axis=1)
+        
+        df['posture'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['posture']), axis=1)
+         
+        df['below_200_FPL'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['below_200_FPL']), axis=1)
+          
+        df['units_in_bldg'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['units_in_bldg']), axis=1)
+        
+        df['subsidy_type'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['subsidy_type']), axis=1)
+         
+        df['housing_type'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['housing_type']), axis=1)
+          
+        df['outcome_date'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['outcome_date']), axis=1)
+           
+        df['outcome'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['outcome']), axis=1)
+        
+        df['services_rendered'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['services_rendered']), axis=1)
+           
+        df['activities'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['activities']), axis=1)
+        
+        #HRA is tracking things differently than we are - extra column at end so we can see what counts toward what what from their perspective
+        
+        def NewProgramAssignment(Proceeding):
+            if Proceeding == "NP" or Proceeding == "HO" or Proceeding == "IL" or Proceeding == "TT":
+                return "UA"
+            elif Proceeding == "EA" or Proceeding == "EJ" or Proceeding == "HP" or Proceeding == "DA" or Proceeding == "7A" or Proceeding == "78" or Proceeding == "S8" or Proceeding == "FC" or Proceeding == "OA" or Proceeding == "OS" or Proceeding == "OO":
+                return "Non-UA"
+        
+        df['2020NewProgramAssignment'] = df.apply(lambda x: NewProgramAssignment(x['proceeding']), axis = 1)
+        
+        
         ###Finalizing Report###
         #put columns in correct order
         
@@ -164,10 +273,12 @@ def TRCExternalPrep():
         'activities',
         'HRA Release?',
         'Percentage of Poverty',
-        'Primary Advocate',
         'Hyperlinked CaseID#',
-        'Pre-3/1/20 Elig Date?'
+        'Pre-3/1/20 Elig Date?',
+        '2020NewProgramAssignment'
         ]]
+        #Add Charles 'is it now UA for 2020? question
+        
         
         #bounce worksheets back to excel
         output_filename = f.filename     
@@ -183,7 +294,7 @@ def TRCExternalPrep():
         problem_format = workbook.add_format({'bg_color':'yellow'})
         worksheet.freeze_panes(1,0)
         worksheet.set_column('A:BL',20)
-        worksheet.set_column ('AN:AN',30,link_format)
+        worksheet.set_column ('AM:AM',30,link_format)
         worksheet.conditional_format('C2:BO100000',{'type': 'text',
                                                  'criteria': 'containing',
                                                  'value': 'Needs',
@@ -197,16 +308,16 @@ def TRCExternalPrep():
 #what the user-facing site looks like
     return '''
     <!doctype html>
-    <title>TRC Report Prep</title>
+    <title>UAHPLP Report Prep [COVID]</title>
     <link rel="stylesheet" href="/static/css/main.css">  
     <link rel="stylesheet" href="/static/css/main.css"> 
-    <h1>Prep Cases for TRC External Report:</h1>
+    <h1>Prep Cases for UA/HPLP External Report [COVID]:</h1>
     <form action="" method=post enctype=multipart/form-data>
-    <p><input type=file name=file><input type=submit value=TRC-ify!>
+    <p><input type=file name=file><input type=submit value=UAC-ify!>
     </form>
     <h3>Instructions:</h3>
     <ul type="disc">
-    <li>This tool is meant to be used in conjunction with the LegalServer report called <a href="https://lsnyc.legalserver.org/report/dynamic?load=1969" target="_blank">TRC External Report</a>.</li>
+    <li>This tool is meant to be used in conjunction with the LegalServer report called <a href="https://lsnyc.legalserver.org/report/dynamic?load=1964" target="_blank">HPLP/UAC External Report</a>.</li>
     
     </ul>
     </br>
