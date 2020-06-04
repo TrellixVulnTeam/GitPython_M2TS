@@ -83,20 +83,20 @@ def TRCServiceType(LevelOfService):
         return "Full Rep"
 
 
-#UAC Level of Service: 
-def UACServiceType(LevelOfService,UAorNonUA):
-    if LevelOfService == "Advice" and UAorNonUA == "UA":
-        return "Brief Legal Assistance"
-    elif LevelOfService == "Brief Service" and UAorNonUA == "UA":
-        return "Brief Legal Assistance"
-    elif LevelOfService == "Out-of-Court Advocacy" and UAorNonUA == "UA":
-        return "Brief Legal Assistance"
-    elif LevelOfService == "Advice" and UAorNonUA == "Non-UA":
-        return "Advice Only"
-    elif LevelOfService == "Brief Service" and UAorNonUA == "Non-UA":
-        return "Advice Only"
-    elif LevelOfService == "Out-of-Court Advocacy" and UAorNonUA == "Non-UA":
-        return "Advice Only"
+#UAC Service Type: 
+def UACServiceType(LevelOfService,UAorNonUA,CloseReason):
+    if CloseReason.startswith(("A","B")) == True:
+        if UAorNonUA == "UA":
+            return "Brief Legal Assistance"
+        elif UAorNonUA == "Non-UA":
+            return "Advice Only"
+    elif CloseReason.startswith(("F","G","H","IA","IB","L")) == True:
+        return "Full Rep"
+    elif LevelOfService == "Advice" or LevelOfService == "Brief Service" or LevelOfService == "Out-of-Court Advocacy":
+        if UAorNonUA == "UA":
+            return "Brief Legal Assistance"
+        elif UAorNonUA == "Non-UA":
+            return "Advice Only"
     elif LevelOfService == "Hold For Review":
         return "Hold For Review"
     elif LevelOfService == "Representation - Admin. Agency" or LevelOfService == "Representation-EOIR" or LevelOfService == "Representation - Federal Court" or LevelOfService == "Representation - State Court":
