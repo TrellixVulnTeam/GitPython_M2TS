@@ -175,7 +175,7 @@ def TRCExternalPrepCovid():
           
         df['city'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['city']), axis=1)
            
-        df['zip'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['zip']), axis=1)
+        df['street_number'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['street_number']), axis=1)
             
         df['rent'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['rent']), axis=1)
         
