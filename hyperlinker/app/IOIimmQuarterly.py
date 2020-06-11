@@ -38,28 +38,9 @@ def upload_IOIimmQuarterly():
         
         
         #Determining 'level of service' from 3 fields       
-        def HRA_Service_Level(Close_Reason,LS_LoS):
-            Close_Reason = str(Close_Reason)
-            LS_LoS = str(LS_LoS)
-                
-            if Close_Reason.startswith("A") == True:
-                return 'Advice'
-            elif Close_Reason.startswith("B") == True:
-                return 'Brief Service'
-            elif Close_Reason.startswith("H") == True or Close_Reason.startswith("I") == True or Close_Reason.startswith("L"):
-                return 'Full Rep or Extensive Service'
-            elif LS_LoS == 'Advice':
-                return 'Advice'
-            elif LS_LoS == 'Hold For Review':
-                return 'Hold For Review'
-            elif LS_LoS == 'Brief Service' or LS_LoS == 'Out-of-Court Advocacy':
-                return 'Brief Service'
-            elif LS_LoS.startswith('Rep') == True:
-                return 'Full Rep or Extensive Service'
-            else:
-                return ''
+          
+        df['HRA Level of Service'] = df.apply(lambda x: ImmigrationToolBox.HRA_Level_Service(x['Close Reason'],x['Level of Service']), axis=1)
         
-        df['HRA Level of Service'] = df.apply(lambda x: HRA_Service_Level(x['Close Reason'],x['Level of Service']), axis=1)
         
        #HRA Case Coding
        #Putting Cases into HRA's Baskets!  

@@ -1,5 +1,5 @@
 from flask import render_template, flash, redirect, url_for, request, Flask, jsonify, send_from_directory
-from app import app, db
+from app import app, db , ImmigrationToolBox
 from app.models import User, Post
 from app.forms import PostForm
 from werkzeug.urls import url_parse
@@ -291,7 +291,7 @@ def upload_IOIimmCentral():
             else:
                 return ''
                 
-        data_xls['Needs Substantial Activity?'] = data_xls.apply(lambda x: Needs_Rollover(x['Open Construct'],x['Substantial Activity'],x['Subs Construct'],x['Matter/Case ID#'],x['ImmigrationTool.ReportedFY19']), axis=1)
+        data_xls['Needs Substantial Activity?'] = data_xls.apply(lambda x: Needs_Rollover(x['Open Construct'],x['Substantial Activity'],x['Subs Construct'],x['Matter/Case ID#'],x['ImmigrationToolBox.ReportedFY19']), axis=1)
 
 
         #Outcomes
