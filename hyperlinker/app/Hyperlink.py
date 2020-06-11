@@ -1,6 +1,6 @@
 #some of these imports are extraneous and left over from the flask megatutorial 
 from flask import render_template, flash, redirect, url_for, request, Flask, jsonify, send_from_directory
-from app import app, db
+from app import app, db, DataWizardTools
 from app.models import User, Post
 from app.forms import PostForm
 from werkzeug.urls import url_parse
@@ -21,42 +21,44 @@ def upload_hyperlink():
         test = pd.read_excel(f)
         test.fillna('',inplace=True)
         if test.iloc[0][0] == '':
-            data_xls = pd.read_excel(f,skiprows=2)
+            df = pd.read_excel(f,skiprows=2)
+            print("Skipped top two rows")
         else:
-            data_xls = pd.read_excel(f)
-
-        if 'Matter/Case ID#' not in data_xls.columns:
-            data_xls['Matter/Case ID#'] = data_xls['id']
+            df = pd.read_excel(f)
+            print("Dataframe starts from top")
         
-        #delete any rows that don't have case ID#s in them
         
+        #apply hyperlink methodology with splicing and concatenation
+      
         def NoIDDelete(CaseID):
-            if CaseID == '' or CaseID == 'nan':
+            if CaseID == '':
                 return 'No Case ID'
             else:
                 return str(CaseID)
-        data_xls['Matter/Case ID#'] = data_xls.apply(lambda x: NoIDDelete(x['Matter/Case ID#']), axis=1)
+        df['Matter/Case ID#'] = df.apply(lambda x: NoIDDelete(x['Matter/Case ID#']), axis=1)
         
-        data_xls = data_xls[data_xls['Matter/Case ID#'] != 'No Case ID']
+        last7 = df['Matter/Case ID#'].apply(lambda x: x[3:])
+        CaseNum = df['Matter/Case ID#']
+        df['Temp Hyperlinked Case #']='=HYPERLINK("https://lsnyc.legalserver.org/matter/dynamic-profile/view/'+last7+'",'+ '"' + CaseNum +'"' +')'
+        del df['Matter/Case ID#']
+        move=df['Temp Hyperlinked Case #']
+        df.insert(0,'Hyperlinked Case #', move)           
+        del df['Temp Hyperlinked Case #']
         
-        #separate last 7 digits from Case ID# so that it can be used for the link
-        last7 = data_xls['Matter/Case ID#'].apply(lambda x: x[-7:])
-
-        #create excel formula with hyperlinks
-        data_xls['Hyperlinked Case #']='=HYPERLINK("https://lsnyc.legalserver.org/matter/dynamic-profile/view/'+last7+'",'+ '"' + data_xls['Matter/Case ID#'] +'"' +')'
+        """
+        #Remove Rows without Case ID values
+        df.fillna('',inplace = True)
+        df['Matter/Case ID#'] = df.apply(lambda x : DataWizardTools.RemoveNoCaseID(x['Matter/Case ID#']),axis=1)        
+        df = df[df['Matter/Case ID#'] != 'No Case ID']
         
-        #this is a way to move a newly created column to the very front of the spreadsheet
-        move = data_xls['Hyperlinked Case #']
-        del data_xls['Hyperlinked Case #']
-        data_xls.insert(0,'Hyperlinked Case #',move)           
-        
-        #delete original case number column since it's no longer necessary
-        del data_xls['Matter/Case ID#']
+        #Create Hyperlinks
+        df['Hyperlinked CaseID#'] = df.apply(lambda x : DataWizardTools.Hyperlinker(x['Matter/Case ID#']),axis=1)    
+        """
         
         #bounce worksheets back to excel
         output_filename = f.filename     
         writer = pd.ExcelWriter("app\\sheets\\"+output_filename, engine = 'xlsxwriter')
-        data_xls.to_excel(writer, sheet_name='Sheet1',index=False)
+        df.to_excel(writer, sheet_name='Sheet1',index=False)
         workbook = writer.book
         worksheet = writer.sheets['Sheet1']
         

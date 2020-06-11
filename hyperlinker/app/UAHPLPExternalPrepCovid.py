@@ -38,7 +38,7 @@ def UAHPLPExternalPrepCovid():
         df['num_adults'] = df['Number of People 18 and Over']
         df['num_children'] = df['Number of People under 18']
         df['Unit'] = df['Apt#/Suite#']
-        df['city'] = df['City']
+        
         df['zip'] = df['Zip Code']
         df['waiver_approval_date'] = df['Housing Date Of Waiver Approval']
         df['waiver'] = df['Housing TRC HRA Waiver Categories']
@@ -75,7 +75,8 @@ def UAHPLPExternalPrepCovid():
         df['street_number'] = df['Street Address'].str.split(' ').str[0]
         df['Street'] = df['Street Address'].str.split(' ',1).str[1]
         
-        
+        #If it is a case in Queens it will have neighborhood - change it to say Queens
+        df['city'] = df.apply(lambda x: DataWizardTools.QueensConsolidater(x['City']), axis=1)
 
         #if it's a multi-tenant/group case? change it from saying Yes/no to say "no = individual" or 'yes = Group'
         #Also, if it's an eviction case, it's individual, otherwise make it "needs review"
@@ -187,7 +188,7 @@ def UAHPLPExternalPrepCovid():
           
         df['city'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['city']), axis=1)
            
-        df['zip'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['zip']), axis=1)
+        df['street_number'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['street_number']), axis=1)
             
         df['rent'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['rent']), axis=1)
         

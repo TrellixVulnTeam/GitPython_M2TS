@@ -1,5 +1,4 @@
 #General Purpose Functions to be used in LSNYC Report Prep 
-#General Purpose Functions to be used in LSNYC Report Prep 
 
 #Translation based on HRA Specs
 def ProceedingType(TypeOfCase):
@@ -45,6 +44,9 @@ def ProceedingType(TypeOfCase):
 #List of proceeding types that constitute an eviction case
 evictionproceedings = ['HO','NP','IL','TT','EA','EJ']
 
+#List of UAC (RTC) Zip Codes:
+UACZipCodes = ['11207','11216','11221','11225','11226','10453','10457','10462','10467','10468','10025','10026','10027','10029','10031','10034','10302','10303','10310','10314','11373','11385','11433','11434','11691']
+
 #Case posture on eligibility date (on trial, no stipulation etc.) - transform them into the HRA initials
 def PostureOnEligibility(Posture):
     splitpostureeligibilitylist = Posture.split( ", ")
@@ -71,15 +73,34 @@ def PostureOnEligibility(Posture):
  
     return "; ".join(recombinedposturelist)
  
-#Level of Service becomes Service type - lots of level of service in LS, mapped to Advice Only, Pre-Lit Strategies (brief service, out of court advocacy, hold for review), and Full Rep (mapping to be confirmed)
-def ServiceType(LevelOfService):
+#TRC Level of Service becomes Service type - lots of level of service in LS, mapped to Advice Only, Pre-Lit Strategies (brief service, out of court advocacy, hold for review), and Full Rep (mapping to be confirmed)
+def TRCServiceType(LevelOfService):
     if LevelOfService == "Advice":
         return "Advice Only"
     elif LevelOfService == "Brief Service" or LevelOfService == "Out-of-Court Advocacy" or LevelOfService == "Hold For Review":
         return "Pre-Litigation Strategies"
     elif LevelOfService == "Representation - Admin. Agency" or LevelOfService == "Representation-EOIR" or LevelOfService == "Representation - Federal Court" or LevelOfService == "Representation - State Court":
         return "Full Rep"
-     
+
+#UAC Service Type: 
+def UACServiceType(LevelOfService,UAorNonUA,CloseReason):
+    if CloseReason.startswith(("A","B")) == True:
+        if UAorNonUA == "UA":
+            return "Brief Legal Assistance"
+        elif UAorNonUA == "Non-UA":
+            return "Advice Only"
+    elif CloseReason.startswith(("F","G","H","IA","IB","L")) == True:
+        return "Full Rep"
+    elif LevelOfService == "Advice" or LevelOfService == "Brief Service" or LevelOfService == "Out-of-Court Advocacy":
+        if UAorNonUA == "UA":
+            return "Brief Legal Assistance"
+        elif UAorNonUA == "Non-UA":
+            return "Advice Only"
+    elif LevelOfService == "Hold For Review":
+        return "Hold For Review"
+    elif LevelOfService == "Representation - Admin. Agency" or LevelOfService == "Representation-EOIR" or LevelOfService == "Representation - Federal Court" or LevelOfService == "Representation - State Court":
+        return "Full Rep"
+ 
 #Housing Regulation Type: mapping down - we have way more categories, rent regulated, market rate, or other (mapping to be confirmed). can't be blank     
 def HousingType(HousingType):
     if HousingType == "Low Income Tax Credit" or HousingType == "Tenant-interim-lease" or HousingType == "Mitchell-Lama" or HousingType == "Rent Stabilized" or HousingType == "Rent Controlled" or HousingType == "Project-based Sec. 8" or HousingType == "Other Subsidized Housing" or HousingType == "Supportive Housing":
@@ -91,8 +112,7 @@ def HousingType(HousingType):
     elif HousingType == "Public Housing" or HousingType == "Public Housing/NYCHA" or HousingType == "NYCHA/NYCHA" or HousingType == "" or HousingType == "" or HousingType == "" or HousingType == "" or HousingType == "" or HousingType == "" or HousingType == "":
         return "NYCHA"
         
-#Referrals need to be one of their specific categories
-        
+#Referrals need to be one of their specific categories        
 def ReferralMap(ReferralSource):
 
     if ReferralSource == "HRA ELS Part F Brooklyn" or ReferralSource == "HRA ELS (Assigned Counsel)" or ReferralSource == "HRA" or ReferralSource == "Documented Documented HRA Referral Referral":
@@ -110,8 +130,7 @@ def ReferralMap(ReferralSource):
     elif ReferralSource == "3-1-1" or ReferralSource == "ADP Hotline" or ReferralSource == "Community Organization" or ReferralSource == "Elected Official" or ReferralSource == "Foreclosure" or ReferralSource == "Friends/Family" or ReferralSource == "Home base" or ReferralSource == "In-House" or ReferralSource == "Other City Agency" or ReferralSource == "Outreach" or ReferralSource == "Returning Client" or ReferralSource == "School" or ReferralSource == "Self-referred" or ReferralSource == "Word of mouth" or ReferralSource == "Legal Services" or ReferralSource == "Other" or ReferralSource == "":
         return "Other"
         
-#Housing Outcomes needs mapping for HRA
-        
+#Housing Outcomes needs mapping for HRA   
 def Outcome(HousingOutcome):
     if HousingOutcome == "Client Allowed to Remain in Residence":
         return "Remain"
