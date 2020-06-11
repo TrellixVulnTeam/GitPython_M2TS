@@ -36,7 +36,7 @@ def TRCExternalPrep():
         df['num_adults'] = df['Number of People 18 and Over']
         df['num_children'] = df['Number of People under 18']
         df['Unit'] = df['Apt#/Suite#']
-        df['city'] = df['City']
+        
         df['zip'] = df['Zip Code']
         df['waiver_approval_date'] = df['Housing Date Of Waiver Approval']
         df['waiver'] = df['Housing TRC HRA Waiver Categories']
@@ -59,6 +59,9 @@ def TRCExternalPrep():
         #Separate out street number from street name (based on first space)
         df['street_number'] = df['Street Address'].str.split(' ').str[0]
         df['Street'] = df['Street Address'].str.split(' ',1).str[1]
+        
+        #If it is a case in Queens it will have neighborhood - change it to say Queens
+        df['city'] = df.apply(lambda x: DataWizardTools.QueensConsolidater(x['City']), axis=1)
         
         #Translation based on HRA Specs            
         df['proceeding'] = df.apply(lambda x: HousingToolBox.ProceedingType(x['Housing Type Of Case']), axis=1)
