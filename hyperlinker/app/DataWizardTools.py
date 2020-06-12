@@ -1,4 +1,5 @@
 #General Purpose Functions to be used in LSNYC Report Prep 
+import datetime
 
 #Remove extraneous summary rows
 def RemoveNoCaseID(CaseID):
@@ -18,9 +19,14 @@ def Hyperlinker(CaseID):
 
 #Take a date formatted as MM/DD/YYYY and make it YYYYMMDD so it can be easily compared to other dates           
 def DateMaker (Date):
+            
+            if isinstance(Date,datetime.datetime) == True:
+                Date = Date.strftime("%m/%d/%Y")
             DateMonth = Date[:2]
             DateDay = Date[3:5]
             DateYear = Date[6:]
+            
+            
             if Date == "":
                 return ""            
             else:
@@ -76,3 +82,37 @@ def QueensConsolidater(City):
         return "Queens"
     else:
         return City
+        
+#Borough office Abbreviators
+
+def OfficeAbbreviator(AssignedBranch):
+    if AssignedBranch == "Bronx Legal Services":
+        return "BxLS"
+    elif AssignedBranch == "Brooklyn Legal Services":
+        return "BkLS"
+    elif AssignedBranch == "Queens Legal Services":
+        return "QLS"    
+    elif AssignedBranch == "Manhattan Legal Services":
+        return "MLS"    
+    elif AssignedBranch == "Staten Island Legal Services":
+        return "SILS"    
+    elif AssignedBranch == "Legal Support Unit":
+        return "LSU"    
+    else:
+        return AssignedBranch    
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
