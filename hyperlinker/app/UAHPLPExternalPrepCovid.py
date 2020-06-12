@@ -168,6 +168,8 @@ def UAHPLPExternalPrepCovid():
         def RedactAnything(ServiceType, PreThreeOne, ToRedact):
             if ServiceType == "Advice Only" and PreThreeOne == "No":
                 return ""
+            elif ServiceType == "Brief Legal Assistance" and PreThreeOne == "No":
+                return ""
             else:
                 return ToRedact
         df['DHCI'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['Housing Signed DHCI Form']), axis=1)

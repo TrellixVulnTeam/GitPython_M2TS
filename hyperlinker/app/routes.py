@@ -65,7 +65,7 @@ def index():
     <br>
     <b>Development Sandbox:</b>
     <ul type="disc">
-    <li>More Information Coming Soon</li>
+    <li><a href="/BoxTester">Checkbox Tester</a></li>
     </ul>
     <br>
     <p>If you have any questions or concerns about these tools (or ideas for new ones!) please reach out to <a href="mailto:jackley@lsnyc.org?cc=rstump@lsnyc.org&Subject=Hi Jay! (Idea for Python tool!)" target="_top">Jay Ackley</a></p>
