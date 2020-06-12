@@ -145,12 +145,16 @@ def UAHPLPExternalPrepCovid():
         def HousholdSum (ServiceType, PreThreeOne, NumAdults, NumChildren):
             if ServiceType == "Advice Only" and PreThreeOne == "No":
                 return NumAdults + NumChildren
+            elif ServiceType == "Brief Legal Assistance" and PreThreeOne == "No":
+                return NumAdults + NumChildren
             else:
                 return NumAdults
         df['num_adults'] = df.apply(lambda x: HousholdSum(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['num_adults'], x['num_children']), axis=1)
         
         def DeleteChildren (ServiceType, PreThreeOne, NumChildren):
             if ServiceType == "Advice Only" and PreThreeOne == "No":
+                return ""
+            elif ServiceType == "Brief Legal Assistance" and PreThreeOne == "No":
                 return ""
             else:
                 return NumChildren
@@ -159,6 +163,8 @@ def UAHPLPExternalPrepCovid():
         #Only have to report birth year 
         def RedactBirthday(ServiceType, PreThreeOne,DOB):
             if ServiceType == "Advice Only" and PreThreeOne == "No":
+                return "01/01/"+ DOB[6:]
+            if ServiceType == "Brief Legal Assistance" and PreThreeOne == "No":
                 return "01/01/"+ DOB[6:]
             else:
                 return DOB
