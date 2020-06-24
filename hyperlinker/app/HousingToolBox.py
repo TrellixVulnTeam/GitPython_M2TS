@@ -1,8 +1,16 @@
 #General Purpose Functions to be used in LSNYC Report Prep 
-
+#if LevelOfService.startswith("A") == True or LevelOfService.startswith("B") == True:
 #Translation based on HRA Specs
-def ProceedingType(TypeOfCase):
-    if TypeOfCase == "HP Action":
+def TRCProceedingType(TypeOfCase,LegalProblemCode,LevelOfService):
+    if LegalProblemCode.startswith("0") == True and LevelOfService.startswith("A") == True:
+        return "CON"
+    elif LegalProblemCode.startswith("3") == True and LevelOfService.startswith("A") == True:
+        return "FAM"
+    elif LegalProblemCode.startswith("5") == True and LevelOfService.startswith("A") == True:
+        return "HEA"
+    elif LegalProblemCode.startswith("7") == True and LevelOfService.startswith("A") == True:
+        return "BEN"
+    elif TypeOfCase == "HP Action":
         return "HP"
     elif TypeOfCase == "Affirmative Litigation Supreme":
         return "OS"
@@ -12,7 +20,7 @@ def ProceedingType(TypeOfCase):
         return "OO"
     elif TypeOfCase == "Non-payment":
         return "NP"
-    elif TypeOfCase == "Section 8 Administrative Proceeding" or TypeOfCase == "Sec. 8 Termination" or TypeOfCase == "Section 8 Grievance" or TypeOfCase == "Section 8 HQS" or TypeOfCase == "" or TypeOfCase == "Section 8 other" or TypeOfCase == "Section 8 share":
+    elif TypeOfCase == "Section 8 Administrative Proceeding" or TypeOfCase == "Sec. 8 Termination" or TypeOfCase == "Section 8 Grievance" or TypeOfCase == "Section 8 HQS" or TypeOfCase == "Section 8 other" or TypeOfCase == "Section 8 share":
         return "S8"
     elif TypeOfCase == "Illegal Lockout":
         return "IL"
@@ -30,7 +38,7 @@ def ProceedingType(TypeOfCase):
         return "78"
     elif TypeOfCase == "Affirmative Litigation Federal" or TypeOfCase == "Appeal Federal":
         return "FC"
-    elif TypeOfCase == "HRA Fair Hearing" or TypeOfCase == "Human Rights Complaint" or TypeOfCase == "Mitchell-Lama RFM"or TypeOfCase == "Mitchell-Lama Termination"or TypeOfCase == "NYCHA Housing Grievance"or TypeOfCase == "NYCHA RFM"or TypeOfCase == "Other Administrative Proceeding" or TypeOfCase == "PA Issue: City FEPS/SEPS" or TypeOfCase == "PA Issue: Budgeting" or TypeOfCase == "PA Issue: FEPS" or TypeOfCase == "" or TypeOfCase == "PA Issue: LINC" or TypeOfCase == "PA Issue: Other" or TypeOfCase == "PA Issue: RAU" or TypeOfCase == "PA Issue: Underpayment" or TypeOfCase == "SCRIE/DRIE" or TypeOfCase == "Certificate of No Harassment Case":
+    elif TypeOfCase == "HRA Fair Hearing" or TypeOfCase == "Human Rights Complaint" or TypeOfCase == "Mitchell-Lama RFM"or TypeOfCase == "Mitchell-Lama Termination"or TypeOfCase == "NYCHA Housing Grievance"or TypeOfCase == "NYCHA RFM"or TypeOfCase == "Other Administrative Proceeding" or TypeOfCase == "PA Issue: City FEPS/SEPS" or TypeOfCase == "PA Issue: Budgeting" or TypeOfCase == "PA Issue: FEPS" or TypeOfCase == "PA Issue: LINC" or TypeOfCase == "PA Issue: Other" or TypeOfCase == "PA Issue: RAU" or TypeOfCase == "PA Issue: Underpayment" or TypeOfCase == "SCRIE/DRIE" or TypeOfCase == "Certificate of No Harassment Case":
         return "OA"
     elif TypeOfCase == "Affirmative Litigation Supreme" or TypeOfCase == "Public Nuisance" or TypeOfCase == "Appeal Supreme" or TypeOfCase == "Other Civil Court":
         return "OS"
@@ -40,7 +48,58 @@ def ProceedingType(TypeOfCase):
         return "IL"
     else:
         return "Needs Review"
-        
+ 
+def UACProceedingType(TypeOfCase,LegalProblemCode,CloseReason,LevelOfService):
+    
+    if CloseReason.startswith("A") == True or CloseReason.startswith("B") == True or LevelOfService.startswith("A") == True or LevelOfService.startswith("B") == True or LevelOfService.startswith("O") == True:
+        if LegalProblemCode.startswith("0") == True:
+            return "CON"
+        elif LegalProblemCode.startswith("3") == True:
+            return "FAM"
+        elif LegalProblemCode.startswith("5") == True:
+            return "HEA"
+        elif LegalProblemCode.startswith("7") == True:
+            return "BEN"
+    
+    elif TypeOfCase == "HP Action":
+        return "HP"
+    elif TypeOfCase == "Affirmative Litigation Supreme":
+        return "OS"
+    elif TypeOfCase == "Holdover":
+        return "HO"
+    elif TypeOfCase == "No Case" or TypeOfCase == "Non-Litigation Advocacy" or TypeOfCase == "Tenant Rights"  or TypeOfCase == "Rent Strike":
+        return "OO"
+    elif TypeOfCase == "Non-payment":
+        return "NP"
+    elif TypeOfCase == "Section 8 Administrative Proceeding" or TypeOfCase == "Sec. 8 Termination" or TypeOfCase == "Section 8 Grievance" or TypeOfCase == "Section 8 HQS" or TypeOfCase == "Section 8 other" or TypeOfCase == "Section 8 share":
+        return "S8"
+    elif TypeOfCase == "Illegal Lockout":
+        return "IL"
+    elif TypeOfCase == "NYCHA Termination of Tenancy":
+        return "TT"
+    elif TypeOfCase == "Dispositive Eviction Appeal":
+        return "EA"
+    elif TypeOfCase == "Ejectment Action":
+        return "EJ"
+    elif TypeOfCase == "DHCR Administrative Action" or TypeOfCase == "DHCR Proceeding":
+        return "DA"
+    elif TypeOfCase == "7A Proceeding":
+        return "7A"
+    elif TypeOfCase == "Article 78":
+        return "78"
+    elif TypeOfCase == "Affirmative Litigation Federal" or TypeOfCase == "Appeal Federal":
+        return "FC"
+    elif TypeOfCase == "HRA Fair Hearing" or TypeOfCase == "Human Rights Complaint" or TypeOfCase == "Mitchell-Lama RFM"or TypeOfCase == "Mitchell-Lama Termination"or TypeOfCase == "NYCHA Housing Grievance"or TypeOfCase == "NYCHA RFM"or TypeOfCase == "Other Administrative Proceeding" or TypeOfCase == "PA Issue: City FEPS/SEPS" or TypeOfCase == "PA Issue: Budgeting" or TypeOfCase == "PA Issue: FEPS" or TypeOfCase == "PA Issue: LINC" or TypeOfCase == "PA Issue: Other" or TypeOfCase == "PA Issue: RAU" or TypeOfCase == "PA Issue: Underpayment" or TypeOfCase == "SCRIE/DRIE" or TypeOfCase == "Certificate of No Harassment Case":
+        return "OA"
+    elif TypeOfCase == "Affirmative Litigation Supreme" or TypeOfCase == "Public Nuisance" or TypeOfCase == "Appeal Supreme" or TypeOfCase == "Other Civil Court":
+        return "OS"
+    elif TypeOfCase == "Appeal-Appellate Division" or TypeOfCase == "Appeal-Appellate Term":
+        return "EA"
+    elif TypeOfCase == "Illegal Lockout":
+        return "IL"
+    else:
+        return "Needs Review"
+ 
 #List of proceeding types that constitute an eviction case
 evictionproceedings = ['HO','NP','IL','TT','EA','EJ']
 
@@ -109,7 +168,7 @@ def HousingType(HousingType):
         return "Other"
     elif HousingType == "Unregulated" or HousingType == "Unregulated - Sublet" or HousingType == "Unregulated - Co-Op" or HousingType == "Unregulated - Other" or HousingType == "Market Rate – Sublet" or HousingType == "Market Rate – Co-Op" or HousingType == "Market Rate – Other":
         return "Market Rate"
-    elif HousingType == "Public Housing" or HousingType == "Public Housing/NYCHA" or HousingType == "NYCHA/NYCHA" or HousingType == "" or HousingType == "" or HousingType == "" or HousingType == "" or HousingType == "" or HousingType == "" or HousingType == "":
+    elif HousingType == "Public Housing" or HousingType == "Public Housing/NYCHA" or HousingType == "NYCHA/NYCHA":
         return "NYCHA"
         
 #Referrals need to be one of their specific categories        

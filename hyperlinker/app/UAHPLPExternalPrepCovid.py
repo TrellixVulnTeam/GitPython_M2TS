@@ -57,7 +57,7 @@ def UAHPLPExternalPrepCovid():
         #Turn our funding codes into HRA Program Names
         
         #Translation based on HRA Specs  (this got moved up cuz it's output is necessary for program name)           
-        df['proceeding'] = df.apply(lambda x: HousingToolBox.ProceedingType(x['Housing Type Of Case']), axis=1)
+        df['proceeding'] = df.apply(lambda x: HousingToolBox.UACProceedingType(x['Housing Type Of Case'],x['Legal Problem Code'],x['Close Reason'],x['Housing Level of Service']), axis=1)
         
         #cases in certain zip codes (RTC zips) that are eviction are UA - everything else is non-UA **Bounce this to housing tools**
         
@@ -136,7 +136,9 @@ def UAHPLPExternalPrepCovid():
         
         df['Pre-3/1/20 Elig Date?'] = df.apply(lambda x: HousingToolBox.PreThreeOne(x['DateConstruct']), axis=1)
         
+        #Map 'Borough Values' based on Zip Code
         
+        df['BoroughByZip'] = df.apply(lambda x: DataWizardTools.ZipToCity(x['Zip Code']), axis=1)
         
         ##different guidelines for post 3/1/20 eligibility dates
         ##If case is advice and has a post-3/1 eligibility date
@@ -284,35 +286,49 @@ def UAHPLPExternalPrepCovid():
         'Percentage of Poverty',
         'Hyperlinked CaseID#',
         'Pre-3/1/20 Elig Date?',
-        '2020NewProgramAssignment'
+        '2020NewProgramAssignment',
+        'BoroughByZip'
         ]]
-        #Add Charles 'is it now UA for 2020? question
         
         
-        #bounce worksheets back to excel
-        output_filename = f.filename     
-        writer = pd.ExcelWriter("app\\sheets\\"+output_filename, engine = 'xlsxwriter')
-        df.to_excel(writer, sheet_name='Sheet1',index=False)
-        workbook = writer.book
-        worksheet = writer.sheets['Sheet1']
         
-        #highlight yellow if needs review
-        #make columns wider
-        #give the hyperlink format
-        link_format = workbook.add_format({'font_color':'blue', 'bold':True, 'underline':True})
-        problem_format = workbook.add_format({'bg_color':'yellow'})
-        worksheet.freeze_panes(1,0)
-        worksheet.set_column('A:BL',20)
-        worksheet.set_column ('AM:AM',30,link_format)
-        worksheet.conditional_format('C2:BO100000',{'type': 'text',
+        borough_dictionary = dict(tuple(df.groupby('BoroughByZip')))
+
+        def save_xls(dict_df, path):
+            writer = pd.ExcelWriter(path, engine = 'xlsxwriter')
+            for i in dict_df:
+                dict_df[i].to_excel(writer, i, index = False)
+                workbook = writer.book
+                link_format = workbook.add_format({'font_color':'blue','bold':True,'underline':True})
+                problem_format = workbook.add_format({'bg_color':'yellow'})
+                header_format = workbook.add_format({
+                'text_wrap':True,
+                'bold':True,
+                'valign': 'middle',
+                'align': 'center'
+                })
+                
+                
+                worksheet = writer.sheets[i]
+                
+                #Add column header data back in
+                
+                worksheet.freeze_panes(1,0)
+                worksheet.set_column('A:BL',20)
+                worksheet.set_column ('AM:AM',30,link_format)
+                worksheet.conditional_format('C2:BO100000',{'type': 'text',
                                                  'criteria': 'containing',
                                                  'value': 'Needs',
                                                  'format': problem_format})
-        
-        writer.save()
-        
-        #send file back to user
+
+            writer.save()
+        output_filename = f.filename
+
+        save_xls(dict_df = borough_dictionary, path = "app\\sheets\\" + output_filename)
+
         return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = "Formatted " + f.filename)
+        
+       
         
 #what the user-facing site looks like
     return '''

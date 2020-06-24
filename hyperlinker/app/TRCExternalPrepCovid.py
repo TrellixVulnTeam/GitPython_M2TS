@@ -66,7 +66,7 @@ def TRCExternalPrepCovid():
         df['city'] = df.apply(lambda x: DataWizardTools.QueensConsolidater(x['City']), axis=1)
         
         #Translation based on HRA Specs            
-        df['proceeding'] = df.apply(lambda x: HousingToolBox.ProceedingType(x['Housing Type Of Case']), axis=1)
+        df['proceeding'] = df.apply(lambda x: HousingToolBox.TRCProceedingType(x['Housing Type Of Case'],x['Legal Problem Code'],x['Housing Level of Service']), axis=1)
 
         #if it's a multi-tenant/group case? change it from saying Yes/no to say "no = individual" or 'yes = Group'
         #Also, if it's an eviction case, it's individual, otherwise make it "needs review"
