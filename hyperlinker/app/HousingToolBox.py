@@ -51,15 +51,15 @@ def TRCProceedingType(TypeOfCase,LegalProblemCode,LevelOfService):
  
 def UACProceedingType(TypeOfCase,LegalProblemCode,CloseReason,LevelOfService):
     
-    if CloseReason.startswith("A") == True or CloseReason.startswith("B") == True or LevelOfService.startswith("A") == True or LevelOfService.startswith("B") == True or LevelOfService.startswith("O") == True:
-        if LegalProblemCode.startswith("0") == True:
-            return "CON"
-        elif LegalProblemCode.startswith("3") == True:
-            return "FAM"
-        elif LegalProblemCode.startswith("5") == True:
-            return "HEA"
-        elif LegalProblemCode.startswith("7") == True:
-            return "BEN"
+
+    if LegalProblemCode.startswith("0") == True:
+        return "CON"
+    elif LegalProblemCode.startswith("3") == True:
+        return "FAM"
+    elif LegalProblemCode.startswith("5") == True:
+        return "HEA"
+    elif LegalProblemCode.startswith("7") == True:
+        return "BEN"
     
     elif TypeOfCase == "HP Action":
         return "HP"
@@ -142,12 +142,20 @@ def TRCServiceType(LevelOfService):
         return "Full Rep"
 
 #UAC Service Type: 
-def UACServiceType(LevelOfService,UAorNonUA,CloseReason):
+def UACServiceType(LevelOfService,UAorNonUA,CloseReason,LegalProblemCode):
     if CloseReason.startswith(("A","B")) == True:
         if UAorNonUA == "UA":
             return "Brief Legal Assistance"
         elif UAorNonUA == "Non-UA":
             return "Advice Only"
+    elif LegalProblemCode.startswith("0") == True  or LegalProblemCode.startswith("3") == True or LegalProblemCode.startswith("5") == True or LegalProblemCode.startswith("7") == True:
+        if UAorNonUA == "UA":
+            return "Brief Legal Assistance"
+        elif UAorNonUA == "Non-UA":
+            return "Advice Only"
+    
+    
+    
     elif CloseReason.startswith(("F","G","H","IA","IB","L")) == True:
         return "Full Rep"
     elif LevelOfService == "Advice" or LevelOfService == "Brief Service" or LevelOfService == "Out-of-Court Advocacy":

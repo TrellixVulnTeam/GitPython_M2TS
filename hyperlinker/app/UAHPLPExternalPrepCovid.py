@@ -101,7 +101,7 @@ def UAHPLPExternalPrepCovid():
         
         
         #Level of Service becomes Service type 
-        df['service_type'] = df.apply(lambda x: HousingToolBox.UACServiceType(x['Housing Level of Service'],x['program_name'],x['Close Reason']), axis=1)
+        df['service_type'] = df.apply(lambda x: HousingToolBox.UACServiceType(x['Housing Level of Service'],x['program_name'],x['Close Reason'],x['Legal Problem Code']), axis=1)
         
         #if below 201, = 'Yes' otherwise 'No'
         df['below_200_FPL'] = df['Percentage of Poverty'].apply(lambda x: "Yes" if x < 200 else "No")
@@ -287,6 +287,7 @@ def UAHPLPExternalPrepCovid():
         'Hyperlinked CaseID#',
         'Pre-3/1/20 Elig Date?',
         '2020NewProgramAssignment',
+        'Legal Problem Code',
         'BoroughByZip'
         ]]
         
