@@ -294,4 +294,12 @@ def PreThreeOne(EligibilityDate):
     elif EligibilityDate >= 20200301:
         return "No"
         
+        
+def RedactForCovid(LevelOfService, PreThreeOne, ToRedact):
+            if LevelOfService == "Advice" and PreThreeOne == "No" and ToRedact != "":
+                return ""
+            else:   
+                return ToRedact
+            
+        
     

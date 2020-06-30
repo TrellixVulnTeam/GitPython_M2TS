@@ -1,5 +1,5 @@
 from flask import render_template, flash, redirect, url_for, request, Flask, jsonify, send_from_directory
-from app import app, db, DataWizardTools
+from app import app, db, DataWizardTools, HousingToolBox
 from app.models import User, Post
 from app.forms import PostForm
 from werkzeug.urls import url_parse
@@ -7,8 +7,8 @@ from datetime import datetime
 import pandas as pd
 
 
-@app.route("/TRCclean", methods=['GET', 'POST'])
-def upload_TRCclean():
+@app.route("/TRCCovidClean", methods=['GET', 'POST'])
+def upload_TRCCovidClean():
     if request.method == 'POST':
         print(request.files['file'])
         f = request.files['file']
@@ -19,19 +19,19 @@ def upload_TRCclean():
         
         #Cleaning
         if test.iloc[0][0] == '':
-            data_xls = pd.read_excel(f,skiprows=2)
+            df = pd.read_excel(f,skiprows=2)
         else:
-            data_xls = pd.read_excel(f)
+            df = pd.read_excel(f)
         
         #Remove Rows without Case ID values
-        data_xls.fillna('',inplace = True)
-        data_xls['Matter/Case ID#'] = data_xls.apply(lambda x : DataWizardTools.RemoveNoCaseID(x['Matter/Case ID#']),axis=1)        
-        data_xls = data_xls[data_xls['Matter/Case ID#'] != 'No Case ID']
+        df.fillna('',inplace = True)
+        df['Matter/Case ID#'] = df.apply(lambda x : DataWizardTools.RemoveNoCaseID(x['Matter/Case ID#']),axis=1)        
+        df = df[df['Matter/Case ID#'] != 'No Case ID']
         
         #Create Hyperlinks
-        data_xls['Hyperlinked CaseID#'] = data_xls.apply(lambda x : DataWizardTools.Hyperlinker(x['Matter/Case ID#']),axis=1)          
+        df['Hyperlinked CaseID#'] = df.apply(lambda x : DataWizardTools.Hyperlinker(x['Matter/Case ID#']),axis=1)          
         
-        data_xls['Assigned Branch/CC'] = data_xls.apply(lambda x : DataWizardTools.OfficeAbbreviator(x['Assigned Branch/CC']),axis=1)   
+        df['Assigned Branch/CC'] = df.apply(lambda x : DataWizardTools.OfficeAbbreviator(x['Assigned Branch/CC']),axis=1)   
 
 
         #Has to have an HRA Release
@@ -45,7 +45,7 @@ def upload_TRCclean():
                 return ''
             else:
                 return 'Needs HRA Release'
-        data_xls['HRA Release Tester'] = data_xls.apply(lambda x: HRARelease(x['HRA Release?'],x['HAL Eligibility Date']), axis=1)
+        df['HRA Release Tester'] = df.apply(lambda x: HRARelease(x['HRA Release?'],x['HAL Eligibility Date']), axis=1)
         
         #Has to have a Housing Type of Case
         
@@ -54,7 +54,7 @@ def upload_TRCclean():
                 return 'Needs Housing Type of Case'
             else:
                 return ''
-        data_xls['Housing Type Tester'] = data_xls.apply(lambda x: HousingType(x['Housing Type Of Case']), axis=1)
+        df['Housing Type Tester'] = df.apply(lambda x: HousingType(x['Housing Type Of Case']), axis=1)
         
         
         #Has to have a Housing Level of Service - and if DHCR case has to be admin proceeding or rep - admin agency 
@@ -65,7 +65,7 @@ def upload_TRCclean():
                 return 'Needs Level of Service'
             else:
                 return ''
-        data_xls['Housing Level Tester'] = data_xls.apply(lambda x: HousingLevel(x['Housing Level of Service'],x['Housing Type Of Case']), axis=1)
+        df['Housing Level Tester'] = df.apply(lambda x: HousingLevel(x['Housing Level of Service'],x['Housing Type Of Case']), axis=1)
         
         #Has to say whether or not it's a building case 
         
@@ -76,7 +76,7 @@ def upload_TRCclean():
                 return 'Needs Building Case Answer'
             else:
                 return ''
-        data_xls['Building Case Tester'] = data_xls.apply(lambda x: BuildingCase(x['Housing Building Case?']), axis=1)
+        df['Building Case Tester'] = df.apply(lambda x: BuildingCase(x['Housing Building Case?']), axis=1)
         
         #Referral Source Can't Be Blank
         
@@ -87,7 +87,7 @@ def upload_TRCclean():
                 return 'Must be FJC'
             else:
                 return ''
-        data_xls['Referral Tester'] = data_xls.apply(lambda x: Referral(x['Referral Source'],x['Primary Funding Code']), axis=1)
+        df['Referral Tester'] = df.apply(lambda x: Referral(x['Referral Source'],x['Primary Funding Code']), axis=1)
         
         #monthly rent can't be 0
         
@@ -96,7 +96,7 @@ def upload_TRCclean():
                 return 'Needs Rent Amount'
             else:
                 return ''
-        data_xls['Rent Tester'] = data_xls.apply(lambda x: Rent(x['Housing Total Monthly Rent']), axis=1)
+        df['Rent Tester'] = df.apply(lambda x: Rent(x['Housing Total Monthly Rent']), axis=1)
         
         #number of units in building can't be 0
         
@@ -109,7 +109,7 @@ def upload_TRCclean():
                 return 'Needs To Be Number'
             else:
                 return ''
-        data_xls['Unit Tester'] = data_xls.apply(lambda x: Units(x['Housing Number Of Units In Building']), axis=1)
+        df['Unit Tester'] = df.apply(lambda x: Units(x['Housing Number Of Units In Building']), axis=1)
         
         #Housing form of regulation can't be blank
         
@@ -118,7 +118,7 @@ def upload_TRCclean():
                 return 'Needs Form of Regulation'
             else:
                 return ''
-        data_xls['Regulation Tester'] = data_xls.apply(lambda x: Regulation(x['Housing Form Of Regulation']), axis=1)
+        df['Regulation Tester'] = df.apply(lambda x: Regulation(x['Housing Form Of Regulation']), axis=1)
         
         #Housing subsidy can't be blank (can be none)
         
@@ -127,7 +127,7 @@ def upload_TRCclean():
                 return 'Needs Type of Subsidy'
             else:
                 return ''
-        data_xls['Subsidy Tester'] = data_xls.apply(lambda x: Subsidy(x['Housing Subsidy Type']), axis=1)
+        df['Subsidy Tester'] = df.apply(lambda x: Subsidy(x['Housing Subsidy Type']), axis=1)
         
         #Years in Apartment Can't be 0 (can be -1)
         
@@ -138,7 +138,7 @@ def upload_TRCclean():
                 return 'Needs Valid Number'
             else:
                 return ''
-        data_xls['Years in Apartment Tester'] = data_xls.apply(lambda x: Years(x['Housing Years Living In Apartment']), axis=1)
+        df['Years in Apartment Tester'] = df.apply(lambda x: Years(x['Housing Years Living In Apartment']), axis=1)
         
         #Language Can't be Blank
         
@@ -147,7 +147,7 @@ def upload_TRCclean():
                 return 'Needs Language'
             else:
                 return ''
-        data_xls['Language Tester'] = data_xls.apply(lambda x: Language(x['Language']), axis=1)
+        df['Language Tester'] = df.apply(lambda x: Language(x['Language']), axis=1)
         
         
         #Housing Posture of Case can't be blank if there is an eligibility date
@@ -157,7 +157,7 @@ def upload_TRCclean():
                 return 'Needs Posture of Case'
             else:
                 return ''
-        data_xls['Posture Tester'] = data_xls.apply(lambda x: Posture(x['Housing Posture of Case on Eligibility Date'],x['HAL Eligibility Date']), axis=1)
+        df['Posture Tester'] = df.apply(lambda x: Posture(x['Housing Posture of Case on Eligibility Date'],x['HAL Eligibility Date']), axis=1)
         
         #Housing Income Verification can't be blank or none and other stuff with kids and poverty level and you just give up if it's closed
         def IncomeVerification (IncomeVerification, Children, PovertyPercent, Disposition):
@@ -173,7 +173,7 @@ def upload_TRCclean():
                 return 'Needs Income Verification'
             else:
                 return ''
-        data_xls['Income Verification Tester'] = data_xls.apply(lambda x: IncomeVerification(x['Housing Income Verification'], x['Number of People under 18'], x['Percentage of Poverty'],x['Case Disposition']), axis=1)
+        df['Income Verification Tester'] = df.apply(lambda x: IncomeVerification(x['Housing Income Verification'], x['Number of People under 18'], x['Percentage of Poverty'],x['Case Disposition']), axis=1)
        
         #PA Tester (need to be correct format as well)
         def PATester (PANumber):
@@ -199,7 +199,7 @@ def upload_TRCclean():
             else:
                 return 'Needs Correct PA # Format'
                 
-        data_xls['PA # Tester'] = data_xls.apply(lambda x: PATester(x['Gen Pub Assist Case Number']), axis=1)
+        df['PA # Tester'] = df.apply(lambda x: PATester(x['Gen Pub Assist Case Number']), axis=1)
         
         #Test if case number is correct format (don't need one if it's brief, advice, or out-of-court)
         def CaseNum (CaseNum,Level):
@@ -228,7 +228,7 @@ def upload_TRCclean():
             else:
                 return "Needs Correct Case # Format"
                 
-        data_xls['Case Number Tester'] = data_xls.apply(lambda x: CaseNum(x['Gen Case Index Number'],x['Housing Level of Service']), axis=1)
+        df['Case Number Tester'] = df.apply(lambda x: CaseNum(x['Gen Case Index Number'],x['Housing Level of Service']), axis=1)
         
         #Test if social security number is correct format (or ignore it if there's a valid PA number)
         def SSNum (CaseNum, PANumber):
@@ -256,7 +256,7 @@ def upload_TRCclean():
             else:
                 return "Needs Correct SS # Format"
                 
-        data_xls['SS # Tester'] = data_xls.apply(lambda x: SSNum(x['Social Security #'],x['Gen Pub Assist Case Number']), axis=1)
+        df['SS # Tester'] = df.apply(lambda x: SSNum(x['Social Security #'],x['Gen Pub Assist Case Number']), axis=1)
         
         #Test Housing Activity Indicator - can't be blank for closed cases that are full rep state or full rep federal(housing level of service) and eviction cases(housing type of case: non-payment holdover illegal lockout nycha housing termination)
         
@@ -270,7 +270,7 @@ def upload_TRCclean():
                 return ''
         
        
-        data_xls['Housing Activity Tester'] = data_xls.apply(lambda x: ActivityTester(x['Housing Activity Indicators'],x['Case Disposition'],x['Housing Level of Service'],x['Housing Type Of Case'],evictiontypes,leveltypes), axis = 1)
+        df['Housing Activity Tester'] = df.apply(lambda x: ActivityTester(x['Housing Activity Indicators'],x['Case Disposition'],x['Housing Level of Service'],x['Housing Type Of Case'],evictiontypes,leveltypes), axis = 1)
         
         #Test Housing Services Rendered - can't be blank for closed cases that are full rep state or full rep federal(housing level of service)
         
@@ -282,7 +282,7 @@ def upload_TRCclean():
             else:
                 return ''
                
-        data_xls['Housing Services Tester'] = data_xls.apply(lambda x: ServicesTester(x['Housing Services Rendered to Client'],x['Case Disposition'],x['Housing Level of Service'],x['Housing Type Of Case'],evictiontypes,leveltypes), axis = 1)
+        df['Housing Services Tester'] = df.apply(lambda x: ServicesTester(x['Housing Services Rendered to Client'],x['Case Disposition'],x['Housing Level of Service'],x['Housing Type Of Case'],evictiontypes,leveltypes), axis = 1)
         
         #Outcome Tester - needs outcome and date for eviction cases that are full rep at state or federal level (not admin)
         
@@ -296,28 +296,78 @@ def upload_TRCclean():
             else:
                 return ''
             
-        data_xls['Outcome Tester'] = data_xls.apply(lambda x: OutcomeTester(x['Case Disposition'],x['Housing Outcome'],x['Housing Outcome Date'],x['Housing Level of Service'],x['Housing Type Of Case'],evictiontypes,leveltypes), axis = 1)
+        df['Outcome Tester'] = df.apply(lambda x: OutcomeTester(x['Case Disposition'],x['Housing Outcome'],x['Housing Outcome Date'],x['Housing Level of Service'],x['Housing Type Of Case'],evictiontypes,leveltypes), axis = 1)
+        
+        #COVID Modifications - make the testers blank if it's an advice only pre-3/1 case!
+        
+        #Differentiate pre- and post- 3/1/20 eligibility date cases
+           
+        df['DateConstruct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['HAL Eligibility Date']), axis=1)
+        
+        df['Pre-3/1/20 Elig Date?'] = df.apply(lambda x: HousingToolBox.PreThreeOne(x['DateConstruct']), axis=1)
+        
+        
+        
+        
+        #CovidException testers to erase clean-up requests
+        
+        
+        df['PA # Tester'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['PA # Tester']), axis=1)
+        
+        df['SS # Tester'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['SS # Tester']), axis=1)
+        
+        df['Case Number Tester'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Case Number Tester']), axis=1)
+        
+        df['Rent Tester'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Rent Tester']), axis=1)
+        
+        df['Years in Apartment Tester'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Years in Apartment Tester']), axis=1)
+        
+        df['Referral Tester'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Referral Tester']), axis=1)
+        
+        df['Income Verification Tester'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Income Verification Tester']), axis=1)
+        
+        df['Posture Tester'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Posture Tester']), axis=1)
+        
+        df['Unit Tester'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Unit Tester']), axis=1)
+        
+        df['Regulation Tester'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Regulation Tester']), axis=1)
+        
+        df['Subsidy Tester'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Subsidy Tester']), axis=1)
+        
+        df['Outcome Tester'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Outcome Tester']), axis=1)
+        
+        df['Housing Services Tester'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Housing Services Tester']), axis=1)
+        
+        df['Housing Activity Tester'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Housing Activity Tester']), axis=1)
+        
+      
+        
+        
+        
+        
+        
+        
         
         #Is everything okay with a case? 
 
-        def TesterTester (ReleaseTester,TypeTester,LevelTester,BuildingTester,ReferralTester,RentTester,UnitTester,RegulationTester,SubsidyTester,YearsTester,LanguageTester,PostureTester,IncomeVerification,PATester,CaseNumberTester,SSTester,ActivityTester,ServicesTester,OutcomeTester):
-            if ReleaseTester == '' and TypeTester == '' and LevelTester == '' and BuildingTester == '' and ReferralTester == '' and RentTester == '' and UnitTester == '' and RegulationTester == '' and SubsidyTester == '' and YearsTester == '' and LanguageTester == '' and PostureTester == '' and IncomeVerification == '' and PATester == '' and CaseNumberTester == '' and SSTester == '' and ActivityTester == '' and ServicesTester == '' and OutcomeTester == '':
+        def TesterTester (ReleaseTester,TypeTester,LevelTester,BuildingTester,ReferralTester,RentTester,UnitTester,RegulationTester,SubsidyTester,YearsTester,LanguageTester,PostureTester,IncomeVerification,PATester,CaseNumberTester,SSTester,ActivityTester,ServicesTester,OutcomeTester,EligibilityDate):
+            if ReleaseTester == '' and TypeTester == '' and LevelTester == '' and BuildingTester == '' and ReferralTester == '' and RentTester == '' and UnitTester == '' and RegulationTester == '' and SubsidyTester == '' and YearsTester == '' and LanguageTester == '' and PostureTester == '' and IncomeVerification == '' and PATester == '' and CaseNumberTester == '' and SSTester == '' and ActivityTester == '' and ServicesTester == '' and OutcomeTester == '' and EligibilityDate != '':
                 return 'No Cleanup Necessary'
             else:
                 return 'Case Needs Attention'
             
-        data_xls['Tester Tester'] = data_xls.apply(lambda x: TesterTester(x['HRA Release Tester'],x['Housing Type Tester'],x['Housing Level Tester'],x['Building Case Tester'],x['Referral Tester'],x['Rent Tester'],x['Unit Tester'],x[ 'Regulation Tester'],x['Subsidy Tester'],x['Years in Apartment Tester'],x['Language Tester'],x['Posture Tester'],x['Income Verification Tester'],x['PA # Tester'],x['Case Number Tester'],x['SS # Tester'],x['Housing Activity Tester'],x['Housing Services Tester'],x['Outcome Tester']),axis=1)
+        df['Tester Tester'] = df.apply(lambda x: TesterTester(x['HRA Release Tester'],x['Housing Type Tester'],x['Housing Level Tester'],x['Building Case Tester'],x['Referral Tester'],x['Rent Tester'],x['Unit Tester'],x[ 'Regulation Tester'],x['Subsidy Tester'],x['Years in Apartment Tester'],x['Language Tester'],x['Posture Tester'],x['Income Verification Tester'],x['PA # Tester'],x['Case Number Tester'],x['SS # Tester'],x['Housing Activity Tester'],x['Housing Services Tester'],x['Outcome Tester'],x['HAL Eligibility Date']),axis=1)
         
 
         #sort by case handler
         
-        data_xls = data_xls.sort_values(by=['Primary Advocate'])
-        data_xls = data_xls.sort_values(by=['Assigned Branch/CC'])
+        df = df.sort_values(by=['Primary Advocate'])
+        df = df.sort_values(by=['Assigned Branch/CC'])
         
         
         #Put everything in the right order
         
-        data_xls = data_xls[['Hyperlinked CaseID#','Primary Advocate',
+        df = df[['Hyperlinked CaseID#','Primary Advocate',
         "Date Opened",
         "Date Closed",
         "Client First Name",
@@ -355,13 +405,14 @@ def upload_TRCclean():
         "Date of Birth",
         "Apt#/Suite#","Legal Problem Code","Case Disposition",
         "Assigned Branch/CC",
-        "Tester Tester"
+        "Tester Tester",
+        'Pre-3/1/20 Elig Date?'
         ]]      
         
         #Preparing Excel Document
         
         #Split into different tabs
-        allgood_dictionary = dict(tuple(data_xls.groupby('Tester Tester')))
+        allgood_dictionary = dict(tuple(df.groupby('Tester Tester')))
         
         def save_xls(dict_df, path):
             writer = pd.ExcelWriter(path, engine = 'xlsxwriter')
@@ -376,6 +427,7 @@ def upload_TRCclean():
                 medium_problem_format = workbook.add_format({'bg_color':'orange'})
                 ws.set_column('A:A',20,link_format)
                 ws.set_column('B:ZZ',25)
+                ws.autofilter('B1:ZZ1')
                 ws.freeze_panes(1, 2)
                 ws.conditional_format('C2:BO100000',{'type': 'text',
                                                  'criteria': 'containing',
@@ -403,9 +455,9 @@ def upload_TRCclean():
 
     return '''
     <!doctype html>
-    <title>TRC Cleaner</title>
+    <title>TRC Cleaner [Covid]</title>
     <link rel="stylesheet" href="/static/css/main.css">  
-    <h1>TRC Cleanup Report:</h1>
+    <h1>TRC Cleanup Report: [Covid]</h1>
     <form action="" method=post enctype=multipart/form-data>
     <p><input type=file name=file><input type=submit value=Clean!>
     </form>
