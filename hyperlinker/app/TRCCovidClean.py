@@ -340,6 +340,10 @@ def upload_TRCCovidClean():
         
         df['Housing Activity Tester'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Housing Activity Tester']), axis=1)
         
+        df['HRA Release Tester'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['HRA Release Tester']), axis=1)
+        
+        df['Housing Type Tester'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Housing Type Tester']), axis=1)
+        
       
         
         
