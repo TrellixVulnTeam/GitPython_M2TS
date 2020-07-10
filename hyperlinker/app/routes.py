@@ -27,19 +27,22 @@ def index():
     <li><a href="/ComplianceConsolidater">Compliance Consolidater</a></li>
     <li><a href="/SuperSplitter">MLS Supervisor Splitter</a></li>
     <li><a href="/AdvocateSplitter">Advocate Splitter</a></li>
+    <li><a href="/LSCCovidPrep">LSC Covid Report Prep</a></li>
     </ul>
     
     <b>Housing Tools:</b>
     <ul type="disc">
+    <li><a href="/UAHPLPCovidClean">[Revised for Covid] UAHPLP Cleaner</a></li>     
+    <li><a href="/UAHPLPExternalPrepCovid">[Revised for Covid] Prepare UA/HPLP Reports for Submission to HRA</a></li>
+    </br>
     <li><a href="/TRCCovidClean">[Revised for Covid] TRC Cleaner</a></li>
-    
-    <li><a href="/TRCtallyCovid">TRC Tally [Covid]</a></li>
-    <li><a href="/UAHPLP">UAHPLP Cleaner</a></li>     
-    
+    <li><a href="/TRCExternalPrepCovid">[Revised for Covid] Prepare TRC Reports for Submission to HRA</a></li>
+    <li><a href="/TRCtallyCovid">[Revised for Covid] TRC Tally</a></li>
+    </br>
     <li><a href="/DHCIPrep">DHCI Document Extractor Prep</a></li>
     
-    <li><a href="/TRCExternalPrepCovid">[Revised for COVID] Prepare TRC Reports for Submission to HRA</a></li>
-    <li><a href="/UAHPLPExternalPrepCovid">[Revised for COVID] Prepare UA/HPLP Reports for Submission to HRA</a></li>
+    
+    
     </ul>
 
     

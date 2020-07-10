@@ -1,5 +1,309 @@
-#General Purpose Functions to be used in LSNYC Report Prep 
-#if LevelOfService.startswith("A") == True or LevelOfService.startswith("B") == True:
+#HOUSING CODE
+
+#List of proceeding types that constitute an eviction case
+evictionproceedings = ['HO','NP','IL','TT','EA','EJ']
+#Housing Type of Case Eviction-Types:
+evictiontypes = ['Holdover','Non-payment','Illegal Lockout','NYCHA Housing Termination']
+#Highest Level of Service Reps
+leveltypes = ['Representation - State Court','Representation - Federal Court']
+
+
+#Functions to Help with TRC/UAHPLP Cleanup
+
+#Has to have an HRA Release
+def HRAReleaseClean (HRARelease,EligibilityDate):
+    if HRARelease == 'No' and EligibilityDate != '':
+        return 'No Release - Remove Elig Date'
+    elif HRARelease == '' and EligibilityDate != '':
+        return 'No Release - Remove Elig Date'
+    elif HRARelease == 'Yes':
+        return ''
+    else:
+        return 'Needs HRA Release'
+
+#Has to have a Housing Type of Case
+def HousingTypeClean (HousingType):
+    if HousingType == '':
+        return 'Needs Housing Type of Case'
+    else:
+        return ''
+ 
+#Has to have a Housing Level of Service - and if DHCR case has to be admin proceeding or rep - admin agency 
+def HousingLevelClean (HousingLevel,HousingType):
+    if HousingLevel == '':
+        return 'Needs Level of Service'
+    else:
+        return '' 
+
+
+#Has to say whether or not it's a building case        
+def BuildingCaseClean (BuildingCase):
+    if BuildingCase == '':
+        return 'Needs Building Case Answer'
+    if BuildingCase == 'Prefer Not To Answer':
+        return 'Needs Building Case Answer'
+    else:
+        return ''
+  
+#Referral Source Can't Be Blank        
+def ReferralClean (Referral,FundingSource):
+    if Referral == '':
+        return 'Needs Referral Source'
+    elif FundingSource == '3011 TRC FJC Initiative' and Referral != 'FJC Housing Intake':
+        return 'Must be FJC'
+    else:
+        return ''
+
+#rent can't be 0
+def RentClean (Rent):
+    if Rent == 0:
+        return 'Needs Rent Amount'
+    else:
+        return ''
+
+#number of units in building can't be 0 or written with letters        
+def UnitsClean (Units):
+    
+    if Units == 0:
+        return 'Needs Units'
+    Units = str(Units)
+    if any(c.isalpha() for c in Units) == True:
+        return 'Needs To Be Number'
+    elif Units == "0":
+        return 'Needs Units'
+    else:
+        return ''
+        
+#Housing form of regulation can't be blank      
+def RegulationClean (Regulation):
+    if Regulation == '':
+        return 'Needs Form of Regulation'
+    else:
+        return ''
+
+
+#Housing subsidy can't be blank (can be none)
+def SubsidyClean (Subsidy):
+    if Subsidy == '':
+        return 'Needs Type of Subsidy'
+    else:
+        return ''
+
+
+#Years in Apartment Can't be 0 (can be -1)
+def YearsClean (Years):
+    if Years == 0:
+        return 'Needs Years In Apartment'
+    elif Years < -1:
+        return 'Needs Valid Number'
+    else:
+        return ''
+
+#Language Can't be Blank
+        
+def LanguageClean (Language):
+    if Language == '':
+        return 'Needs Language'
+    else:
+        return ''
+
+#Housing Posture of Case can't be blank if there is an eligibility date
+        
+def PostureClean (Posture,EligibilityDate,Type,Level):
+    if Type in evictiontypes and Level.startswith("Rep") == True:
+        
+        if EligibilityDate  != '' and Posture == '':
+            return 'Needs Posture of Case'
+        else:
+            return ''
+    else:
+        return ''
+
+#TRC Housing Income Verification can't be blank or none and other stuff with kids and poverty level and you just give up if it's closed
+def IncomeVerificationClean (IncomeVerification, Children, PovertyPercent, Disposition):
+    if Children > 0 and PovertyPercent <= 200.99 and IncomeVerification == '':
+        return 'Must Have DHCI or PA#'
+    elif Children > 0 and PovertyPercent <= 200.99 and IncomeVerification == 'None':
+        return 'Must Have DHCI or PA#'
+    elif Disposition == 'Closed' and IncomeVerification =='None':
+        return ''
+    elif IncomeVerification == '':
+        return 'Needs Income Verification'
+    elif IncomeVerification == 'None':
+        return 'Needs Income Verification'
+    else:
+        return ''
+        
+#UAC Housing Income Verification can't be blank or none and other stuff with kids and poverty level and you just give up if it's closed (after 6 months)
+def UACIncomeVerificationClean (IncomeVerification, Children, PovertyPercent, Disposition, DateClosed,TodayDate):
+    if Children > 0 and PovertyPercent <= 200.99 and IncomeVerification == '':
+        return 'Must Have DHCI or PA#'
+    elif Children > 0 and PovertyPercent <= 200.99 and IncomeVerification == 'None':
+        return 'Must Have DHCI or PA#'
+    
+    
+    elif Disposition == 'Closed' and IncomeVerification =='None' and TodayDate-DateClosed >= 600 and TodayDate-DateClosed <= 8870:
+        return ''
+    elif Disposition == 'Closed' and IncomeVerification =='None' and TodayDate-DateClosed >= 9400:
+        return ''
+    elif Disposition == 'Closed' and IncomeVerification =='' and TodayDate-DateClosed >= 600 and TodayDate-DateClosed <= 8870:
+        return ''
+    elif Disposition == 'Closed' and IncomeVerification =='' and TodayDate-DateClosed >= 9400:
+        return ''
+    elif IncomeVerification == '':
+        return 'Needs Income Verification'
+    elif IncomeVerification == 'None':
+        return 'Needs Income Verification'
+    else:
+        return ''
+
+#PA Tester (need to be correct format as well)
+def PATesterClean (PANumber):
+                
+    PANumber = str(PANumber)
+    LastCharacter = PANumber[-1:]
+    PenultimateCharater = PANumber[-2:-1]
+    SecondCharacter = PANumber [1:2]
+    if PANumber == '':
+        return ''
+    elif PANumber == 'None':
+        return ''
+    elif SecondCharacter == 'o':
+        return ''
+    elif SecondCharacter == 'n':
+        return ''
+    elif len(PANumber) == 10 and str.isalpha(LastCharacter) == True and str.isalpha(PenultimateCharater) == False and PenultimateCharater != '-' and PenultimateCharater != ' ':
+        return ''
+    elif len(PANumber) == 12 and str.isalpha(LastCharacter) == True and str.isalpha(PenultimateCharater) == False and PenultimateCharater != '-' and PenultimateCharater != ' ':
+        return ''
+    elif len(PANumber) == 9 and str.isalpha(LastCharacter) == False and PenultimateCharater != '-' and PenultimateCharater != ' ':
+        return ''
+    else:
+        return 'Needs Correct PA # Format'
+
+#Test if case number is correct format (don't need one if it's brief, advice, or out-of-court)
+def CaseNumClean (CaseNum,Level):
+    CaseNum = str(CaseNum)
+    First3 = CaseNum[0:3]
+    ThirdFromEnd = CaseNum[-3:-2]
+    SecondFromEnd = CaseNum[-2:-1]
+    First6 = CaseNum[0:6]
+    First2 = CaseNum[0:2]
+    
+    if Level == 'Advice' or Level == 'Brief Service' or Level == 'Out-of-Court Advocacy' or Level == 'Hold For Review':
+        return ''            
+    #City LT Case format LT-123456-19/XX
+    elif len(CaseNum) == 15 and First3 == 'LT-' and ThirdFromEnd == '/':
+        return ''
+    elif len(CaseNum) == 15 and First3 == 'CV-' and ThirdFromEnd == '/':
+        return ''
+    #DHCR format AA-123456-S (or 2 letters at end)
+    elif str.isalpha(First2) == True and len(CaseNum) == 11 and SecondFromEnd == '-':
+        return ''
+    elif str.isalpha(First2) == True and len(CaseNum) == 12 and ThirdFromEnd == '-':
+        return ''
+    #Federal/Supreme format 123456/2019
+    elif len(CaseNum) == 11 and str.isdigit(First6) == True:
+        return ''
+    else:
+        return "Needs Correct Case # Format"
+
+#Test if social security number is correct format (or ignore it if there's a valid PA number)
+def SSNumClean (CaseNum, PANumber):
+    CaseNum = str(CaseNum)
+    First3 = CaseNum[0:3]
+    Middle2 = CaseNum[4:6]
+    Last4 = CaseNum[7:11]
+    FirstDash = CaseNum[3:4]
+    SecondDash = CaseNum[6:7]
+    PANumber = str(PANumber)
+    LastCharacter = PANumber[-1:]
+    PenultimateCharater = PANumber[-2:-1]
+    SecondCharacter = PANumber [1:2]
+    
+    if First3 == '000' and Middle2 == '00':
+        return 'Needs  Full SS#'
+    elif str.isnumeric(First3) == True and str.isnumeric(Middle2) == True and str.isnumeric(Last4) == True and FirstDash == '-' and SecondDash == '-': 
+        return ''
+    elif len(PANumber) == 10 and str.isalpha(LastCharacter) == True and str.isalpha(PenultimateCharater) == False and PenultimateCharater != '-' and PenultimateCharater != ' ':
+        return ''
+    elif len(PANumber) == 12 and str.isalpha(LastCharacter) == True and str.isalpha(PenultimateCharater) == False and PenultimateCharater != '-' and PenultimateCharater != ' ':
+        return ''
+    elif len(PANumber) == 9 and str.isalpha(LastCharacter) == False and PenultimateCharater != '-' and PenultimateCharater != ' ':
+        return '' 
+    else:
+        return "Needs Correct SS # Format"
+
+        
+#Test Housing Activity Indicator - can't be blank for closed cases that are full rep state or full rep federal(housing level of service) and eviction cases(housing type of case: non-payment holdover illegal lockout nycha housing termination)    
+
+def ActivityTesterClean(HousingActivity,Disposition,Level,Type):
+    if Disposition == 'Closed' and Level in leveltypes and Type in evictiontypes and HousingActivity == '':
+        return 'Needs Activity Indicator'
+    else:
+        return ''
+
+
+#Test Housing Services Rendered - can't be blank for closed cases that are full rep state or full rep federal(housing level of service)
+        
+def ServicesTesterClean(HousingServices,Disposition,Level,Type):
+    if Disposition == 'Closed' and Level in leveltypes and HousingServices == '':
+        return 'Needs Services Rendered'
+    elif Level == 'Representation - Admin. Agency' and Disposition == 'Closed' and HousingServices == '':
+        return 'Needs Services Rendered'
+    else:
+        return ''
+
+#Outcome Tester - needs outcome and date for eviction cases that are full rep at state or federal level (not admin)
+        
+def TRCOutcomeTesterClean (Disposition,Outcome,OutcomeDate,Level,Type):
+    if Disposition == 'Closed' and Level in leveltypes and Type in evictiontypes and Outcome == '' and OutcomeDate == '':
+        return 'Needs Outcome & Date'
+    elif Disposition == 'Closed' and Level in leveltypes and Type in evictiontypes and Outcome == '':
+        return 'Needs Outcome'
+    elif Disposition == 'Closed' and Level in leveltypes and Type in evictiontypes and OutcomeDate == '':
+        return 'Needs Outcome Date'
+    else:
+        return ''
+
+#Outcome Tester - IF CLOSED OR IF OVER 6 Months Old (since eligiblity date) needs outcome and date for eviction cases that are full rep at state or federal level (not admin)
+        
+def UAHPLPOutcomeTesterClean (Disposition,Outcome,OutcomeDate,Level,Type,EligDate,TodayDate):
+    if EligDate == "":
+        return ""
+    elif TodayDate-EligDate >= 600 and TodayDate-EligDate <= 8870:
+        if Level in leveltypes and Type in evictiontypes and Outcome == '' and OutcomeDate == '':
+            return 'Needs Outcome & Date'
+        elif Level in leveltypes and Type in evictiontypes and Outcome == '':
+            return 'Needs Outcome'
+        elif Level in leveltypes and Type in evictiontypes and OutcomeDate == '':
+            return 'Needs Outcome Date'
+        else:
+            return ''
+    elif TodayDate-EligDate >= 9400:
+        if Level in leveltypes and Type in evictiontypes and Outcome == '' and OutcomeDate == '':
+            return 'Needs Outcome & Date'
+        elif Level in leveltypes and Type in evictiontypes and Outcome == '':
+            return 'Needs Outcome'
+        elif Level in leveltypes and Type in evictiontypes and OutcomeDate == '':
+            return 'Needs Outcome Date'
+        else:
+            return ''
+    elif Disposition == 'Closed' :
+        if Level in leveltypes and Type in evictiontypes and Outcome == '' and OutcomeDate == '':
+            return 'Needs Outcome & Date'
+        elif Level in leveltypes and Type in evictiontypes and Outcome == '':
+            return 'Needs Outcome'
+        elif Level in leveltypes and Type in evictiontypes and OutcomeDate == '':
+            return 'Needs Outcome Date'
+        else:
+            return ''
+    else:
+        return ''
+
+
+#Functions to be used in TRC/UAHPLP Housing Report Prep 
+
 #Translation based on HRA Specs
 def TRCProceedingType(TypeOfCase,LegalProblemCode,LevelOfService):
     if LegalProblemCode.startswith("0") == True and LevelOfService.startswith("A") == True:
@@ -99,9 +403,9 @@ def UACProceedingType(TypeOfCase,LegalProblemCode,CloseReason,LevelOfService):
         return "IL"
     else:
         return "Needs Review"
+
  
-#List of proceeding types that constitute an eviction case
-evictionproceedings = ['HO','NP','IL','TT','EA','EJ']
+
 
 #List of UAC (RTC) Zip Codes:
 UACZipCodes = ['11207','11216','11221','11225','11226','10453','10457','10462','10467','10468','10025','10026','10027','10029','10031','10034','10302','10303','10310','10314','11373','11385','11433','11434','11691']
@@ -296,10 +600,21 @@ def PreThreeOne(EligibilityDate):
         
         
 def RedactForCovid(LevelOfService, PreThreeOne, ToRedact):
-            if LevelOfService == "Advice" and PreThreeOne == "No" and ToRedact != "":
+            LevelOfService = str(LevelOfService)
+            if LevelOfService.startswith("Advice") == True and PreThreeOne == "No" and ToRedact != "":
                 return ""
             else:   
                 return ToRedact
             
         
-    
+def NoReleaseRedactForCovid(LevelOfService, PreThreeOne, ToRedact,Release):
+            
+            LevelOfService = str(LevelOfService)
+            if Release == "Yes":
+                return ToRedact
+            elif LevelOfService.startswith("Advice") == True and PreThreeOne == "No" and ToRedact != "":
+                return ""
+            else:   
+                return ToRedact
+            
+            

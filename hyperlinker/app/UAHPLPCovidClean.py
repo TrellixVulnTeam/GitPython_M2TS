@@ -7,8 +7,8 @@ from datetime import datetime
 import pandas as pd
 
 
-@app.route("/TRCCovidClean", methods=['GET', 'POST'])
-def upload_TRCCovidClean():
+@app.route("/UAHPLPCovidClean", methods=['GET', 'POST'])
+def upload_UAHPLPCovidClean():
     if request.method == 'POST':
         print(request.files['file'])
         f = request.files['file']
@@ -81,7 +81,12 @@ def upload_TRCCovidClean():
         
         #Housing Income Verification can't be blank or none and other stuff with kids and poverty level and you just give up if it's closed
         
-        df['Income Verification Tester'] = df.apply(lambda x: HousingToolBox.IncomeVerificationClean(x['Housing Income Verification'], x['Number of People under 18'], x['Percentage of Poverty'],x['Case Disposition']), axis=1)
+        df['DateClosedConstruct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['Date Closed']), axis=1)
+        
+        df['Today'] = datetime.now()
+        df['TodayConstruct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['Today']), axis=1)
+        
+        df['Income Verification Tester'] = df.apply(lambda x: HousingToolBox.UACIncomeVerificationClean(x['Housing Income Verification'], x['Number of People under 18'], x['Percentage of Poverty'],x['Case Disposition'],x['DateClosedConstruct'],x['TodayConstruct']), axis=1)
        
         #PA Tester (need to be correct format as well)
                 
@@ -104,14 +109,12 @@ def upload_TRCCovidClean():
                
         df['Housing Services Tester'] = df.apply(lambda x: HousingToolBox.ServicesTesterClean(x['Housing Services Rendered to Client'],x['Case Disposition'],x['Housing Level of Service'],x['Housing Type Of Case']), axis = 1)
         
-        #Outcome Tester - needs outcome and date for eviction cases that are full rep at state or federal level (not admin)
-            
-        df['Outcome Tester'] = df.apply(lambda x: HousingToolBox.TRCOutcomeTesterClean(x['Case Disposition'],x['Housing Outcome'],x['Housing Outcome Date'],x['Housing Level of Service'],x['Housing Type Of Case']), axis = 1)
+        #Outcome Tester - needs outcome and date for eviction cases that are full rep at state or federal level (not admin) and closed or 6 months since eligibility
+        
+        df['EligConstruct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['HAL Eligibility Date']), axis=1)
         
         
-        
-  
-        
+        df['Outcome Tester'] = df.apply(lambda x: HousingToolBox.UAHPLPOutcomeTesterClean(x['Case Disposition'],x['Housing Outcome'],x['Housing Outcome Date'],x['Housing Level of Service'],x['Housing Type Of Case'],x['EligConstruct'],x['TodayConstruct']), axis = 1)
         
         #COVID Modifications - make the testers blank if it's an advice only pre-3/1 case!
         
@@ -122,39 +125,58 @@ def upload_TRCCovidClean():
         df['Pre-3/1/20 Elig Date?'] = df.apply(lambda x: HousingToolBox.PreThreeOne(x['DateConstruct']), axis=1)
 
         #CovidException testers to erase clean-up requests
+        #need to know program name and service type, 
+        #Translation based on HRA Specs  (this got moved up cuz it's output is necessary for program name)           
+        df['proceeding'] = df.apply(lambda x: HousingToolBox.UACProceedingType(x['Housing Type Of Case'],x['Legal Problem Code'],x['Close Reason'],x['Housing Level of Service']), axis=1)
+        
+        #cases in certain zip codes (RTC zips) that are eviction are UA - everything else is non-UA **Bounce this to housing tools**
+        
+        def UAorNonUA (TypeOfCase,Zip):
+            if TypeOfCase in HousingToolBox.evictionproceedings and str(Zip) in HousingToolBox.UACZipCodes:
+                return "UA"
+            else:
+                return "Non-UA"
+                
+        df['program_name'] = df.apply(lambda x: UAorNonUA(x['proceeding'],x['Zip Code']), axis=1)
+        #Level of Service becomes Service type 
+        df['service_type'] = df.apply(lambda x: HousingToolBox.UACServiceType(x['Housing Level of Service'],x['program_name'],x['Close Reason'],x['Legal Problem Code']), axis=1)
 
         
-        df['PA # Tester'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['PA # Tester']), axis=1)
         
-        df['SS # Tester'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['SS # Tester']), axis=1)
+        df['PA # Tester'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['PA # Tester']), axis=1)
         
-        df['Case Number Tester'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Case Number Tester']), axis=1)
+        df['SS # Tester'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['SS # Tester']), axis=1)
         
-        df['Rent Tester'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Rent Tester']), axis=1)
         
-        df['Years in Apartment Tester'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Years in Apartment Tester']), axis=1)
         
-        df['Referral Tester'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Referral Tester']), axis=1)
         
-        df['Income Verification Tester'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Income Verification Tester']), axis=1)
+        df['Case Number Tester'] = df.apply(lambda x: HousingToolBox.NoReleaseRedactForCovid(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['Case Number Tester'], x['HRA Release?']), axis=1)
         
-        df['Posture Tester'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Posture Tester']), axis=1)
+        df['Rent Tester'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['Rent Tester']), axis=1)
         
-        df['Unit Tester'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Unit Tester']), axis=1)
+        df['Years in Apartment Tester'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['Years in Apartment Tester']), axis=1)
         
-        df['Regulation Tester'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Regulation Tester']), axis=1)
+        df['Referral Tester'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['Referral Tester']), axis=1)
         
-        df['Subsidy Tester'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Subsidy Tester']), axis=1)
+        df['Income Verification Tester'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['Income Verification Tester']), axis=1)
         
-        df['Outcome Tester'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Outcome Tester']), axis=1)
+        df['Posture Tester'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['Posture Tester']), axis=1)
         
-        df['Housing Services Tester'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Housing Services Tester']), axis=1)
+        df['Unit Tester'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['Unit Tester']), axis=1)
         
-        df['Housing Activity Tester'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Housing Activity Tester']), axis=1)
+        df['Regulation Tester'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['Regulation Tester']), axis=1)
         
-        df['HRA Release Tester'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['HRA Release Tester']), axis=1)
+        df['Subsidy Tester'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['Subsidy Tester']), axis=1)
         
-        df['Housing Type Tester'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Housing Type Tester']), axis=1)
+        df['Outcome Tester'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['Outcome Tester']), axis=1)
+        
+        df['Housing Services Tester'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['Housing Services Tester']), axis=1)
+        
+        df['Housing Activity Tester'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['Housing Activity Tester']), axis=1)
+        
+        df['HRA Release Tester'] = df.apply(lambda x: HousingToolBox.NoReleaseRedactForCovid(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['HRA Release Tester'], x['HRA Release?']), axis=1)
+        
+        df['Housing Type Tester'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['Housing Type Tester']), axis=1)
         
     
         #Is everything okay with a case? 
@@ -167,18 +189,7 @@ def upload_TRCCovidClean():
             
         df['Tester Tester'] = df.apply(lambda x: TesterTester(x['HRA Release Tester'],x['Housing Type Tester'],x['Housing Level Tester'],x['Building Case Tester'],x['Referral Tester'],x['Rent Tester'],x['Unit Tester'],x[ 'Regulation Tester'],x['Subsidy Tester'],x['Years in Apartment Tester'],x['Language Tester'],x['Posture Tester'],x['Income Verification Tester'],x['PA # Tester'],x['Case Number Tester'],x['SS # Tester'],x['Housing Activity Tester'],x['Housing Services Tester'],x['Outcome Tester'],x['HAL Eligibility Date']),axis=1)
         
-        
-        #DuplicateTester
-        #add client name and birth year and eligiblity date into one ID string
-        #identify duplicates based on ID string
-        #make new column identifying repeat values
-        
-        
-        df['DupEligID'] = df["Client Last Name"]+df["Date of Birth"] +df["HAL Eligibility Date"]
-        df['DuplicatedClient&EligDate?Bool'] = df.duplicated(['DupEligID'])
-        
-        df['DuplicatedClient&EligDate?'] = df['DuplicatedClient&EligDate?Bool'].apply(lambda x: 'Duplicate Found' if x ==True else '')
-        
+
         #sort by case handler
         
         df = df.sort_values(by=['Primary Advocate'])
@@ -219,7 +230,6 @@ def upload_TRCCovidClean():
         "Number of People 18 and Over",
         "Percentage of Poverty",
         "Total Annual Income ",
-        "Total Annual Income ",
         "Housing Funding Note",
         "Housing Date Of Waiver Approval",
         "Housing TRC HRA Waiver Categories",
@@ -228,9 +238,11 @@ def upload_TRCCovidClean():
         "Assigned Branch/CC",
         "Tester Tester",
         'Pre-3/1/20 Elig Date?',
-        'DupEligID',
-        'DuplicatedClient&EligDate?'
-        
+        'program_name',
+        'service_type',
+        'TodayConstruct',
+        'DateClosedConstruct',
+        'EligConstruct'
         ]]      
         
         #Preparing Excel Document
@@ -279,17 +291,17 @@ def upload_TRCCovidClean():
 
     return '''
     <!doctype html>
-    <title>TRC Cleaner [Covid]</title>
+    <title>UAHPLP Cleaner [Covid]</title>
     <link rel="stylesheet" href="/static/css/main.css">  
-    <h1>TRC Cleanup Report: [Covid]</h1>
+    <h1>UAHPLP Cleanup Report: [Covid]</h1>
     <form action="" method=post enctype=multipart/form-data>
     <p><input type=file name=file><input type=submit value=Clean!>
     </form>
     <h3>Instructions:</h3>
     <ul type="disc">
-    <li>This tool is meant to be used in conjunction with the LegalServer report called <a href="https://lsnyc.legalserver.org/report/dynamic?load=1507" target="_blank">TRC Raw Case Data Report</a>.</li>
+    <li>This tool is meant to be used in conjunction with the LegalServer report called <a href="https://lsnyc.legalserver.org/report/dynamic?load=1963" target="_blank">HPLP/UAC Internal Report **set filter for not just rep cases**</a>.</li>
     
-    
+   
     </br>
     <a href="/">Home</a>
     '''

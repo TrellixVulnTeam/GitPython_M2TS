@@ -164,7 +164,18 @@ def ComplianceConsolidater():
         
         def CitImmTester(AttestationOnFile,StaffVerified,ClientInPerson,CloseReason,ComplianceCheck):
             CloseReason = str(CloseReason)
-            if CloseReason != "nan"and AttestationOnFile != "Yes" and StaffVerified != "Yes" and ClientInPerson != 'No' and ComplianceCheck != "Yes":
+            
+            if AttestationOnFile == "Yes" or StaffVerified == "Yes":
+                return ''
+            elif ComplianceCheck == "Yes":
+                return ''
+            elif CloseReason.startswith(('A','B')) == True and ClientInPerson == 'No':
+                return ''
+            else:
+                return 'Needs Review'
+            
+            
+            """if CloseReason != "nan"and AttestationOnFile != "Yes" and StaffVerified != "Yes" and ClientInPerson != 'No' and ComplianceCheck != "Yes":
                 return 'Needs Review'
             
             elif AttestationOnFile != "Yes" and StaffVerified != "Yes" and CloseReason.startswith(('F','G','H','I','L')) == True and ComplianceCheck != "Yes": 
@@ -172,7 +183,9 @@ def ComplianceConsolidater():
                 
             else:
                 return ''                
-
+            """
+            
+            
         df['Citizenship & Immigration Tester'] = df.apply(lambda x : CitImmTester(x['Attestation on File?'],x['Staff Verified Non-Citizenship Documentation'],x['Did any Staff Meet Client in Person?'],x['Close Reason'],x['Compliance Check Citizenship and Immigration']),axis=1)
         
         
