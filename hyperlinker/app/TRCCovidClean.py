@@ -156,28 +156,53 @@ def upload_TRCCovidClean():
         
         df['Housing Type Tester'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Housing Type Tester']), axis=1)
         
-    
-        #Is everything okay with a case? 
-
-        def TesterTester (ReleaseTester,TypeTester,LevelTester,BuildingTester,ReferralTester,RentTester,UnitTester,RegulationTester,SubsidyTester,YearsTester,LanguageTester,PostureTester,IncomeVerification,PATester,CaseNumberTester,SSTester,ActivityTester,ServicesTester,OutcomeTester,EligibilityDate):
-            if ReleaseTester == '' and TypeTester == '' and LevelTester == '' and BuildingTester == '' and ReferralTester == '' and RentTester == '' and UnitTester == '' and RegulationTester == '' and SubsidyTester == '' and YearsTester == '' and LanguageTester == '' and PostureTester == '' and IncomeVerification == '' and PATester == '' and CaseNumberTester == '' and SSTester == '' and ActivityTester == '' and ServicesTester == '' and OutcomeTester == '' and EligibilityDate != '':
-                return 'No Cleanup Necessary'
-            else:
-                return 'Case Needs Attention'
-            
-        df['Tester Tester'] = df.apply(lambda x: TesterTester(x['HRA Release Tester'],x['Housing Type Tester'],x['Housing Level Tester'],x['Building Case Tester'],x['Referral Tester'],x['Rent Tester'],x['Unit Tester'],x[ 'Regulation Tester'],x['Subsidy Tester'],x['Years in Apartment Tester'],x['Language Tester'],x['Posture Tester'],x['Income Verification Tester'],x['PA # Tester'],x['Case Number Tester'],x['SS # Tester'],x['Housing Activity Tester'],x['Housing Services Tester'],x['Outcome Tester'],x['HAL Eligibility Date']),axis=1)
-        
         
         #DuplicateTester
         #add client name and birth year and eligiblity date into one ID string
         #identify duplicates based on ID string
         #make new column identifying repeat values
         
-        
         df['DupEligID'] = df["Client Last Name"]+df["Date of Birth"] +df["HAL Eligibility Date"]
         df['DuplicatedClient&EligDate?Bool'] = df.duplicated(['DupEligID'])
         
-        df['DuplicatedClient&EligDate?'] = df['DuplicatedClient&EligDate?Bool'].apply(lambda x: 'Duplicate Found' if x ==True else '')
+        def DuplicateHasEligDate (DupBool,EligDate):
+            if EligDate == '':
+                return False
+            else:
+                return DupBool
+        df['DuplicatedClient&EligDate?Bool'] = df.apply(lambda x: DuplicateHasEligDate(x['DuplicatedClient&EligDate?Bool'], x['HAL Eligibility Date']), axis=1)
+        
+        #df['DuplicatedClient&EligDate?Bool'] = df['DuplicatedClient&EligDate?Bool'].apply(lambda x: x if x == True else '')
+
+        dfs = df.groupby('DupEligID',sort = False)
+
+        tdf = pd.DataFrame()
+        for x, y in dfs:
+            for z in y['DuplicatedClient&EligDate?Bool']:
+                if z == True:
+                    y['Duplicate Tester'] = 'Duplicate Found'
+                else:
+                    y['Duplicate Tester'] = ''
+                    
+            tdf = tdf.append(y)
+        df = tdf
+        
+       
+       #***make it so that duplicates only show up if there's an eligibility date
+    
+        #Is everything okay with a case? 
+
+        def TesterTester (ReleaseTester,TypeTester,LevelTester,BuildingTester,ReferralTester,RentTester,UnitTester,RegulationTester,SubsidyTester,YearsTester,LanguageTester,PostureTester,IncomeVerification,PATester,CaseNumberTester,SSTester,ActivityTester,ServicesTester,OutcomeTester,EligibilityDate,DuplicateTally):
+            if ReleaseTester == '' and TypeTester == '' and LevelTester == '' and BuildingTester == '' and ReferralTester == '' and RentTester == '' and UnitTester == '' and RegulationTester == '' and SubsidyTester == '' and YearsTester == '' and LanguageTester == '' and PostureTester == '' and IncomeVerification == '' and PATester == '' and CaseNumberTester == '' and SSTester == '' and ActivityTester == '' and ServicesTester == '' and OutcomeTester == '' and DuplicateTally == '' and EligibilityDate != '':
+                return 'No Cleanup Necessary'
+            else:
+                return 'Case Needs Attention'
+            
+        df['Tester Tester'] = df.apply(lambda x: TesterTester(x['HRA Release Tester'],x['Housing Type Tester'],x['Housing Level Tester'],x['Building Case Tester'],x['Referral Tester'],x['Rent Tester'],x['Unit Tester'],x[ 'Regulation Tester'],x['Subsidy Tester'],x['Years in Apartment Tester'],x['Language Tester'],x['Posture Tester'],x['Income Verification Tester'],x['PA # Tester'],x['Case Number Tester'],x['SS # Tester'],x['Housing Activity Tester'],x['Housing Services Tester'],x['Outcome Tester'],x['HAL Eligibility Date'],x['Duplicate Tester']),axis=1)
+        
+        
+        
+        
         
         #sort by case handler
         
@@ -225,11 +250,12 @@ def upload_TRCCovidClean():
         "Housing TRC HRA Waiver Categories",
         "Date of Birth",
         "Apt#/Suite#","Legal Problem Code","Case Disposition",
+        'DupEligID',
+        #'DuplicatedClient&EligDate?Bool',
+        'Duplicate Tester',
         "Assigned Branch/CC",
         "Tester Tester",
         'Pre-3/1/20 Elig Date?',
-        'DupEligID',
-        'DuplicatedClient&EligDate?'
         
         ]]      
         
