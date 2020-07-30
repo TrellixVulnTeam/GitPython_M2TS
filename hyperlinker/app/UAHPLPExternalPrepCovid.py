@@ -62,7 +62,10 @@ def UAHPLPExternalPrepCovid():
         #cases in certain zip codes (RTC zips) that are eviction are UA - everything else is non-UA **Bounce this to housing tools**
         
         def UAorNonUA (TypeOfCase,Zip):
-            if TypeOfCase in HousingToolBox.evictionproceedings and str(Zip) in HousingToolBox.UACZipCodes:
+            if TypeOfCase== "CON" or TypeOfCase== "FAM" or TypeOfCase== "HEA" or TypeOfCase== "BEN":
+                return "UA"
+            
+            elif TypeOfCase in HousingToolBox.evictionproceedings and str(Zip) in HousingToolBox.UACZipCodes:
                 return "UA"
             else:
                 return "Non-UA"
@@ -89,7 +92,7 @@ def UAHPLPExternalPrepCovid():
             elif TypeOfCase in EvictionProceedings:
                 return "Individual"
             else:
-                return "Needs Review"
+                return ""
         df['proceeding_level'] = df.apply(lambda x: ProceedingLevel(x['Housing Building Case?'], x['proceeding'], HousingToolBox.evictionproceedings), axis=1)
         
         #For years in apartment, negative 1 or less = 0.5
@@ -343,7 +346,7 @@ def UAHPLPExternalPrepCovid():
     </form>
     <h3>Instructions:</h3>
     <ul type="disc">
-    <li>This tool is meant to be used in conjunction with the LegalServer report called <a href="https://lsnyc.legalserver.org/report/dynamic?load=2308" target="_blank">HPLP/UAC Internal Report All Cases</a>.</li>
+    <li>This tool is meant to be used in conjunction with the LegalServer report called <a href="https://lsnyc.legalserver.org/report/dynamic?load=1964" target="_blank">HPLP/UAC External Report</a>.</li>
     
     </ul>
     </br>

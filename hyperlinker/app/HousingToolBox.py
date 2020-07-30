@@ -372,7 +372,7 @@ def UACProceedingType(TypeOfCase,LegalProblemCode,CloseReason,LevelOfService):
     elif TypeOfCase == "Holdover":
         return "HO"
     elif TypeOfCase == "No Case" or TypeOfCase == "Non-Litigation Advocacy" or TypeOfCase == "Tenant Rights"  or TypeOfCase == "Rent Strike":
-        return "OO"
+        return "EVC"
     elif TypeOfCase == "Non-payment":
         return "NP"
     elif TypeOfCase == "Section 8 Administrative Proceeding" or TypeOfCase == "Sec. 8 Termination" or TypeOfCase == "Section 8 Grievance" or TypeOfCase == "Section 8 HQS" or TypeOfCase == "Section 8 other" or TypeOfCase == "Section 8 share":
@@ -402,7 +402,7 @@ def UACProceedingType(TypeOfCase,LegalProblemCode,CloseReason,LevelOfService):
     elif TypeOfCase == "Illegal Lockout":
         return "IL"
     else:
-        return "Needs Review"
+        return ""
 
  
 
@@ -603,6 +603,8 @@ def RedactForCovid(LevelOfService, PreThreeOne, ToRedact):
             LevelOfService = str(LevelOfService)
             if LevelOfService.startswith("Advice") == True and PreThreeOne == "No" and ToRedact != "":
                 return ""
+            elif LevelOfService.startswith("Brief") == True and PreThreeOne == "No" and ToRedact != "":
+                return ""
             else:   
                 return ToRedact
             
@@ -613,6 +615,8 @@ def NoReleaseRedactForCovid(LevelOfService, PreThreeOne, ToRedact,Release):
             if Release == "Yes":
                 return ToRedact
             elif LevelOfService.startswith("Advice") == True and PreThreeOne == "No" and ToRedact != "":
+                return ""
+            elif LevelOfService.startswith("Brief") == True and PreThreeOne == "No" and ToRedact != "":
                 return ""
             else:   
                 return ToRedact

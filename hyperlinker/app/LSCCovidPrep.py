@@ -42,7 +42,7 @@ def LSCCovidPrep():
             else:  
                 return "003"
         
-        df['Funding Source'] = df.apply(lambda x: FundingSourceCode(x['Primary Funding Codes'],x['Secondary Funding Codes']), axis = 1)
+        df['Funding Source Code'] = df.apply(lambda x: FundingSourceCode(x['Primary Funding Codes'],x['Secondary Funding Codes']), axis = 1)
         
         #Staffing Code: S is staff, P is Private Attorney Involvement
         
@@ -65,8 +65,12 @@ def LSCCovidPrep():
         def ClosingCode(CloseReason):
             if CloseReason == "":
                 return ""
-            elif CloseReason.startswith('I') == True:
-                return CloseReason[0:2]
+            elif CloseReason.startswith('IA') == True:
+                return "Ia"
+            elif CloseReason.startswith('IB') == True:
+                return "Ib"
+            elif CloseReason.startswith('IC') == True:
+                return "Ic"
             else:
                 return CloseReason[0:1]
         df['Closing Code'] = df.apply(lambda x: ClosingCode(x['Close Reason']), axis = 1)
@@ -82,7 +86,7 @@ def LSCCovidPrep():
                 return "O"
             else:
                 return "U"
-        df['Gender Code'] = df.apply(lambda x: ClosingCode(x['Gender']), axis = 1)
+        df['Gender Code'] = df.apply(lambda x: LSCGender(x['Gender']), axis = 1)
         
         #Veteran Status Code: N onveteran V eteran U nknown
         def VeteranCode(Veteran):
@@ -118,7 +122,10 @@ def LSCCovidPrep():
         
         #Year of Birth - client
         df['Year of Birth'] = df['Date of Birth'].str.slice(0,4)
-
+        
+        df['Year of Birth'] = df['Year of Birth'].apply(lambda x: '1900' if x == '' else x)
+        
+        
         df['ClosedDateConstruct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['Date Closed']), axis=1)
         df['OpenedDateConstruct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['Date Opened']), axis=1)
         
@@ -161,7 +168,7 @@ def LSCCovidPrep():
         df['PlaceholderColumn'] = '!'
         
         df = df[[
-        "Funding Source",
+        "Funding Source Code",
         "Staffing Code",
         "Problem Code",
         "Closing Code",

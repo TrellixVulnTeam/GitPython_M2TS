@@ -203,7 +203,7 @@ def DAPException():
             SSIMonthly = int(SSIMonthly)
             if ReceivedSSI == 'Yes' and SSIMonthly == 0:
                 return 'Needs SSI Award Amount'
-            elif ReceivedSSI == 'No' and SSIMonthly > 0:
+            elif ReceivedSSI != 'Yes' and SSIMonthly > 0:
                 return 'Needs Received SSI? = Yes'
             else:
                 return ''
@@ -217,7 +217,7 @@ def DAPException():
             DIBMonthly = int(DIBMonthly)
             if ReceivedDIB == 'Yes' and DIBMonthly == 0:
                 return 'Needs DIB Award Amount'
-            elif ReceivedDIB == 'No' and DIBMonthly > 0:
+            elif ReceivedDIB != 'Yes' and DIBMonthly > 0:
                 return 'Needs Received DIB? = Yes'
             else:
                 return ''

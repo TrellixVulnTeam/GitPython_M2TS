@@ -40,6 +40,7 @@ def index():
     <li><a href="/TRCtallyCovid">[Revised for Covid] TRC Tally</a></li>
     </br>
     <li><a href="/DHCIPrep">DHCI Document Extractor Prep</a></li>
+    <li><a href="/UAHPLPConsolidatedBoroughCleaner">UAHPLP Consolidated Borough Cleaner</a></li>
     
     
     
