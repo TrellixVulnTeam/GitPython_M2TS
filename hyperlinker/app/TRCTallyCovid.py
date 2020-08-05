@@ -51,42 +51,11 @@ def upload_TRCtallyCovid():
         
         data_xls['Case Value'] = data_xls.apply(lambda x: CaseValue(x['service_type'], x['waiver'],x['referral_source'],x['id'],x['Pre-3/1/20 Elig Date?']), axis=1)
         
-        brownsville_advocates= [
-                    "McCowen, Tamella",
-                    "Farrell, Emily",
-                    "Goncharov-Cruickshnk, Natalie",
-                    "Henriquez, Luis",
-                    "Katnani, Samar",
-                    "Kelly, Dawn",
-                    "Landry-Reyes, Jane",
-                    "Bailey, Michael",
-                    "Costa, Stephanie",
-                    "Crisona, Kathryn",
-                    "Hardy, Le`Shera",
-                    "Hecht-Felella, Laura",
-                    "Marchena, Ivan",
-                    "McCormick, James",
-                    "Patel, Mona",
-                    "Roman, Melissa",
-                    "Rubin, Jenn",
-                    "St. Louis, Bianca",
-                    "Wong, Humbert",
-                    "Xie, Vivian",
-                    "Chew, Thomas",
-                    "Cisneros, Marisol",
-                    "DeLong, Sarah",
-                    "Reardon, Elizabeth",
-                    "Ijaz, Kulsoom",
-                    "Catuira, Rochelle",
-                    "Haynes, Tralane",
-                    "Hernandez, Elizabeth",
-                    "Lee, Alicia",
-                    "Pongnon, Miouly"
-                    ]
+        
         
         #Assign Zips to Deliverable Categories
         
-        def ServiceArea (zip,city,advocate,brownsville_advocates):
+        def ServiceArea (zip,city):
             if zip == 10453 or zip == 10452:
                 return "Bronx - Morris Height/Highbridge"
             elif zip == 10459 or zip == 10457 or zip == 10460:
@@ -97,8 +66,7 @@ def upload_TRCtallyCovid():
                 return "Brooklyn - Gowanus/Park Slope/Boerum Hill/Carroll Garden/Red Hook"
             elif zip == 11207 or zip == 11208 or zip == 11212 or zip == 11233:
                 return "Brooklyn - East New York/Brownsville/Ocean Hill"
-            elif advocate in brownsville_advocates:
-                return "Brooklyn - Other Zips - Brownsville Team"
+            
             elif zip == 10029 or zip == 10035:
                 return "Manhattan - East Harlem"
             elif zip == 10034:
@@ -116,7 +84,7 @@ def upload_TRCtallyCovid():
             elif city == "MANHATTAN":
                 return "Manhattan - Other Zips"
             elif city == "BROOKLYN":
-                return "Brooklyn - Other Zips - Flatbush Team"
+                return "Brooklyn - Other Zips"
             elif city == "BRONX":
                 return "Bronx - Other Zips"
             elif city == "QUEENS":
@@ -126,7 +94,7 @@ def upload_TRCtallyCovid():
             else:  
                 return ""
         
-        data_xls['Service Area'] = data_xls.apply(lambda x: ServiceArea(x['zip'], x['city'], x['Primary Advocate'], brownsville_advocates), axis = 1)
+        data_xls['Service Area'] = data_xls.apply(lambda x: ServiceArea(x['zip'], x['city']), axis = 1)
         
         #pulling month for later
         data_xls['Eligibility Month'] = pd.to_numeric(data_xls['eligibility_date'].apply(lambda x: str(x)[:2]))
@@ -147,7 +115,7 @@ def upload_TRCtallyCovid():
         
         area_pivot = pd.pivot_table(data_xls,index=['Service Area'],values=['Case Value'],aggfunc=sum,fill_value=0)
         
-        area_reorder = ["Bronx - Morris Height/Highbridge","Bronx - Longwood/East Tremont/West Farms","Bronx - Other Zips","Brooklyn - Ridgewood/Bushwick","Brooklyn - Gowanus/Park Slope/Boerum Hill/Carroll Garden/Red Hook","Brooklyn - East New York/Brownsville/Ocean Hill","Brooklyn - Other Zips - Brownsville Team","Brooklyn - Other Zips - Flatbush Team","Manhattan - East Harlem","Manhattan - Inwood","Manhattan - Washington Heights","Manhattan - Other Zips","Queens - Long Island City","Queens - Flushing/West Flushing","Queens - Far Rockaway","Queens - Other Zips","Staten Island - Stapleton/Bay Street","Staten Island - Other Zips"]
+        area_reorder = ["Bronx - Morris Height/Highbridge","Bronx - Longwood/East Tremont/West Farms","Bronx - Other Zips","Brooklyn - Ridgewood/Bushwick","Brooklyn - Gowanus/Park Slope/Boerum Hill/Carroll Garden/Red Hook","Brooklyn - East New York/Brownsville/Ocean Hill","Brooklyn - Other Zips","Manhattan - East Harlem","Manhattan - Inwood","Manhattan - Washington Heights","Manhattan - Other Zips","Queens - Long Island City","Queens - Flushing/West Flushing","Queens - Far Rockaway","Queens - Other Zips","Staten Island - Stapleton/Bay Street","Staten Island - Other Zips"]
         
         area_pivot = area_pivot.reindex(area_reorder)
         
@@ -198,10 +166,9 @@ def upload_TRCtallyCovid():
                 return 36
             elif area == "Brooklyn - East New York/Brownsville/Ocean Hill":
                 return 1650
-            elif area == "Brooklyn - Other Zips - Brownsville Team":
-                return 244
-            elif area == "Brooklyn - Other Zips - Flatbush Team":
-                return 632
+            elif area == "Brooklyn - Other Zips":
+                return 876
+            
             elif area == "Manhattan - East Harlem":
                 return 618
             elif area == "Manhattan - Inwood":
@@ -255,7 +222,7 @@ def upload_TRCtallyCovid():
         
         #put sheets in right order
         
-        data_xls = data_xls[['id','city','street_number','Street','zip','Service Area','Primary Advocate','service_type','waiver','referral_source','Eligibility Month','Pre-3/1/20 Elig Date?','Case Value']]
+        data_xls = data_xls[['id','city','street_number','Street','zip','Service Area','service_type','waiver','referral_source','Eligibility Month','Pre-3/1/20 Elig Date?','Case Value']]
         city_pivot = city_pivot[['city','Case Value','Proportional Goal','Proportional Percentage','Annual Goal','Annual Percentage']]
         area_pivot = area_pivot[['Service Area','Case Value','Proportional Goal','Proportional Percentage','Annual Goal','Annual Percentage']]
         

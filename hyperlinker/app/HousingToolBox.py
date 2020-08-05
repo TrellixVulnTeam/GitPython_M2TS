@@ -328,7 +328,7 @@ def TRCProceedingType(TypeOfCase,LegalProblemCode,LevelOfService):
         return "S8"
     elif TypeOfCase == "Illegal Lockout":
         return "IL"
-    elif TypeOfCase == "NYCHA Termination of Tenancy":
+    elif TypeOfCase == "NYCHA Termination of Tenancy" or TypeOfCase == "NYCHA Housing Termination":
         return "TT"
     elif TypeOfCase == "Dispositive Eviction Appeal":
         return "EA"
