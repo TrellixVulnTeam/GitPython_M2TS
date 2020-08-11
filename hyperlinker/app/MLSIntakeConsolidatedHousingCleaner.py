@@ -205,7 +205,7 @@ def MLSIntakeConsolidatedHousingCleaner():
     </form>
     <h3>Instructions:</h3>
     <ul type="disc">
-    <li>This tool is meant to be used in conjunction with the LegalServer report called <a href="https://lsnyc.legalserver.org/report/dynamic?load=2308" target="_blank">HPLP/UAC Internal Report All Cases</a>.</li>
+    <li>This tool is meant to be used in conjunction with the LegalServer report called <a href="https://lsnyc.legalserver.org/report/dynamic?load=2314" target="_blank">MLS Consolidated Housing Cleanup Report</a>.</li>
     
    
     </br>
