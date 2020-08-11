@@ -31,7 +31,7 @@ def upload_TRCDuplicateIdentifier():
         #Create Hyperlinks
         df['Hyperlinked CaseID#'] = df.apply(lambda x : DataWizardTools.Hyperlinker(x['Matter/Case ID#']),axis=1)          
         
-        df['Assigned Branch/CC'] = df.apply(lambda x : DataWizardTools.OfficeAbbreviator(x['Assigned Branch/CC']),axis=1)   
+ 
 
 
         
@@ -88,8 +88,7 @@ def upload_TRCDuplicateIdentifier():
         'Hyperlinked CaseID#',
         'Primary Advocate',
         'Duplicate Tester',
-        "Date Opened",
-        "Date Closed",
+
         "Client First Name",
         "Client Last Name",
        
@@ -100,8 +99,7 @@ def upload_TRCDuplicateIdentifier():
         'DupEligID',
         
         
-        "Assigned Branch/CC",
-        
+       
         
         
         ]]      
@@ -148,7 +146,7 @@ def upload_TRCDuplicateIdentifier():
         
         save_xls(dict_df = allgood_dictionary, path = "app\\sheets\\" + output_filename)
        
-        return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = "Cleaned " + f.filename)
+        return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = "Duplicate Check " + f.filename)
 
     return '''
     <!doctype html>
