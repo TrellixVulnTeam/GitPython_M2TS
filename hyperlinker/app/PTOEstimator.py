@@ -21,7 +21,7 @@ def PTOEstimator():
             else:
                 return str(CaseID)
         
-        df['Pay Period'] = df.apply(lambda x : DataWizardTools.RemoveNoCaseID(x['Pay Period']),axis=1)        
+        df['Pay Period'] = df.apply(lambda x : RemoveNoPayPeriod(x['Pay Period']),axis=1)        
         df = df[df['Pay Period'] != 'No Case ID']
         
         def DateMaker (Date):
