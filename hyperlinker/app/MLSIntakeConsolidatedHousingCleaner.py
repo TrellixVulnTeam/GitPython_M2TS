@@ -39,19 +39,28 @@ def MLSIntakeConsolidatedHousingCleaner():
 
         #Has to have a Housing Level of Service 
 
-        #Level of Service is HOLD FOR REVIEW tester? incorporate into above
-
+       
         #Eligiblity date tester - blank or not?
        
         df['DateConstruct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['HAL Eligibility Date']), axis=1)
         
         df['Pre-3/1/20 Elig Date?'] = df.apply(lambda x: HousingToolBox.PreThreeOne(x['DateConstruct']), axis=1)
        
-        #PA Tester if theres no dhci
+        #don't need consent form if it's post-covid advice/brief
+        def ReleaseTester(HRARelease,PreThreeOne,LevelOfService):
+            LevelOfService = str(LevelOfService)
+            if PreThreeOne == "No" and LevelOfService.startswith("Advice"):
+                return "Unnecessary due to post-3/1 limited service"
+            else:
+                return HRARelease
+       
+        df['HRA Release?'] = df.apply(lambda x: ReleaseTester(x['HRA Release?'],x['Pre-3/1/20 Elig Date?'],x["Housing Level of Service"]),axis = 1)
+       
+        #PA Tester if theres no dhci, not needed for post-covid advice/brief cases
         def PATester (PANum,DHCI,PreThreeOne,LevelOfService):
             LevelOfService = str(LevelOfService)
             if PreThreeOne == "No" and LevelOfService.startswith("Advice"):
-                return "Not Needed due to post-3/1 limited service"
+                return "Unnecessary due to post-3/1 limited service"
             elif DHCI == "Yes" and PANum == "":
                 return "Not Needed due to DHCI"
             else:
@@ -204,9 +213,9 @@ def MLSIntakeConsolidatedHousingCleaner():
 
     return '''
     <!doctype html>
-    <title>MLS Housing Consolidated Borough Cleaner</title>
+    <title>MLS Housing Consolidated intake Cleaner</title>
     <link rel="stylesheet" href="/static/css/main.css">  
-    <h1>Housing Consolidated Borough Cleaner:</h1>
+    <h1>MLS Housing Consolidated intake Cleaner:</h1>
     <form action="" method=post enctype=multipart/form-data>
     <p><input type=file name=file><input type=submit value=Clean!>
     </form>
