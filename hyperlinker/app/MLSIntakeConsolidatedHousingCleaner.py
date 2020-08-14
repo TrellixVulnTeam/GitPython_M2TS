@@ -43,14 +43,21 @@ def MLSIntakeConsolidatedHousingCleaner():
 
         #Eligiblity date tester - blank or not?
        
+        df['DateConstruct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['HAL Eligibility Date']), axis=1)
+        
+        df['Pre-3/1/20 Elig Date?'] = df.apply(lambda x: HousingToolBox.PreThreeOne(x['DateConstruct']), axis=1)
+       
         #PA Tester if theres no dhci
-        def PATester (PANum,DHCI):
-            if DHCI == "Yes" and PANum == "":
+        def PATester (PANum,DHCI,PreThreeOne,LevelOfService):
+            LevelOfService = str(LevelOfService)
+            if PreThreeOne == "No" and LevelOfService.startswith("Advice"):
+                return "Not Needed due to post-3/1 limited service"
+            elif DHCI == "Yes" and PANum == "":
                 return "Not Needed due to DHCI"
             else:
                 return PANum
             
-        df['Gen Pub Assist Case Number'] = df.apply(lambda x: PATester(x['Gen Pub Assist Case Number'],x['Housing Signed DHCI Form']),axis = 1)
+        df['Gen Pub Assist Case Number'] = df.apply(lambda x: PATester(x['Gen Pub Assist Case Number'],x['Housing Signed DHCI Form'],x['Pre-3/1/20 Elig Date?'],x["Housing Level of Service"]),axis = 1)
 
         #Outcome Tester - date no outcome or outcome no date
         

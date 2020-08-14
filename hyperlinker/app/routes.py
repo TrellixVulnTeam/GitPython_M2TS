@@ -32,6 +32,9 @@ def index():
     
     <b>Housing Tools:</b>
     <ul type="disc">
+    
+    <li><a href="/AllHousing">All Housing Report</a></li>
+    </br>
     <li><a href="/UAHPLPCovidClean">[Revised for Covid] UAHPLP Cleaner</a></li>     
     <li><a href="/UAHPLPExternalPrepCovid">[Revised for Covid] Prepare UA/HPLP Reports for Submission to HRA</a></li>
     </br>
