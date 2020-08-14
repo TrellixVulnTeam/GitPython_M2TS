@@ -50,23 +50,27 @@ def MLSIntakeConsolidatedHousingCleaner():
         def ReleaseTester(HRARelease,PreThreeOne,LevelOfService):
             LevelOfService = str(LevelOfService)
             if PreThreeOne == "No" and LevelOfService.startswith("Advice"):
-                return "Unnecessary due to post-3/1 limited service"
+                return "Unnecessary post-3/1 advice/brief"
             else:
                 return HRARelease
        
         df['HRA Release?'] = df.apply(lambda x: ReleaseTester(x['HRA Release?'],x['Pre-3/1/20 Elig Date?'],x["Housing Level of Service"]),axis = 1)
+        
+        df['Housing Income Verification'] = df.apply(lambda x: ReleaseTester(x['Housing Income Verification'],x['Pre-3/1/20 Elig Date?'],x["Housing Level of Service"]),axis = 1)
+        
+       
        
         #PA Tester if theres no dhci, not needed for post-covid advice/brief cases
         def PATester (PANum,DHCI,PreThreeOne,LevelOfService):
             LevelOfService = str(LevelOfService)
             if PreThreeOne == "No" and LevelOfService.startswith("Advice"):
-                return "Unnecessary due to post-3/1 limited service"
-            elif DHCI == "Yes" and PANum == "":
+                return "Unnecessary post-3/1 advice/brief"
+            elif DHCI == "DHCI Form" and PANum == "":
                 return "Not Needed due to DHCI"
             else:
                 return PANum
             
-        df['Gen Pub Assist Case Number'] = df.apply(lambda x: PATester(x['Gen Pub Assist Case Number'],x['Housing Signed DHCI Form'],x['Pre-3/1/20 Elig Date?'],x["Housing Level of Service"]),axis = 1)
+        df['Gen Pub Assist Case Number'] = df.apply(lambda x: PATester(x['Gen Pub Assist Case Number'],x['Housing Income Verification'],x['Pre-3/1/20 Elig Date?'],x["Housing Level of Service"]),axis = 1)
 
         #Outcome Tester - date no outcome or outcome no date
         
@@ -160,7 +164,7 @@ def MLSIntakeConsolidatedHousingCleaner():
         
         
         "Gen Pub Assist Case Number",
-        "Housing Signed DHCI Form",
+        "Housing Income Verification",
 
         
         "Housing Outcome",
@@ -189,7 +193,7 @@ def MLSIntakeConsolidatedHousingCleaner():
                 ws.autofilter('B1:ZZ1')
                 ws.freeze_panes(1, 2)
 
-                ws.conditional_format('F2:J100000',{'type': 'blanks',
+                ws.conditional_format('F2:K100000',{'type': 'blanks',
                                                  'format': problem_format})
                 ws.conditional_format('G2:G100000',{'type': 'text',
                                                  'criteria': 'containing',
