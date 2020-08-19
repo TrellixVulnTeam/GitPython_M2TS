@@ -43,8 +43,7 @@ def AllHousing():
                 
         df['Funding Code Sorter'] = df.apply(lambda x : TabAssigner(x['Primary Funding Code']),axis=1)
         
-        """
-        
+
         df['Assigned Branch/CC'] = df.apply(lambda x : DataWizardTools.OfficeAbbreviator(x['Assigned Branch/CC']),axis=1)   
 
 
@@ -93,10 +92,11 @@ def AllHousing():
         #Housing Posture of Case can't be blank if there is an eligibility date
         df['Posture Tester'] = df.apply(lambda x: HousingToolBox.PostureClean(x['Housing Posture of Case on Eligibility Date'],x['HAL Eligibility Date'],x['Housing Type Of Case'],x['Housing Level of Service']), axis=1)
         
+        
         #Housing Income Verification can't be blank or none and other stuff with kids and poverty level and you just give up if it's closed
         
         df['Income Verification Tester'] = df.apply(lambda x: HousingToolBox.IncomeVerificationClean(x['Housing Income Verification'], x['Number of People under 18'], x['Percentage of Poverty'],x['Case Disposition']), axis=1)
-       
+        
         #PA Tester (need to be correct format as well)
                 
         df['PA # Tester'] = df.apply(lambda x: HousingToolBox.PATesterClean(x['Gen Pub Assist Case Number']), axis=1)
@@ -105,9 +105,9 @@ def AllHousing():
         
         df['Case Number Tester'] = df.apply(lambda x: HousingToolBox.CaseNumClean(x['Gen Case Index Number'],x['Housing Level of Service']), axis=1)
         
-        #Test if social security number is correct format (or ignore it if there's a valid PA number)
         
-                
+        #Test if social security number is correct format (or ignore it if there's a valid PA number)
+     
         df['SS # Tester'] = df.apply(lambda x: HousingToolBox.SSNumClean(x['Social Security #'],x['Gen Pub Assist Case Number']), axis=1)
         
         #Test Housing Activity Indicator - can't be blank for closed cases that are full rep state or full rep federal(housing level of service) and eviction cases(housing type of case: non-payment holdover illegal lockout nycha housing termination)
@@ -122,10 +122,7 @@ def AllHousing():
             
         df['Outcome Tester'] = df.apply(lambda x: HousingToolBox.TRCOutcomeTesterClean(x['Case Disposition'],x['Housing Outcome'],x['Housing Outcome Date'],x['Housing Level of Service'],x['Housing Type Of Case']), axis = 1)
         
-        
-        
-  
-        
+
         
         #COVID Modifications - make the testers blank if it's an advice only pre-3/1 case!
         
@@ -170,10 +167,8 @@ def AllHousing():
         
         df['Housing Type Tester'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Housing Type Tester']), axis=1)
         
-        
-        
-       
-       #***make it so that duplicates only show up if there's an eligibility date
+
+        """
     
         #Is everything okay with a case? 
 
@@ -187,7 +182,7 @@ def AllHousing():
         
         
         
-        
+        """
         
         #sort by case handler
         
@@ -198,6 +193,29 @@ def AllHousing():
         #Put everything in the right order
         
         df = df[['Hyperlinked CaseID#','Primary Advocate',
+        
+        "HRA Release?",'HRA Release Tester',
+        "Housing Type Of Case",'Housing Type Tester',
+        "Housing Level of Service",'Housing Level Tester',
+        "Housing Building Case?",'Building Case Tester',
+        "Referral Source",'Referral Tester',
+        "Housing Total Monthly Rent",'Rent Tester',
+        "Housing Number Of Units In Building",'Unit Tester',
+        "Housing Form Of Regulation",'Regulation Tester',
+        "Housing Subsidy Type",'Subsidy Tester',
+        "Housing Years Living In Apartment",'Years in Apartment Tester',
+        "Language",'Language Tester',
+        "Housing Posture of Case on Eligibility Date",'Posture Tester',
+        "Housing Income Verification",'Income Verification Tester',
+        "Gen Pub Assist Case Number",'PA # Tester',
+        "Gen Case Index Number",'Case Number Tester',  
+        "Social Security #","SS # Tester",
+        "Housing Activity Indicators",'Housing Activity Tester',
+        "Housing Services Rendered to Client",'Housing Services Tester',
+        "Housing Outcome",'Outcome Tester',"Housing Outcome Date",
+        'Pre-3/1/20 Elig Date?',"Funding Code Sorter",
+        ]]
+        """
         "Date Opened",
         "Date Closed",
         "Client First Name",
@@ -205,43 +223,21 @@ def AllHousing():
         "Street Address",
         "City",
         "Zip Code",
-        "HRA Release?",'HRA Release Tester',
-        "Housing Income Verification",'Income Verification Tester',
-        "Gen Case Index Number",'Case Number Tester',        
-        "Housing Type Of Case",'Housing Type Tester',
-        "Housing Level of Service",'Housing Level Tester',"Close Reason",
-        "Housing Building Case?",'Building Case Tester',
-        "HAL Eligibility Date","Housing Posture of Case on Eligibility Date",'Posture Tester',
+        "Close Reason",
+        "HAL Eligibility Date",
         "Primary Funding Code",
-        "Housing Total Monthly Rent",'Rent Tester',
-        "Housing Number Of Units In Building",'Unit Tester',
-        "Housing Form Of Regulation",'Regulation Tester',
-        "Housing Subsidy Type",'Subsidy Tester',
-        "Housing Years Living In Apartment",'Years in Apartment Tester',
-        "Language",'Language Tester',
-        "Gen Pub Assist Case Number",'PA # Tester',
-        "Social Security #","SS # Tester",
-        "Referral Source",'Referral Tester',
-        "Housing Activity Indicators",'Housing Activity Tester',
-        "Housing Services Rendered to Client",'Housing Services Tester',
-        "Housing Outcome",'Outcome Tester',"Housing Outcome Date",
         "Number of People under 18",
         "Number of People 18 and Over",
         "Percentage of Poverty",
-        "Total Annual Income ",
         "Total Annual Income ",
         "Housing Funding Note",
         "Housing Date Of Waiver Approval",
         "Housing TRC HRA Waiver Categories",
         "Date of Birth",
         "Apt#/Suite#","Legal Problem Code","Case Disposition",
-        'DupEligID',
-        #'DuplicatedClient&EligDate?Bool',
-        'Duplicate Tester',
         "Assigned Branch/CC",
         "Tester Tester",
-        'Pre-3/1/20 Elig Date?',
-        
+
         ]]      
         
         """

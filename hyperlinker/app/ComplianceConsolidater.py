@@ -203,6 +203,7 @@ def ComplianceConsolidater():
         
         #remove cases that don't need compliance review
         df = df[df['Tester Tester'] == "Needs Review"]
+        df = df[df['Assigned Branch/CC'] != "Legal Services NYC"]
         
         #Putting everything in the right order
         

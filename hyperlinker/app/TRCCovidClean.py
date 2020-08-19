@@ -31,8 +31,9 @@ def upload_TRCCovidClean():
         #Create Hyperlinks
         df['Hyperlinked CaseID#'] = df.apply(lambda x : DataWizardTools.Hyperlinker(x['Matter/Case ID#']),axis=1)          
         
+        
         df['Assigned Branch/CC'] = df.apply(lambda x : DataWizardTools.OfficeAbbreviator(x['Assigned Branch/CC']),axis=1)   
-
+        
 
         #Has to have an HRA Release
         
@@ -207,6 +208,7 @@ def upload_TRCCovidClean():
         #sort by case handler
         
         df = df.sort_values(by=['Primary Advocate'])
+        
         df = df.sort_values(by=['Assigned Branch/CC'])
         
         
@@ -245,7 +247,7 @@ def upload_TRCCovidClean():
         "Percentage of Poverty",
         "Total Annual Income ",
         "Total Annual Income ",
-        "Housing Funding Note",
+        
         "Housing Date Of Waiver Approval",
         "Housing TRC HRA Waiver Categories",
         "Date of Birth",
@@ -253,7 +255,7 @@ def upload_TRCCovidClean():
         'DupEligID',
         #'DuplicatedClient&EligDate?Bool',
         'Duplicate Tester',
-        "Assigned Branch/CC",
+        #"Assigned Branch/CC",
         "Tester Tester",
         'Pre-3/1/20 Elig Date?',
         
@@ -313,7 +315,7 @@ def upload_TRCCovidClean():
     </form>
     <h3>Instructions:</h3>
     <ul type="disc">
-    <li>This tool is meant to be used in conjunction with the LegalServer report called <a href="https://lsnyc.legalserver.org/report/dynamic?load=1507" target="_blank">TRC Raw Case Data Report</a>.</li>
+    <li>This tool is meant to be used in conjunction with the LegalServer report called <a href="https://lsnyc.legalserver.org/report/dynamic?load=2317" target="_blank">TRC Reports Python Tool Cleaner</a>.</li>
     
     
     </br>

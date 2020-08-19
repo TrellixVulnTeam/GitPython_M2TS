@@ -205,6 +205,9 @@ def CaseNumClean (CaseNum,Level):
     #Federal/Supreme format 123456/2019
     elif len(CaseNum) == 11 and str.isdigit(First6) == True:
         return ''
+    #NYCHA Housing Termination Cases -  "904607-CR-2019"
+    elif len(CaseNum) == 14 and str.isdigit(First6) == True:
+        return ''
     else:
         return "Needs Correct Case # Format"
 
