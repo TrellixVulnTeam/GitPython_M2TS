@@ -49,7 +49,7 @@ def upload_TRCtally():
         
         #Assign Zips to Deliverable Categories
         
-        def ServiceArea (zip,city,advocate):
+        def ServiceArea (zip,city):
             if zip == 10453 or zip == 10452:
                 return "Bronx - Morris Height/Highbridge"
             elif zip == 10459 or zip == 10457 or zip == 10460:
@@ -88,7 +88,7 @@ def upload_TRCtally():
             else:  
                 return ""
         
-        data_xls['Service Area'] = data_xls.apply(lambda x: ServiceArea(x['zip'], x['city'], x['Primary Advocate']), axis = 1)
+        data_xls['Service Area'] = data_xls.apply(lambda x: ServiceArea(x['zip'], x['city']), axis = 1)
         
         #pulling month for later
         data_xls['Eligibility Month'] = pd.to_numeric(data_xls['eligibility_date'].apply(lambda x: str(x)[:2]))
@@ -215,7 +215,7 @@ def upload_TRCtally():
         
         #put sheets in right order
         
-        data_xls = data_xls[['id','city','street_number','Street','zip','Service Area','Primary Advocate','service_type','waiver','referral_source','Eligibility Month','Case Value']]
+        data_xls = data_xls[['id','city','street_number','Street','zip','Service Area','service_type','waiver','referral_source','Eligibility Month','Case Value']]
         city_pivot = city_pivot[['city','Case Value','Proportional Goal','Proportional Percentage','Annual Goal','Annual Percentage']]
         area_pivot = area_pivot[['Service Area','Case Value','Proportional Goal','Proportional Percentage','Annual Goal','Annual Percentage']]
         
