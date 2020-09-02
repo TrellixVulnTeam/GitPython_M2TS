@@ -20,6 +20,19 @@ def HRAReleaseClean (HRARelease,EligibilityDate):
         return ''
     else:
         return 'Needs HRA Release'
+        
+def ReleaseAndEligTester(HRARelease,EligibilityDate):
+    if HRARelease == 'Yes' and EligibilityDate != '':
+        return ''
+    elif HRARelease == 'Yes' and EligibilityDate == '':
+        return "Needs Eligibility Date"
+    elif HRARelease == 'No' or HRARelease == '':
+        if EligibilityDate != '':
+            return "Needs HRA Release"
+        else:   
+            return 'Needs Elig & Release'
+    else:
+        return 'Needs Elig & Release'
 
 #Has to have a Housing Type of Case
 def HousingTypeClean (HousingType):
@@ -102,7 +115,7 @@ def YearsClean (Years):
 #Language Can't be Blank
         
 def LanguageClean (Language):
-    if Language == '':
+    if Language == '' or Language == 'Unknown':
         return 'Needs Language'
     else:
         return ''
@@ -257,7 +270,7 @@ def ServicesTesterClean(HousingServices,Disposition,Level,Type):
     else:
         return ''
 
-#Outcome Tester - needs outcome and date for eviction cases that are full rep at state or federal level (not admin)
+#Outcome Tester - needs outcome and date for closed  eviction cases that are full rep at state or federal level (not admin)
         
 def TRCOutcomeTesterClean (Disposition,Outcome,OutcomeDate,Level,Type):
     if Disposition == 'Closed' and Level in leveltypes and Type in evictiontypes and Outcome == '' and OutcomeDate == '':
@@ -268,6 +281,8 @@ def TRCOutcomeTesterClean (Disposition,Outcome,OutcomeDate,Level,Type):
         return 'Needs Outcome Date'
     else:
         return ''
+
+
 
 #Outcome Tester - IF CLOSED OR IF OVER 6 Months Old (since eligiblity date) needs outcome and date for eviction cases that are full rep at state or federal level (not admin)
         
@@ -309,13 +324,13 @@ def UAHPLPOutcomeTesterClean (Disposition,Outcome,OutcomeDate,Level,Type,EligDat
 
 #Translation based on HRA Specs
 def TRCProceedingType(TypeOfCase,LegalProblemCode,LevelOfService):
-    if LegalProblemCode.startswith("0") == True and LevelOfService.startswith("A") == True:
+    if LegalProblemCode.startswith("0") == True:
         return "CON"
-    elif LegalProblemCode.startswith("3") == True and LevelOfService.startswith("A") == True:
+    elif LegalProblemCode.startswith("3") == True:
         return "FAM"
-    elif LegalProblemCode.startswith("5") == True and LevelOfService.startswith("A") == True:
+    elif LegalProblemCode.startswith("5") == True:
         return "HEA"
-    elif LegalProblemCode.startswith("7") == True and LevelOfService.startswith("A") == True:
+    elif LegalProblemCode.startswith("7") == True:
         return "BEN"
     elif TypeOfCase == "HP Action":
         return "HP"
@@ -440,9 +455,13 @@ def PostureOnEligibility(Posture):
     return "; ".join(recombinedposturelist)
  
 #TRC Level of Service becomes Service type - lots of level of service in LS, mapped to Advice Only, Pre-Lit Strategies (brief service, out of court advocacy, hold for review), and Full Rep (mapping to be confirmed)
-def TRCServiceType(LevelOfService):
+def TRCServiceType(LevelOfService,LegalProblemCode):
     if LevelOfService == "Advice":
         return "Advice Only"
+    elif LegalProblemCode.startswith("3") == True or LegalProblemCode.startswith("5") == True or LegalProblemCode.startswith("7") == True:
+        return "Advice Only"
+    elif LegalProblemCode.startswith("0") == True:
+        return "Needs Review"
     elif LevelOfService == "Brief Service" or LevelOfService == "Out-of-Court Advocacy" or LevelOfService == "Hold For Review":
         return "Pre-Litigation Strategies"
     elif LevelOfService == "Representation - Admin. Agency" or LevelOfService == "Representation-EOIR" or LevelOfService == "Representation - Federal Court" or LevelOfService == "Representation - State Court":
@@ -600,8 +619,33 @@ def PreThreeOne(EligibilityDate):
         return "Yes"
     elif EligibilityDate >= 20200301:
         return "No"
+
+def NeedsRedactingTester(LevelOfService, PreThreeOne,FundingCodeSorter):
+    if LevelOfService.startswith("Advice") == True and PreThreeOne == "No":
+        return "Needs Redacting"
+    elif LevelOfService.startswith("Brief") == True and PreThreeOne == "No" and FundingCodeSorter == "UAHPLP":
+        return "Needs Redacting"
+    else:
+        return ""
         
-        
+      
+def TRCRedactForCovid(LevelOfService, PreThreeOne, ToRedact):
+            LevelOfService = str(LevelOfService)
+            if LevelOfService.startswith("Advice") == True and PreThreeOne == "No" and ToRedact != "":
+                return ""
+
+            else:   
+                return ToRedact
+                
+def AllHousingRedactForCovid(LevelOfService, PreThreeOne, ToRedact,FundingCodeSorter):
+            LevelOfService = str(LevelOfService)
+            if LevelOfService.startswith("Advice") == True and PreThreeOne == "No" and ToRedact != "":
+                return ""
+            elif LevelOfService.startswith("Brief") == True and PreThreeOne == "No" and ToRedact != "" and FundingCodeSorter == "UAHPLP":
+                return ""
+            else:   
+                return ToRedact
+      
 def RedactForCovid(LevelOfService, PreThreeOne, ToRedact):
             LevelOfService = str(LevelOfService)
             if LevelOfService.startswith("Advice") == True and PreThreeOne == "No" and ToRedact != "":
@@ -624,4 +668,4 @@ def NoReleaseRedactForCovid(LevelOfService, PreThreeOne, ToRedact,Release):
             else:   
                 return ToRedact
             
-            
+      

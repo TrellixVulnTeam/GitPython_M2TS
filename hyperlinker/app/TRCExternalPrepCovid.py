@@ -91,7 +91,7 @@ def TRCExternalPrepCovid():
         
         
         #Level of Service becomes Service type 
-        df['service_type'] = df.apply(lambda x: HousingToolBox.TRCServiceType(x['Housing Level of Service']), axis=1)
+        df['service_type'] = df.apply(lambda x: HousingToolBox.TRCServiceType(x['Housing Level of Service'],x['Legal Problem Code']), axis=1)
         
         #if below 201, = 'Yes' otherwise 'No'
         df['below_200_FPL'] = df['Percentage of Poverty'].apply(lambda x: "Yes" if x < 200 else "No")
@@ -129,7 +129,7 @@ def TRCExternalPrepCovid():
         #Flag cases that don't have housing-based legal problem codes for Kim's review
         
         def NonHousingIdentifier(LegalProblemCode):
-            if LegalProblemCode.startswith(('0','3','5','7')) == True:
+            if LegalProblemCode.startswith(('0','7')) == True:
                 return "Needs Review"
             else:
                 return ""
@@ -263,7 +263,9 @@ def TRCExternalPrepCovid():
         'Primary Advocate',
         'Hyperlinked CaseID#',
         'Pre-3/1/20 Elig Date?',
-        'Non-Housing Case?'
+        'Legal Problem Code',
+        'Non-Housing Case?',
+        'Primary Funding Code'
         ]]
         
         #bounce worksheets back to excel

@@ -45,31 +45,38 @@ def UAHPLPConsolidatedBoroughCleaner():
 
         #Eligiblity date tester - blank or not?
        
-        df['DateConstruct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['HAL Eligibility Date']), axis=1)
+        df['EligDateConstruct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['HAL Eligibility Date']), axis=1)
         
-        df['Pre-3/1/20 Elig Date?'] = df.apply(lambda x: HousingToolBox.PreThreeOne(x['DateConstruct']), axis=1)
+        df['Pre-3/1/20 Elig Date?'] = df.apply(lambda x: HousingToolBox.PreThreeOne(x['EligDateConstruct']), axis=1)
+        
+        df['OpenedDateConstruct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['Date Opened']), axis=1)
        
         #don't need consent form if it's post-covid advice/brief
-        def ReleaseTester(HRARelease,PreThreeOne,LevelOfService):
+        def ReleaseTester(HRARelease,PreThreeOne,LevelOfService,EligDate,OpenDate):
             LevelOfService = str(LevelOfService)
-            if PreThreeOne == "No" and LevelOfService.startswith("Advice"):
+            if PreThreeOne == "No" and LevelOfService.startswith("Advice") and EligDate != '':
+                return "Unnecessary due to post-3/1 limited service"
+            elif PreThreeOne == "No" and LevelOfService.startswith("Advice") and OpenDate >= 20200301:
                 return "Unnecessary due to post-3/1 limited service"
             else:
                 return HRARelease
        
-        df['HRA Release?'] = df.apply(lambda x: ReleaseTester(x['HRA Release?'],x['Pre-3/1/20 Elig Date?'],x["Housing Level of Service"]),axis = 1)
+        df['HRA Release?'] = df.apply(lambda x: ReleaseTester(x['HRA Release?'],x['Pre-3/1/20 Elig Date?'],x["Housing Level of Service"],x['EligDateConstruct'],x['OpenedDateConstruct']),axis = 1)
        
         #PA Tester if theres no dhci, not needed for post-covid advice/brief cases
-        def PATester (PANum,DHCI,PreThreeOne,LevelOfService):
+        def PATester (PANum,DHCI,PreThreeOne,LevelOfService,EligDate,OpenDate):
             LevelOfService = str(LevelOfService)
-            if PreThreeOne == "No" and LevelOfService.startswith("Advice"):
+            if PreThreeOne == "No" and LevelOfService.startswith("Advice") and EligDate != '':
                 return "Unnecessary due to post-3/1 limited service"
+            elif PreThreeOne == "No" and LevelOfService.startswith("Advice") and OpenDate >= 20200301:
+                return "Unnecessary due to post-3/1 limited service"
+            
             elif DHCI == "Yes" and PANum == "":
                 return "Not Needed due to DHCI"
             else:
                 return PANum
             
-        df['Gen Pub Assist Case Number'] = df.apply(lambda x: PATester(x['Gen Pub Assist Case Number'],x['Housing Signed DHCI Form'],x['Pre-3/1/20 Elig Date?'],x["Housing Level of Service"]),axis = 1)
+        df['Gen Pub Assist Case Number'] = df.apply(lambda x: PATester(x['Gen Pub Assist Case Number'],x['Housing Signed DHCI Form'],x['Pre-3/1/20 Elig Date?'],x["Housing Level of Service"],x['EligDateConstruct'],x['OpenedDateConstruct']),axis = 1)
         
         #Outcome Tester - date no outcome or outcome no date
         
