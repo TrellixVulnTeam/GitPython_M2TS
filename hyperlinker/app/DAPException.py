@@ -19,28 +19,28 @@ def DAPException():
 
 
         if test.iloc[0][0] == '':
-            data_xls = pd.read_excel(f,skiprows=2)
+            df = pd.read_excel(f,skiprows=2)
         else:
-            data_xls = pd.read_excel(f)
-        data_xls.fillna('',inplace=True)
+            df = pd.read_excel(f)
+        df.fillna('',inplace=True)
         
         def NoIDDelete(CaseID):
             if CaseID == '':
                 return 'No Case ID'
             else:
                 return str(CaseID)
-        data_xls['Matter/Case ID#'] = data_xls.apply(lambda x: NoIDDelete(x['Matter/Case ID#']), axis=1)
+        df['Matter/Case ID#'] = df.apply(lambda x: NoIDDelete(x['Matter/Case ID#']), axis=1)
         
-        data_xls = data_xls[data_xls['Matter/Case ID#'] != 'No Case ID']
+        df = df[df['Matter/Case ID#'] != 'No Case ID']
 
-        if 'Matter/Case ID#' not in data_xls.columns:
-            data_xls['Matter/Case ID#'] = data_xls['id']
+        if 'Matter/Case ID#' not in df.columns:
+            df['Matter/Case ID#'] = df['id']
 
-        last7 = data_xls['Matter/Case ID#'].apply(lambda x: x[-7:])
-        data_xls['Hyperlinked Case #']='=HYPERLINK("https://lsnyc.legalserver.org/matter/dynamic-profile/view/'+last7+'",'+ '"' + data_xls['Matter/Case ID#'] +'"' +')'
-        move = data_xls['Hyperlinked Case #']
-        del data_xls['Hyperlinked Case #']
-        data_xls.insert(0,'Hyperlinked Case #',move)           
+        last7 = df['Matter/Case ID#'].apply(lambda x: x[-7:])
+        df['Hyperlinked Case #']='=HYPERLINK("https://lsnyc.legalserver.org/matter/dynamic-profile/view/'+last7+'",'+ '"' + df['Matter/Case ID#'] +'"' +')'
+        move = df['Hyperlinked Case #']
+        del df['Hyperlinked Case #']
+        df.insert(0,'Hyperlinked Case #',move)           
         
         #Test if Social Security Number is Correctly Formatted
         
@@ -59,7 +59,7 @@ def DAPException():
             else:
                 return "Needs Correct SS # Format"
                 
-        data_xls['SS # Tester'] = data_xls.apply(lambda x: SSNum(x['S.S.N.']), axis=1)
+        df['SS # Tester'] = df.apply(lambda x: SSNum(x['S.S.N.']), axis=1)
         
         #Is there a DAP Income Type for every Case?
         
@@ -68,7 +68,7 @@ def DAPException():
                 return 'Needs DAP Income Type'
             else:
                 return ''
-        data_xls['DAP Income Type Tester'] = data_xls.apply(lambda x: DAPIncomeType(x['DAP Income Type']), axis=1)
+        df['DAP Income Type Tester'] = df.apply(lambda x: DAPIncomeType(x['DAP Income Type']), axis=1)
         
         #Test for blank 'DAP Problem Type'
         
@@ -78,7 +78,7 @@ def DAPException():
             else:
                 return ''
                 
-        data_xls ['DAP Legal Problem Tester'] = data_xls.apply(lambda x : DAPProblemTester(x['DAP Legal Problem']), axis=1)
+        df ['DAP Legal Problem Tester'] = df.apply(lambda x : DAPProblemTester(x['DAP Legal Problem']), axis=1)
         
         #Test for blank highest level of representation
         
@@ -88,7 +88,7 @@ def DAPException():
             else:
                 return ''
                 
-        data_xls ['DAP Level of Representation Tester'] = data_xls.apply(lambda x : DAPRepresentationTester(x['DAP Level Of Representation']), axis=1)
+        df ['DAP Level of Representation Tester'] = df.apply(lambda x : DAPRepresentationTester(x['DAP Level Of Representation']), axis=1)
         
         #Test if there's an ALJ Name for cases that have ALJ Hearings
         
@@ -97,17 +97,17 @@ def DAPException():
                 return 'Needs ALJ Name'
             else:
                 return ''
-        data_xls['DAP ALJ Name Tester'] = data_xls.apply(lambda x : ALJNameTester(x['DAP Level Of Representation'],x['DAP ALJ Name'],x['DAP Outcome']), axis = 1)
+        df['DAP ALJ Name Tester'] = df.apply(lambda x : ALJNameTester(x['DAP Level Of Representation'],x['DAP ALJ Name'],x['DAP Outcome']), axis = 1)
         
         
         #Convert LegalServer Names into Comprehensible Column Headers (only necessary if using old DAP legalserver report)
         
-        #data_xls['Received DIB?'] = data_xls['Custom - DAP Disability - Title II']
-        #data_xls['Received SSI?'] = data_xls['Custom - DAP SSI Title XVI']
-        #data_xls['Monthly DIB Award'] = data_xls['Custom - DAP Monthly Disability']
-        #data_xls['Monthly SSI Award'] = data_xls['Custom - DAP Monthly Social Security']
-        #data_xls['Retroactive Award'] = data_xls['Custom - DAP Retro Total']
-        #data_xls['Interim Assistance'] = data_xls['Custom - DAP Interim Deduction']
+        #df['Received DIB?'] = df['Custom - DAP Disability - Title II']
+        #df['Received SSI?'] = df['Custom - DAP SSI Title XVI']
+        #df['Monthly DIB Award'] = df['Custom - DAP Monthly Disability']
+        #df['Monthly SSI Award'] = df['Custom - DAP Monthly Social Security']
+        #df['Retroactive Award'] = df['Custom - DAP Retro Total']
+        #df['Interim Assistance'] = df['Custom - DAP Interim Deduction']
         
         
         #Test Monthly Award Amounts over 3k?
@@ -117,7 +117,7 @@ def DAPException():
                 return 'Needs to Confirm Monthly $ Amount'
             else:
                 return ''
-        data_xls ['Monthly Award Tester'] = data_xls.apply(lambda x : MonthlyAwardTester(x['Monthly SSI Award'],x['Monthly DIB Award']), axis = 1)        
+        df ['Monthly Award Tester'] = df.apply(lambda x : MonthlyAwardTester(x['Monthly SSI Award'],x['Monthly DIB Award']), axis = 1)        
         
         #Retro awards testing if they're over $100k
         
@@ -126,7 +126,7 @@ def DAPException():
                 return 'Needs to Confirm DAP Retro $ Amount'
             else:
                 return ''
-        data_xls ['Retro Award Tester'] = data_xls.apply(lambda x : RetroAwardTester(x['DAP Retroactive Award']), axis = 1)          
+        df ['Retro Award Tester'] = df.apply(lambda x : RetroAwardTester(x['DAP Retroactive Award']), axis = 1)          
                 
        
         
@@ -137,7 +137,7 @@ def DAPException():
                return 'Needs Outcome'
             else :
                return ''
-        data_xls ['Blank Outcome Tester'] = data_xls.apply(lambda x : BlankOutcomeTester(x['DAP Outcome']), axis = 1)
+        df ['Blank Outcome Tester'] = df.apply(lambda x : BlankOutcomeTester(x['DAP Outcome']), axis = 1)
         
         
         
@@ -145,7 +145,7 @@ def DAPException():
         
         NoBenefitsList = ['Short or other services','Client did not receive / retain benefits','Client withdrew/failed to return','Client won/did not receive any benefits','Case Remanded']
         
-        def DAPOutcomeTester (DAPOutcome,DAPRetro,DAPInterim,SSIMonthly,DIBMonthly,NoBenefitsList):
+        def DAPOutcomeTester (DAPOutcome,DAPRetro,DAPInterim,SSIMonthly,DIBMonthly,NoBenefitsList,LevelOfRep):
             if DAPOutcome in NoBenefitsList and DAPRetro > 0:
                 return 'Needs Higher Level Outcome'
             elif DAPOutcome in NoBenefitsList and DAPInterim > 0:
@@ -154,9 +154,11 @@ def DAPException():
                 return 'Needs Higher Level Outcome'
             elif DAPOutcome in NoBenefitsList and DIBMonthly > 0:
                 return 'Needs Higher Level Outcome'
+            elif LevelOfRep == 'ALJ Hearing' and DAPOutcome == 'Short or other services':
+                return 'Needs Higher Level Outcome'
             else :
                 return ''
-        data_xls ['DAP Outcome Tester'] = data_xls.apply(lambda x : DAPOutcomeTester(x['DAP Outcome'],x['DAP Retroactive Award'],x['Interim Assistance'],x['Monthly SSI Award'],x['Monthly DIB Award'],NoBenefitsList), axis = 1)
+        df ['DAP Outcome Tester'] = df.apply(lambda x : DAPOutcomeTester(x['DAP Outcome'],x['DAP Retroactive Award'],x['Interim Assistance'],x['Monthly SSI Award'],x['Monthly DIB Award'],NoBenefitsList,x['DAP Level Of Representation']), axis = 1)
         
         
         #if the outcome is monthly benefits then either DAP Monthly or SSI Monthly has to have $
@@ -168,7 +170,7 @@ def DAPException():
                 return 'Needs Monthly Benefits'
             else:
                 return ''
-        data_xls ['DAP Monthly Benefits Tester'] = data_xls.apply(lambda x : MonthlyBenefitsTester(x['DAP Outcome'],x['Monthly DIB Award'],x['Monthly SSI Award']),axis = 1)
+        df ['DAP Monthly Benefits Tester'] = df.apply(lambda x : MonthlyBenefitsTester(x['DAP Outcome'],x['Monthly DIB Award'],x['Monthly SSI Award']),axis = 1)
        
        
         #If the outcome says you got retro, must enter retro award $
@@ -179,7 +181,7 @@ def DAPException():
                 return "Needs Retro Award $"
             else:
                 return ''
-        data_xls ['DAP Retro Tester'] = data_xls.apply(lambda x : DAPRetroTester(x['DAP Outcome'],x['DAP Retroactive Award']),axis = 1)
+        df ['DAP Retro Tester'] = df.apply(lambda x : DAPRetroTester(x['DAP Outcome'],x['DAP Retroactive Award']),axis = 1)
         
         
         #if outcome = no benefits, then there should not be $ benefits
@@ -195,11 +197,11 @@ def DAPException():
                 return 'Should Not have $ Benefits with this Outcome'
             else :
                 return ''
-        data_xls ['No Benefits Tester'] = data_xls.apply(lambda x : NoBenefitsTester(x['DAP Outcome'],x['DAP Retroactive Award'],x['Interim Assistance'],x['Monthly SSI Award'],x['Monthly DIB Award'],NoBenefitsList), axis = 1)
+        df ['No Benefits Tester'] = df.apply(lambda x : NoBenefitsTester(x['DAP Outcome'],x['DAP Retroactive Award'],x['Interim Assistance'],x['Monthly SSI Award'],x['Monthly DIB Award'],NoBenefitsList), axis = 1)
         
         #Received SSI Tester
         
-        def SSITester (ReceivedSSI,SSIMonthly):
+        def SSITester (ReceivedSSI,SSIMonthly,ReceivedDIB,DAPOutcome):
             SSIMonthly = int(SSIMonthly)
             if ReceivedSSI == 'Yes' and SSIMonthly == 0:
                 return 'Needs SSI Award Amount'
@@ -208,21 +210,23 @@ def DAPException():
             else:
                 return ''
                 
-        data_xls ['SSI Tester'] = data_xls.apply(lambda x : SSITester(x['Received SSI?'],x['Monthly SSI Award']),axis = 1)
+        df ['SSI Tester'] = df.apply(lambda x : SSITester(x['Received SSI?'],x['Monthly SSI Award'],x['Received DIB?'],x['DAP Outcome']),axis = 1)
                 
         
         #Received DIB Tester
         
-        def DIBTester (ReceivedDIB,DIBMonthly):
+        def DIBTester (ReceivedDIB,DIBMonthly,ReceivedSSI,DAPOutcome):
             DIBMonthly = int(DIBMonthly)
             if ReceivedDIB == 'Yes' and DIBMonthly == 0:
                 return 'Needs DIB Award Amount'
             elif ReceivedDIB != 'Yes' and DIBMonthly > 0:
                 return 'Needs Received DIB? = Yes'
+            elif DAPOutcome == 'Client won/received only retroactive benefits' and ReceivedDIB != 'Yes' and ReceivedSSI != 'Yes':
+                return 'Needs Received DIB or SSI = Yes'
             else:
                 return ''
                 
-        data_xls ['DIB Tester'] = data_xls.apply(lambda x : DIBTester(x['Received DIB?'],x['Monthly DIB Award']),axis = 1)
+        df ['DIB Tester'] = df.apply(lambda x : DIBTester(x['Received DIB?'],x['Monthly DIB Award'],x['Received SSI?'],x['DAP Outcome']),axis = 1)
         
         #If Client withdrew - Do Not Report
         
@@ -232,7 +236,7 @@ def DAPException():
             else:
                 return ''
         
-        data_xls ['Withdrew Tester'] = data_xls.apply(lambda x : WithdrewTester(x['DAP Outcome']),axis = 1)
+        df ['Withdrew Tester'] = df.apply(lambda x : WithdrewTester(x['DAP Outcome']),axis = 1)
         
         #Tester Tester
         
@@ -242,13 +246,13 @@ def DAPException():
             else:
                 return 'Case Needs Attention'
                 
-        data_xls ['Case Attention Tester'] = data_xls.apply(lambda x: TesterTester(x['SS # Tester'],x['DAP Income Type Tester'],x['DAP Legal Problem Tester'],x['DAP Level of Representation Tester'],x['DAP ALJ Name Tester'],x['Monthly Award Tester'],x['Retro Award Tester'],x['Blank Outcome Tester'],x['DAP Outcome Tester'],x['DAP Monthly Benefits Tester'],x['DAP Retro Tester'],x['No Benefits Tester'],x['SSI Tester'],x['DIB Tester'],x['Withdrew Tester']), axis = 1)
+        df ['Case Attention Tester'] = df.apply(lambda x: TesterTester(x['SS # Tester'],x['DAP Income Type Tester'],x['DAP Legal Problem Tester'],x['DAP Level of Representation Tester'],x['DAP ALJ Name Tester'],x['Monthly Award Tester'],x['Retro Award Tester'],x['Blank Outcome Tester'],x['DAP Outcome Tester'],x['DAP Monthly Benefits Tester'],x['DAP Retro Tester'],x['No Benefits Tester'],x['SSI Tester'],x['DIB Tester'],x['Withdrew Tester']), axis = 1)
         
         #Columns for Formatted Report
         
-        data_xls['Agency'] = 'LS-NYC'
-        data_xls['Region'] = 'NYC'
-        data_xls['Agency Office'] = '0'
+        df['Agency'] = 'LS-NYC'
+        df['Region'] = 'NYC'
+        df['Agency Office'] = '0'
         
         
         def CaseSplicer (CaseID):
@@ -257,18 +261,18 @@ def DAPException():
                 return CaseID[1:3] + CaseID[7:]
             else:
                 return CaseID[0:2] + CaseID[4:]
-        data_xls['Case#'] = data_xls.apply(lambda x: CaseSplicer(x['Matter/Case ID#']), axis =1)
+        df['Case#'] = df.apply(lambda x: CaseSplicer(x['Matter/Case ID#']), axis =1)
         
-        data_xls['Case open date'] = data_xls['Date Opened']
-        data_xls['Case close date'] = data_xls['Date Closed']
-        data_xls['Client name'] = data_xls['Client Name']
-        data_xls['Client SS#'] = data_xls['S.S.N.']
-        data_xls['Client DOB'] = data_xls['Date of Birth']
-        data_xls['Client gender'] = data_xls['Gender']
-        data_xls['Client ethnicity'] = data_xls['Race']
-        data_xls['Client county'] = data_xls['County of Residence']
-        data_xls['Client ZIP code'] = data_xls['Zip Code']
-        data_xls['Client disabilities'] = ''
+        df['Case open date'] = df['Date Opened']
+        df['Case close date'] = df['Date Closed']
+        df['Client name'] = df['Client Name']
+        df['Client SS#'] = df['S.S.N.']
+        df['Client DOB'] = df['Date of Birth']
+        df['Client gender'] = df['Gender']
+        df['Client ethnicity'] = df['Race']
+        df['Client county'] = df['County of Residence']
+        df['Client ZIP code'] = df['Zip Code']
+        df['Client disabilities'] = ''
         
         #if dap income is DAP eligible w/out PA
         
@@ -278,7 +282,7 @@ def DAPException():
             else: 
                 return "F"
         
-        data_xls['Elig for PA w/o SSI/SSD'] = data_xls.apply(lambda x : EligforPA(x['DAP Income Type']),axis = 1)
+        df['Elig for PA w/o SSI/SSD'] = df.apply(lambda x : EligforPA(x['DAP Income Type']),axis = 1)
       
       #is it an old funding code 2070
       
@@ -288,7 +292,7 @@ def DAPException():
             else: 
                 return "F"
         
-        data_xls['DAP TANF'] = data_xls.apply(lambda x : DAPTANF(x['Primary Funding Codes']),axis = 1)
+        df['DAP TANF'] = df.apply(lambda x : DAPTANF(x['Primary Funding Codes']),axis = 1)
         
         def PATranslator(DAPIncomeType):
             if DAPIncomeType == "TANF":
@@ -299,7 +303,7 @@ def DAPException():
                 return "3"
             elif DAPIncomeType == "DAP eligible w/o PA" or DAPIncomeType == "Eligible for but not receiving PA":
                 return "4"
-        data_xls['PA category'] = data_xls.apply(lambda x : PATranslator(x['DAP Income Type']),axis=1)
+        df['PA category'] = df.apply(lambda x : PATranslator(x['DAP Income Type']),axis=1)
         
         def ReferralTranslator(ReferralType):
             if ReferralType == "Former Client":
@@ -312,7 +316,7 @@ def DAPException():
                 return "4"
             else:
                 return "5"
-        data_xls['Referral source'] = data_xls.apply(lambda x : ReferralTranslator(x['DAP Referral Source']),axis=1)
+        df['Referral source'] = df.apply(lambda x : ReferralTranslator(x['DAP Referral Source']),axis=1)
 
         
         #Local DSS placement
@@ -323,7 +327,7 @@ def DAPException():
             else: 
                 return ""
         
-        data_xls['DSS region'] = data_xls.apply(lambda x : LocalDSS(x['DAP Referral Source']),axis = 1)
+        df['DSS region'] = df.apply(lambda x : LocalDSS(x['DAP Referral Source']),axis = 1)
        
         def ProblemTranslator(DAPLegalProblem):
             if DAPLegalProblem == "No Problem":
@@ -334,7 +338,7 @@ def DAPException():
                 return "3"
             elif DAPLegalProblem == "Other":
                 return "4"
-        data_xls['SSI/SSD problem'] = data_xls.apply(lambda x : ProblemTranslator(x['DAP Legal Problem']),axis=1)
+        df['SSI/SSD problem'] = df.apply(lambda x : ProblemTranslator(x['DAP Legal Problem']),axis=1)
         
         
         def LevelTranslator(Level):
@@ -348,9 +352,9 @@ def DAPException():
                 return "D"
             elif Level == "Other":
                 return "E"
-        data_xls['Highest level of review'] = data_xls.apply(lambda x : LevelTranslator(x['DAP Level Of Representation']),axis=1)
+        df['Highest level of review'] = df.apply(lambda x : LevelTranslator(x['DAP Level Of Representation']),axis=1)
         
-        data_xls['ALJ name'] = data_xls['DAP ALJ Name']
+        df['ALJ name'] = df['DAP ALJ Name']
         
         def OutcomeTranslator(DAPOutcome):
             if DAPOutcome == "Client did not receive / retain benefits":
@@ -367,7 +371,7 @@ def DAPException():
                 return "6"
             elif DAPOutcome == "Client won/did not receive any benefits":
                 return "7"
-        data_xls['Outcome'] = data_xls.apply(lambda x : OutcomeTranslator(x['DAP Outcome']),axis=1)
+        df['Outcome'] = df.apply(lambda x : OutcomeTranslator(x['DAP Outcome']),axis=1)
         
         
         #Swap Yes for T and No for F
@@ -378,7 +382,7 @@ def DAPException():
                 return "F"
             else: 
                 return "F"
-        data_xls['Received DIB'] = data_xls.apply(lambda x : ReceivedDIB(x['Received DIB?']),axis = 1)
+        df['Received DIB'] = df.apply(lambda x : ReceivedDIB(x['Received DIB?']),axis = 1)
         
         def ReceivedSSI(ReceivedSSI):
             if ReceivedSSI == "Yes":
@@ -387,26 +391,26 @@ def DAPException():
                 return "F"
             else: 
                 return "F"
-        data_xls['Received SSI'] = data_xls.apply(lambda x : ReceivedSSI(x['Received SSI?']),axis = 1)
+        df['Received SSI'] = df.apply(lambda x : ReceivedSSI(x['Received SSI?']),axis = 1)
         
         
-        data_xls['Monthly DIB Award'] = data_xls['Monthly DIB Award'].replace('0',0)
-        data_xls['Monthly SSI Award'] = data_xls['Monthly SSI Award'].replace('0',0)
-        data_xls['DAP Retroactive Award'] = data_xls['DAP Retroactive Award'].replace('0',0)
-        data_xls['Interim Assistance'] = data_xls['Interim Assistance'].replace('0',0)
+        df['Monthly DIB Award'] = df['Monthly DIB Award'].replace('0',0)
+        df['Monthly SSI Award'] = df['Monthly SSI Award'].replace('0',0)
+        df['DAP Retroactive Award'] = df['DAP Retroactive Award'].replace('0',0)
+        df['Interim Assistance'] = df['Interim Assistance'].replace('0',0)
         
         
-        data_xls['DIB award amount'] = round(data_xls['Monthly DIB Award'])
-        data_xls['SSI award amount'] = round(data_xls['Monthly SSI Award'])
-        data_xls['Retroactive award amt'] = round(data_xls['DAP Retroactive Award'])
-        data_xls['Interim assistance amt'] = round(data_xls['Interim Assistance'])
+        df['DIB award amount'] = round(df['Monthly DIB Award'])
+        df['SSI award amount'] = round(df['Monthly SSI Award'])
+        df['Retroactive award amt'] = round(df['DAP Retroactive Award'])
+        df['Interim assistance amt'] = round(df['Interim Assistance'])
         #***these dollar values need to be rounded to nearest dollar
         
         
         
         #Ordering Spreadsheet Correctly
         
-        data_xls = data_xls[['Hyperlinked Case #','Assigned Branch/CC','Primary Advocate','Client Name',
+        df = df[['Hyperlinked Case #','Assigned Branch/CC','Primary Advocate','Client Name',
         'Case Attention Tester',
         'Withdrew Tester',
         'S.S.N.','SS # Tester',
@@ -454,7 +458,7 @@ def DAPException():
        
         ]]       
 
-        allgood_dictionary = dict(tuple(data_xls.groupby('Case Attention Tester')))
+        allgood_dictionary = dict(tuple(df.groupby('Case Attention Tester')))
         
         def save_xls(dict_df, path):
             writer = pd.ExcelWriter(path, engine = 'xlsxwriter')
