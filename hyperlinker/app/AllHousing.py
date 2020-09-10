@@ -177,8 +177,15 @@ def AllHousing():
 
         
         #Test Housing Services Rendered - can't be blank for closed cases that are full rep state or full rep federal(housing level of service)
-               
-        df['Housing Services Tester'] = df.apply(lambda x: HousingToolBox.ServicesTesterClean(x['Housing Services Rendered to Client'],x['Case Disposition'],x['Housing Level of Service'],x['Housing Type Of Case']), axis = 1)
+         
+        def ServicesTesterClean(HousingServices,Disposition,Level,Type):
+            
+            if Level == 'Representation - Admin. Agency' and HousingServices == '':
+                return 'Needs Services Rendered'
+            else:
+                return ''
+         
+        df['Housing Services Tester'] = df.apply(lambda x: ServicesTesterClean(x['Housing Services Rendered to Client'],x['Case Disposition'],x['Housing Level of Service'],x['Housing Type Of Case']), axis = 1)
         
         #Housing Type of Case Eviction-Types:
         evictiontypes = ['Holdover','Non-payment','Illegal Lockout']
@@ -324,7 +331,7 @@ def AllHousing():
                 return "No"
         df['Pre-3/1/20 Elig Date?'] = df.apply(lambda x: PreThreeOne(x['EligConstruct'],x['OpenedConstruct']), axis=1)
         
-        df['Needs Redacting Tester'] = df.apply(lambda x: HousingToolBox.NeedsRedactingTester(x['Housing Level of Service'],x['Pre-3/1/20 Elig Date?'],x['Funding Code Sorter']), axis=1)
+        df['Post-3/1 Limited Service Tester'] = df.apply(lambda x: HousingToolBox.NeedsRedactingTester(x['Housing Level of Service'],x['Pre-3/1/20 Elig Date?'],x['Funding Code Sorter']), axis=1)
 
         #CovidException testers to erase clean-up requests
 
@@ -375,13 +382,13 @@ def AllHousing():
         #Put everything in the right order
         
         df = df[['Hyperlinked CaseID#','Primary Advocate',
-        'Needs Redacting Tester',
+        'Post-3/1 Limited Service Tester',
         "HRA Release?","HAL Eligibility Date",'Release & Elig Tester',
         "Housing Type Of Case",'Housing Type Tester',
         "Housing Level of Service",'Housing Level Tester',
         "Housing Building Case?",'Building Case Tester',
         "Referral Source",'Referral Tester',
-        "Housing Total Monthly Rent",'Rent Tester',
+        #'Rent Tester',
         "Housing Number Of Units In Building",'Unit Tester',
         "Housing Form Of Regulation",'Regulation Tester',
         "Housing Subsidy Type",'Subsidy Tester',
@@ -419,6 +426,7 @@ def AllHousing():
         
        
         "Total Annual Income ",
+        "Housing Total Monthly Rent",
         "Housing Funding Note",
         
         "Date of Birth",
@@ -450,6 +458,7 @@ def AllHousing():
                 medium_problem_format = workbook.add_format({'bg_color':'orange'})
                 ws.set_column('A:A',20,link_format)
                 ws.set_column('B:ZZ',25)
+                ws.set_column('C:C',32)
                 ws.autofilter('B1:ZZ1')
                 ws.freeze_panes(1, 2)
                 ws.conditional_format('C2:BO100000',{'type': 'text',

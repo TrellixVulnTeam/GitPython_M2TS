@@ -11,7 +11,6 @@ def upload_TRCtallyCovid():
         f = request.files['file']
         data_xls = pd.read_excel(f)
         data_xls.fillna('',inplace=True)
-        
         data_xls['city'] = data_xls.apply(lambda x: DataWizardTools.QueensConsolidater(x['city']), axis = 1)
         data_xls['city'] = data_xls['city'].str.upper()
         data_xls['city'] = data_xls['city'].str.replace('NEW YORK','MANHATTAN')

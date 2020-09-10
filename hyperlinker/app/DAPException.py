@@ -207,6 +207,8 @@ def DAPException():
                 return 'Needs SSI Award Amount'
             elif ReceivedSSI != 'Yes' and SSIMonthly > 0:
                 return 'Needs Received SSI? = Yes'
+            elif DAPOutcome == 'Client won/received only retroactive benefits' and ReceivedDIB != 'Yes' and ReceivedSSI != 'Yes':
+                return 'Needs Received DIB or SSI = Yes'
             else:
                 return ''
                 
