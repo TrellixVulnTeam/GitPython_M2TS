@@ -258,7 +258,8 @@ def upload_TRCCovidClean():
         #"Assigned Branch/CC",
         "Tester Tester",
         'Pre-3/1/20 Elig Date?',
-        
+        'Assigned Branch/CC'
+
         ]]      
         
         #Preparing Excel Document
