@@ -77,8 +77,19 @@ def AllHousing():
         df['Rent Tester'] = ''
         
         #number of units in building can't be 0 or written with letters
-
-        df['Unit Tester'] = df.apply(lambda x: HousingToolBox.UnitsClean(x['Housing Number Of Units In Building']), axis=1)
+        def UnitsClean (Units):
+            if Units == 0:
+                return 'Needs Units'
+            elif Units < -1:
+                return "Needs Valid Unit #"
+            Units = str(Units)
+            if any(c.isalpha() for c in Units) == True:
+                return 'Needs To Be Number'
+            elif Units == "0":
+                return 'Needs Units'
+            else:
+                return ''
+        df['Unit Tester'] = df.apply(lambda x: UnitsClean(x['Housing Number Of Units In Building']), axis=1)
         
         #Housing form of regulation can't be blank
         df['Regulation Tester'] = df.apply(lambda x: HousingToolBox.RegulationClean(x['Housing Form Of Regulation']), axis=1)
@@ -92,18 +103,31 @@ def AllHousing():
         
         #Language Can't be Blank or Unknown
         df['Language Tester'] = df.apply(lambda x: HousingToolBox.LanguageClean(x['Language']), axis=1)
-        
-        
-        
-        
+
         
         #Housing Income Verification can't be blank or none and other stuff with kids and poverty level and you just give up if it's closed
         
         #df['Income Verification Tester'] = df.apply(lambda x: HousingToolBox.IncomeVerificationClean(x['Housing Income Verification'], x['Number of People under 18'], x['Percentage of Poverty'],x['Case Disposition']), axis=1)
         
         #Test if social security number is correct format (or ignore it if there's a valid PA number)
-     
-        df['SS # Tester'] = df.apply(lambda x: HousingToolBox.SSNumClean(x['Social Security #'],x['Gen Pub Assist Case Number']), axis=1)
+        
+        def SSNumClean (CaseNum):
+            CaseNum = str(CaseNum)
+            First3 = CaseNum[0:3]
+            Middle2 = CaseNum[4:6]
+            Last4 = CaseNum[7:11]
+            FirstDash = CaseNum[3:4]
+            SecondDash = CaseNum[6:7]
+
+            
+            if First3 == '000' and Middle2 == '00':
+                return 'Needs  Full SS#'
+            elif str.isnumeric(First3) == True and str.isnumeric(Middle2) == True and str.isnumeric(Last4) == True and FirstDash == '-' and SecondDash == '-': 
+                return ''
+            else:
+                return "Needs Correct SS # Format"
+                
+        df['SS # Tester'] = df.apply(lambda x: SSNumClean(x['Social Security #']), axis=1)
         
         
         #PA Tester (need to be correct format as well)
@@ -114,9 +138,9 @@ def AllHousing():
             LastCharacter = PANumber[-1:]
             PenultimateCharater = PANumber[-2:-1]
             SecondCharacter = PANumber [1:2]
-            #if SSTester == '':
-            #    return 'Unnecessary due to SS#'
-            if PANumber == '' or PANumber == 'None' or PANumber == 'NONE' or SecondCharacter == 'o' or SecondCharacter == 'n':
+            if SSTester == '':
+                return 'Unnecessary due to SS#'
+            elif PANumber == '' or PANumber == 'None' or PANumber == 'NONE' or SecondCharacter == 'o' or SecondCharacter == 'n':
                 return ''
             elif str.isdigit(PANumber) == True and len(PANumber) <= 9:
                 return ''
@@ -137,6 +161,18 @@ def AllHousing():
 
         
         df['PA # Tester'] = df.apply(lambda x: PATesterClean(x['Gen Pub Assist Case Number'],x['SS # Tester']), axis=1)
+        
+        #if PA # Tester is fine then SS# Tester doesn't matter
+        
+        def SSDoubleTester(SSTester, PATester, PANum):
+            PANum = str(PANum)
+            if PATester == '' and PANum != '' and len(PANum) >= 9:
+                return 'Unnecessary due to PA #'
+            else:
+                return SSTester
+        
+        df['SS # Tester'] = df.apply(lambda x: SSDoubleTester(x['SS # Tester'],x['PA # Tester'],x['Gen Pub Assist Case Number']),axis=1)
+        
         
         #Test if case number is correct format (don't need one if it's brief, advice, or out-of-court)
         
@@ -210,14 +246,15 @@ def AllHousing():
                 TodayDay = int(Today[3:5])
                 TodayYear = int(Today [6:])
                 
+                if TodayMonth == 1:
+                    TodayMonth = 13
+                
                 #BirthDateConstruct = int(BirthDateYear + BirthDateMonth + BirthDateDay)
                 #TodayConstruct = int(TodayYear + TodayMonth + TodayDay)
                 
                 if TodayYear - BirthDateYear > 62:
                     return "Yes"
-                elif TodayYear - BirthDateYear == 62 and TodayMonth > BirthDateMonth:
-                    return "Yes"
-                elif TodayYear - BirthDateYear == 62 and TodayMonth == BirthDateMonth and BirthDateDay > TodayDay:
+                elif TodayYear - BirthDateYear == 62 and TodayMonth - 1 >= BirthDateMonth:
                     return "Yes"
                 else: 
                     return "No"
@@ -259,26 +296,30 @@ def AllHousing():
         
         #Outcome Tester - needs outcome and date for eviction cases that are full rep at state or federal level (not admin)
         
-        def OutcomeTesterClean (Over62,Outcome,OutcomeDate,Level,Type):
+        def OutcomeTesterClean (Over62,Outcome,OutcomeDate,Level,Type,Disposition):
             
-            if Level in leveltypes and Type in evictiontypes:
+            if Level in leveltypes and Type in evictiontypes and Disposition == "Closed":
                 if Outcome == '' and OutcomeDate == '':
                     return 'Needs Outcome & Date'
                 elif  Outcome == '':
                     return 'Needs Outcome'
                 elif OutcomeDate == '':
                     return 'Needs Outcome Date'
-            elif Level in leveltypes and Over62 == "Yes" and Type == "NYCHA Housing Termination":
+                else:
+                    return ""
+            elif Level in leveltypes and Over62 == "Yes" and Type == "NYCHA Housing Termination" and Disposition == "Closed":
                 if Outcome == '' and OutcomeDate == '':
                     return 'Needs Outcome & Date'
                 elif  Outcome == '':
                     return 'Needs Outcome'
                 elif OutcomeDate == '':
                     return 'Needs Outcome Date'
+                else:
+                    return ""
             else:
                 return ''
         
-        df['Outcome Tester'] = df.apply(lambda x: OutcomeTesterClean(x['Over 62?'],x['Housing Outcome'],x['Housing Outcome Date'],x['Housing Level of Service'],x['Housing Type Of Case']), axis = 1)
+        df['Outcome Tester'] = df.apply(lambda x: OutcomeTesterClean(x['Over 62?'],x['Housing Outcome'],x['Housing Outcome Date'],x['Housing Level of Service'],x['Housing Type Of Case'],x['Case Disposition']), axis = 1)
         
 
         #Test if Poverty Percentage > 1000%
@@ -292,10 +333,43 @@ def AllHousing():
         
         #Test # of adults (can't be 0)
         
-        def AdultTester (HouseholdAdults):
-            if HouseholdAdults == 0:
-                return "Needs Over-18 Household Member"
-        df['Over-18 Tester'] = df.apply(lambda x: AdultTester(x['Number of People 18 and Over']), axis = 1)
+        def AdultTester (HouseholdAdults,BirthDate):
+            if BirthDate == '':
+                return 'Needs Date of Birth'
+            
+            elif BirthDate != '':
+                BirthDateMonth = int(BirthDate[:2])
+                BirthDateDay = int(BirthDate[3:5])
+                BirthDateYear = int(BirthDate[6:])
+                
+                Today = datetime.today()
+                Today = Today.strftime("%m/%d/%Y")
+                
+                TodayMonth = int(Today[:2])
+                TodayDay = int(Today[3:5])
+                TodayYear = int(Today [6:])
+                
+                if TodayMonth == 1:
+                    TodayMonth = 13
+                
+                #BirthDateConstruct = int(BirthDateYear + BirthDateMonth + BirthDateDay)
+                #TodayConstruct = int(TodayYear + TodayMonth + TodayDay)
+                
+                if TodayYear - BirthDateYear > 18:
+                    if HouseholdAdults == 0:
+                        return "Needs Over-18 Household Member"
+                    else:
+                        return ""
+                elif TodayYear - BirthDateYear == 18 and TodayMonth - 1 >= BirthDateMonth:
+                    if HouseholdAdults == 0:
+                        return "Needs Over-18 Household Member"
+                    else:
+                        return ""
+                else: 
+                    return "Client Needs to be Over 18"
+            else:
+                return ""
+        df['Over-18 Tester'] = df.apply(lambda x: AdultTester(x['Number of People 18 and Over'],x['Date of Birth']), axis = 1)
         
         #date of waiver approval & waiver categories - if there's something in one but not the other, then flag it. 
         
@@ -307,6 +381,17 @@ def AllHousing():
             else:
                 return ""
         df['Waiver Tester'] = df.apply(lambda x: WaiverTester(x['Housing TRC HRA Waiver Categories'],x['Housing Date Of Waiver Approval']), axis = 1)
+        
+        def FundingTester (PrimaryFunding,SecondaryFunding):
+            if PrimaryFunding == SecondaryFunding:
+                return ""
+            elif "3011" in SecondaryFunding or "3018" in SecondaryFunding or "3111" in SecondaryFunding or "3112" in SecondaryFunding or "3113" in SecondaryFunding or "3114" in SecondaryFunding or "3115" in SecondaryFunding or "3121" in SecondaryFunding or "3122" in SecondaryFunding or "3123" in SecondaryFunding or "3124" in SecondaryFunding or "3125" in SecondaryFunding:
+                return "Needs Funding Code Review"
+            else:
+                return ""
+            
+                
+        df['Funding Tester'] = df.apply(lambda x: FundingTester(x['Primary Funding Code'],x['Secondary Funding Codes']), axis = 1)
         
         
         #COVID Modifications - make the testers blank if it's an advice only pre-3/1 case!
@@ -322,9 +407,7 @@ def AllHousing():
                     return "No"
                 else:
                     return "Yes"
-                
-                
-                
+
             elif EligibilityDate < 20200301:
                 return "Yes"
             elif EligibilityDate >= 20200301:
@@ -368,9 +451,58 @@ def AllHousing():
         
         df['Release & Elig Tester'] = df.apply(lambda x: HousingToolBox.AllHousingRedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Release & Elig Tester'],x['Funding Code Sorter']), axis=1)
         
-        df['Housing Type Tester'] = df.apply(lambda x: HousingToolBox.AllHousingRedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Housing Type Tester'],x['Funding Code Sorter']), axis=1)
+        df['Building Case Tester'] = df.apply(lambda x: HousingToolBox.AllHousingRedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Building Case Tester'],x['Funding Code Sorter']), axis=1)
         
-
+        #Tester Tester
+        
+        def TesterTester(ReleaseEligTester,PostureTester,CaseNumberTester,HousingTypeTester,HousingLevelTester,BuildingCaseTester,ReferralTester,PATester,SSTester,UnitTester,RegulationTester,SubsidyTester,YearsAptTester,LanguageTester,HousingActivityTester,HousingServicesTester,OutcomeTester,OverEighteenTester,PovertyPercentTester,WaiverTester,FundingTester):
+            if "Needs" in ReleaseEligTester:
+                return "Needs Cleanup"
+            elif "Needs" in PostureTester:
+                return "Needs Cleanup"
+            elif "Needs" in CaseNumberTester:
+                return "Needs Cleanup"
+            elif "Needs" in HousingTypeTester:
+                return "Needs Cleanup"
+            elif "Needs" in HousingLevelTester:
+                return "Needs Cleanup"
+            elif "Needs" in BuildingCaseTester:
+                return "Needs Cleanup"
+            elif "Needs" in ReferralTester:
+                return "Needs Cleanup"
+            elif "Needs" in PATester:
+                return "Needs Cleanup"
+            elif "Needs" in SSTester:
+                return "Needs Cleanup"
+            elif "Needs" in UnitTester:
+                return "Needs Cleanup"
+            elif "Needs" in RegulationTester:
+                return "Needs Cleanup"
+            elif "Needs" in SubsidyTester:
+                return "Needs Cleanup"
+            elif "Needs" in YearsAptTester:
+                return "Needs Cleanup"
+            elif "Needs" in LanguageTester:
+                return "Needs Cleanup"
+            elif "Needs" in HousingActivityTester:
+                return "Needs Cleanup"
+            elif "Needs" in HousingServicesTester:
+                return "Needs Cleanup"
+            elif "Needs" in OutcomeTester:
+                return "Needs Cleanup"
+            elif "Needs" in OverEighteenTester:
+                return "Needs Cleanup"
+            elif "Needs" in PovertyPercentTester:
+                return "Needs Cleanup"
+            elif "Needs" in WaiverTester:
+                return "Needs Cleanup"
+            elif "Needs" in FundingTester:
+                return "Needs Cleanup"
+            else:
+                return ""
+        
+        
+        df['Tester Tester'] = df.apply(lambda x: TesterTester(x['Release & Elig Tester'],x['Posture Tester'],x['Case Number Tester'],x['Housing Type Tester'],x['Housing Level Tester'],x['Building Case Tester'],x['Referral Tester'],x['PA # Tester'],x['SS # Tester'],x['Unit Tester'],x['Regulation Tester'],x['Subsidy Tester'],x['Years in Apartment Tester'],x['Language Tester'],x['Housing Activity Tester'],x['Housing Services Tester'],x['Outcome Tester'],x['Over-18 Tester'],x['Poverty Percent Tester'],x['Waiver Tester'],x['Funding Tester']), axis = 1)
        
         
         #sort by case handler
@@ -381,61 +513,67 @@ def AllHousing():
         
         #Put everything in the right order
         
-        df = df[['Hyperlinked CaseID#','Primary Advocate',
-        'Post-3/1 Limited Service Tester',
-        "HRA Release?","HAL Eligibility Date",'Release & Elig Tester',
+        df = df[['Hyperlinked CaseID#',
+        "Assigned Branch/CC",
+        "Tester Tester",
+        'Primary Advocate',
+        "Date Opened",
+        "Date Closed",
+        "Client First Name",
+        "Client Last Name",
+        "Street Address",
+        "Apt#/Suite#",
+        "City",
+        "Zip Code",
+        "HRA Release?",
+        "HAL Eligibility Date",
+        'Release & Elig Tester',
+        "Housing Income Verification",
+        #'Income Verification Tester',
+        "Housing Posture of Case on Eligibility Date",'Posture Tester',
+        "Gen Case Index Number",'Case Number Tester',  
         "Housing Type Of Case",'Housing Type Tester',
         "Housing Level of Service",'Housing Level Tester',
+        "Close Reason",
         "Housing Building Case?",'Building Case Tester',
-        "Referral Source",'Referral Tester',
+        "Primary Funding Code",
+        "Secondary Funding Codes",
+        "Funding Tester",
+        "Housing Total Monthly Rent",
         #'Rent Tester',
+        "Referral Source",'Referral Tester',
+        "Gen Pub Assist Case Number",'PA # Tester',
+        "Social Security #","SS # Tester",
         "Housing Number Of Units In Building",'Unit Tester',
         "Housing Form Of Regulation",'Regulation Tester',
         "Housing Subsidy Type",'Subsidy Tester',
         "Housing Years Living In Apartment",'Years in Apartment Tester',
         "Language",'Language Tester',
-        "Housing Posture of Case on Eligibility Date",'Posture Tester',
-        "Housing Income Verification",
-        #'Income Verification Tester',
-        "Gen Pub Assist Case Number",'PA # Tester',
-        "Gen Case Index Number",'Case Number Tester',  
-        "Social Security #","SS # Tester",
         "Housing Activity Indicators",'Housing Activity Tester',
         "Housing Services Rendered to Client",'Housing Services Tester',
         "Housing Outcome",'Outcome Tester',"Housing Outcome Date",
-        "Poverty Percent Tester","Percentage of Poverty",
-        "Waiver Tester","Housing Date Of Waiver Approval",
-        "Housing TRC HRA Waiver Categories",
-        
-        "Over-18 Tester","Number of People 18 and Over","Number of People under 18",
-        
-        
-        'Pre-3/1/20 Elig Date?',
-
-        "Date Opened",
-        "Date Closed",
-        "Client First Name",
-        
-        "Client Last Name",
-        #"Street Address",
-        "City",
-        "Zip Code",
-        "Close Reason",
-        
-        "Primary Funding Code",
-        
-       
-        "Total Annual Income ",
-        "Housing Total Monthly Rent",
-        "Housing Funding Note",
-        
+        "Assigned Branch/CC",
+        "Number of People 18 and Over","Number of People under 18","Over-18 Tester",
         "Date of Birth",
         "Over 62?",
-        #"Apt#/Suite#",
-        "Legal Problem Code","Case Disposition",
-        "Assigned Branch/CC",
-        #"Tester Tester",
+        "Percentage of Poverty","Poverty Percent Tester",
+        "Case Disposition",
+        "Housing Date Of Waiver Approval","Housing TRC HRA Waiver Categories","Waiver Tester",
+        "IOLA Outcome",
+        "Housing Signed DHCI Form",
+        "Income Types",
+        "Total Annual Income ",
+        "Housing Funding Note",
+        "Total Time For Case",
+        "Service Date",
+        "Caseworker Name",
+        "Retainer on File Compliance",
+        "Retainer on File",
+        "Case Involves Covid-19",
+        "Legal Problem Code",
         "Agency",
+        'Post-3/1 Limited Service Tester'
+        
 
         ]]      
         
@@ -464,6 +602,10 @@ def AllHousing():
                 ws.conditional_format('C2:BO100000',{'type': 'text',
                                                  'criteria': 'containing',
                                                  'value': 'No Release - Remove Elig Date',
+                                                 'format': bad_problem_format})
+                ws.conditional_format('AM2:AM100000',{'type': 'text',
+                                                 'criteria': 'containing',
+                                                 'value': 'Valid',
                                                  'format': bad_problem_format})
                 ws.conditional_format('C2:BO100000',{'type': 'text',
                                                  'criteria': 'containing',

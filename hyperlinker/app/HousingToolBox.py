@@ -629,9 +629,9 @@ def NeedsRedactingTester(LevelOfService, PreThreeOne,FundingCodeSorter):
         return ""
         
       
-def TRCRedactForCovid(LevelOfService, PreThreeOne, ToRedact):
+def TRCRedactForCovid(LevelOfService, PreThreeOne, ToRedact,PrimaryFunding):
             LevelOfService = str(LevelOfService)
-            if LevelOfService.startswith("Advice") == True and PreThreeOne == "No" and ToRedact != "":
+            if LevelOfService.startswith("Advice") == True and PreThreeOne == "No" and ToRedact != "" and PrimaryFunding != "3011 TRC FJC Initiative":
                 return ""
 
             else:   
