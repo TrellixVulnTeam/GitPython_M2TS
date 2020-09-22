@@ -499,7 +499,7 @@ def AllHousing():
             elif "Needs" in FundingTester:
                 return "Needs Cleanup"
             else:
-                return ""
+                return "No Cleanup Necessary"
         
         
         df['Tester Tester'] = df.apply(lambda x: TesterTester(x['Release & Elig Tester'],x['Posture Tester'],x['Case Number Tester'],x['Housing Type Tester'],x['Housing Level Tester'],x['Building Case Tester'],x['Referral Tester'],x['PA # Tester'],x['SS # Tester'],x['Unit Tester'],x['Regulation Tester'],x['Subsidy Tester'],x['Years in Apartment Tester'],x['Language Tester'],x['Housing Activity Tester'],x['Housing Services Tester'],x['Outcome Tester'],x['Over-18 Tester'],x['Poverty Percent Tester'],x['Waiver Tester'],x['Funding Tester']), axis = 1)
@@ -509,6 +509,7 @@ def AllHousing():
         
         df = df.sort_values(by=['Primary Advocate'])
         df = df.sort_values(by=['Assigned Branch/CC'])
+        df = df.sort_values(by=['Tester Tester'])
         
         
         #Put everything in the right order
@@ -615,6 +616,43 @@ def AllHousing():
                                                  'criteria': 'containing',
                                                  'value': 'Tester',
                                                  'format': problem_format})
+                                                 
+                ws.conditional_format('C1:BO1',{'type': 'text',
+                                                 'criteria': 'containing',
+                                                 'value': 'Zip Code',
+                                                 'format': medium_problem_format})
+                ws.conditional_format('C1:BO1',{'type': 'text',
+                                                 'criteria': 'containing',
+                                                 'value': 'Housing Type Of Case',
+                                                 'format': medium_problem_format})                                 
+                ws.conditional_format('C1:BO1',{'type': 'text',
+                                                 'criteria': 'containing',
+                                                 'value': 'Gen Case Index Number',
+                                                 'format': medium_problem_format})
+                ws.conditional_format('C1:BO1',{'type': 'text',
+                                                 'criteria': 'containing',
+                                                 'value': 'Language',
+                                                 'format': medium_problem_format})
+                ws.conditional_format('C1:BO1',{'type': 'text',
+                                                 'criteria': 'containing',
+                                                 'value': 'Total Annual Income',
+                                                 'format': medium_problem_format})
+                ws.conditional_format('C1:BO1',{'type': 'text',
+                                                 'criteria': 'containing',
+                                                 'value': 'HAL Eligibility Date',
+                                                 'format': medium_problem_format})
+                ws.conditional_format('C1:BO1',{'type': 'text',
+                                                 'criteria': 'containing',
+                                                 'value': 'Housing Level of Service',
+                                                 'format': medium_problem_format})
+                ws.conditional_format('C1:BO1',{'type': 'text',
+                                                 'criteria': 'containing',
+                                                 'value': 'Housing Level of Service',
+                                                 'format': medium_problem_format})
+                ws.conditional_format('C1:BO1',{'type': 'text',
+                                                 'criteria': 'containing',
+                                                 'value': 'Percentage of Poverty',
+                                                 'format': medium_problem_format})
                 ws.conditional_format('C2:BO100000',{'type': 'text',
                                                  'criteria': 'containing',
                                                  'value': 'Must Have DHCI or PA#',
