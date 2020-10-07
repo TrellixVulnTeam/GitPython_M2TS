@@ -190,16 +190,30 @@ def ComplianceConsolidater():
                  
         df['Active Advocate Tester'] = df.apply(lambda x : ActiveAdvocateTester(x['Login Active']),axis=1)
         
+        #Case needs a retainer if it's closed with higher level of service than A or B
+        
+        def RetainerTester(Retainer,CloseReason,LevelOfService,CaseStatus):
+            if Retainer == 'Yes' or CaseStatus == 'Assigned Pro Bono':
+                return ''
+            elif CloseReason.startswith('F') == True or CloseReason.startswith('G') == True or CloseReason.startswith('H') == True or CloseReason.startswith('IA') == True or CloseReason.startswith('IB') == True or CloseReason.startswith('IC') == True or CloseReason.startswith('L') == True:
+                return 'Needs Retainer'
+            elif LevelOfService.startswith('Representation')== True:
+                return 'Needs Retainer'
+            else:
+                return ''
+        df['Retainer Tester'] = df.apply(lambda x : RetainerTester(x['Retainer on File'],x['Close Reason'],x['Level of Service'],x['Case Status']),axis=1)
+        
+        
         
         #also add in code related to checking the boxes they check if something has been compliance-reviewed
         
         #Make a tester tester
-        def TesterTester(NoAssistanceTester,AgeTester,TwoHundredPercentTester,OneTwentyFivePercentTester,LSCCSRTester,NoAgeTester,UntimelyClosedTester,UntimelyClosedOverriddenTester,CitImmTester,ActAdvTester):
-            if NoAssistanceTester != "" or AgeTester != "" or TwoHundredPercentTester != "" or OneTwentyFivePercentTester != "" or LSCCSRTester != "" or NoAgeTester != "" or UntimelyClosedTester != "" or UntimelyClosedOverriddenTester != "" or CitImmTester != "" or ActAdvTester != "":
+        def TesterTester(NoAssistanceTester,AgeTester,TwoHundredPercentTester,OneTwentyFivePercentTester,LSCCSRTester,NoAgeTester,UntimelyClosedTester,UntimelyClosedOverriddenTester,CitImmTester,ActAdvTester,RetainerTester):
+            if NoAssistanceTester != "" or AgeTester != "" or TwoHundredPercentTester != "" or OneTwentyFivePercentTester != "" or LSCCSRTester != "" or NoAgeTester != "" or UntimelyClosedTester != "" or UntimelyClosedOverriddenTester != "" or CitImmTester != "" or ActAdvTester != "" or RetainerTester != "":
                 return "Needs Review"
             else:
                 return ""
-        df['Tester Tester'] = df.apply(lambda x : TesterTester(x['No Legal Assistance Documented Tester'],x['No Time Entered for 90 Days Tester'],x['200% of Poverty Tester'],x['125-200% of Poverty Tester'],x['Funding Code 4000 Tester'],x['No Age for Client Tester'],x['Untimely Closed Tester'],x['Untimely Closed Overridden Tester'],x['Citizenship & Immigration Tester'],x['Active Advocate Tester']),axis=1)        
+        df['Tester Tester'] = df.apply(lambda x : TesterTester(x['No Legal Assistance Documented Tester'],x['No Time Entered for 90 Days Tester'],x['200% of Poverty Tester'],x['125-200% of Poverty Tester'],x['Funding Code 4000 Tester'],x['No Age for Client Tester'],x['Untimely Closed Tester'],x['Untimely Closed Overridden Tester'],x['Citizenship & Immigration Tester'],x['Active Advocate Tester'],x['Retainer Tester']),axis=1)        
         
         #remove cases that don't need compliance review
         df = df[df['Tester Tester'] == "Needs Review"]
@@ -207,7 +221,7 @@ def ComplianceConsolidater():
         
         #Putting everything in the right order
         
-        df = df[['Hyperlinked CaseID#','Assigned Branch/CC','Primary Advocate Name','Client First Name','Client Last Name','No Legal Assistance Documented Tester','No Time Entered for 90 Days Tester','200% of Poverty Tester','125-200% of Poverty Tester','Funding Code 4000 Tester','No Age for Client Tester','Untimely Closed Tester','Untimely Closed Overridden Tester','Citizenship & Immigration Tester','Active Advocate Tester','Caseworker Name','Compliance Check Untimely Closed','Compliance Check Untimely Closed Overwritten','Compliance Check 125 to 200 Poverty Income Ineligible','Compliance Check 200 Poverty Income Eligible','Compliance Check Citizenship and Immigration','Attestation on File?','Staff Verified Non-Citizenship Documentation','Did any Staff Meet Client in Person?','Close Reason','Date Closed','CSR: Is Legal Assistance Documented?','Age in Days','Percentage of Poverty','LSC Eligible?','CSR Eligible','Income Eligible','Primary Funding Codes','Secondary Funding Codes','DOB Information','Group','CSR: Timely Closing?','Was Timely Closed overridden?']]
+        df = df[['Hyperlinked CaseID#','Assigned Branch/CC','Primary Advocate Name','Client First Name','Client Last Name','No Legal Assistance Documented Tester','No Time Entered for 90 Days Tester','200% of Poverty Tester','125-200% of Poverty Tester','Funding Code 4000 Tester','No Age for Client Tester','Untimely Closed Tester','Untimely Closed Overridden Tester','Citizenship & Immigration Tester','Active Advocate Tester','Retainer Tester','Caseworker Name','Compliance Check Untimely Closed','Compliance Check Untimely Closed Overwritten','Compliance Check 125 to 200 Poverty Income Ineligible','Compliance Check 200 Poverty Income Eligible','Compliance Check Citizenship and Immigration','Attestation on File?','Staff Verified Non-Citizenship Documentation','Did any Staff Meet Client in Person?','Close Reason','Date Closed','CSR: Is Legal Assistance Documented?','Age in Days','Percentage of Poverty','LSC Eligible?','CSR Eligible','Income Eligible','Primary Funding Codes','Secondary Funding Codes','DOB Information','Group','CSR: Timely Closing?','Was Timely Closed overridden?','Case Status','Level of Service','Retainer on File']]
         
         
         
@@ -236,10 +250,10 @@ def ComplianceConsolidater():
                 #Add column header data back in
                 for col_num, value in enumerate(df.columns.values):
                     worksheet.write(0, col_num, value, header_format)
-                worksheet.autofilter('A1:O1')
+                worksheet.autofilter('A1:P1')
                 worksheet.set_column('A:A',15,link_format)
-                worksheet.set_column('B:O',20)
-                worksheet.set_column('P:ZZ',0)
+                worksheet.set_column('B:P',20)
+                worksheet.set_column('Q:ZZ',0)
                 worksheet.set_row(0,60)
                 worksheet.write_comment('F1',
                     'No Legal Assistance Documented: If we close a case as something other than ZZ, we must have some documentation of the legal assistance provided. For these, whoever closed the case may have misunderstood the meaning of “legal assistance” or “documented.” Please review and add the legal assistance documented in case notes. If there was no legal assistance, change the closing code to ZZ.',
@@ -270,6 +284,9 @@ def ComplianceConsolidater():
                     {'height':70,'width':500})
                 worksheet.write_comment('O1',
                     'Active Advocate Tester: These are cases for which the Primary Advocate does not have an active user profile in LegalServer. All Cases must be assigned to a currently-active case handler',
+                    {'height':70,'width':500})
+                worksheet.write_comment('P1',
+                    'Retainer Tester: Cases that have a Close Reason showing more than Advice/Brief Service, or a Level of Service indicating representation has been provided must have retainers.',
                     {'height':70,'width':500})
                     
                 worksheet.conditional_format('D2:BO100000',{'type': 'text',

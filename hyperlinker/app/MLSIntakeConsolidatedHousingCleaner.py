@@ -169,6 +169,15 @@ def MLSIntakeConsolidatedHousingCleaner():
         
         "Housing Outcome",
         "Housing Outcome Date",
+        
+        "Primary Funding Code",
+        "Service Date",
+        "Combined Notes",
+        "Activity Details",
+        "Total Time For Case",
+        
+        
+        
         "Tester Tester",
         "Assigned Branch/CC",
         "Intake Paralegal"

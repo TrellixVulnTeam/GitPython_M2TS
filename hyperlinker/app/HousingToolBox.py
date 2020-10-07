@@ -10,6 +10,16 @@ leveltypes = ['Representation - State Court','Representation - Federal Court']
 
 #Functions to Help with TRC/UAHPLP Cleanup
 
+
+def NonHousingTester (ProblemCode, EligConstruct):
+    if EligConstruct != '':
+        if ProblemCode.startswith('6') != True and EligConstruct > 20200930:
+            return 'Needs Review'
+        else:
+            return ''
+    else:
+        return ''
+
 #Has to have an HRA Release
 def HRAReleaseClean (HRARelease,EligibilityDate):
     if HRARelease == 'No' and EligibilityDate != '':

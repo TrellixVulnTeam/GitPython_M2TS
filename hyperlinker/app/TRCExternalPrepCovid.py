@@ -126,14 +126,12 @@ def TRCExternalPrepCovid():
         
         df['Pre-3/1/20 Elig Date?'] = df.apply(lambda x: HousingToolBox.PreThreeOne(x['DateConstruct']), axis=1)
         
-        #Flag cases that don't have housing-based legal problem codes for Kim's review
+        #Flag cases that don't have housing-based legal problem codes for Kim's review, after 9/30
         
-        def NonHousingIdentifier(LegalProblemCode):
-            if LegalProblemCode.startswith(('0','7')) == True:
-                return "Needs Review"
-            else:
-                return ""
-        df['Non-Housing Case?'] = df.apply(lambda x: NonHousingIdentifier(x['Legal Problem Code']), axis=1)
+    
+        df['Non-Housing Case Tester'] = df.apply(lambda x: HousingToolBox.NonHousingTester(x['Legal Problem Code'],x['Date Construct']), axis=1)
+        
+      
         
         ##different guidelines for post 3/1/20 eligibility dates
         ##If case is advice and has a post-3/1 eligibility date
@@ -266,7 +264,7 @@ def TRCExternalPrepCovid():
         'Hyperlinked CaseID#',
         'Pre-3/1/20 Elig Date?',
         'Legal Problem Code',
-        'Non-Housing Case?',
+        'Non-Housing Case Tester',
         'Primary Funding Code'
         ]]
         
