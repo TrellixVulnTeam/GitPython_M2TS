@@ -40,8 +40,12 @@ def upload_TRCCovidClean():
         df['HRA Release Tester'] = df.apply(lambda x: HousingToolBox.HRAReleaseClean(x['HRA Release?'],x['HAL Eligibility Date']), axis=1)
         
         #Has to have a Housing Type of Case
-        
-        df['Housing Type Tester'] = df.apply(lambda x: HousingToolBox.HousingTypeClean(x['Housing Type Of Case']), axis=1)
+        def HousingTypeClean (HousingType,ProblemCode):
+            if HousingType == '' and ProblemCode.startswith('6') == True:
+                return 'Needs Housing Type of Case'
+            else:
+                return ''
+        df['Housing Type Tester'] = df.apply(lambda x: HousingTypeClean(x['Housing Type Of Case'],x['Legal Problem Code']), axis=1)
         
         #Has to have a Housing Level of Service 
 
@@ -86,7 +90,7 @@ def upload_TRCCovidClean():
        
         #PA Tester (need to be correct format as well)
                 
-        df['PA # Tester'] = df.apply(lambda x: HousingToolBox.PATesterClean(x['Gen Pub Assist Case Number']), axis=1)
+        #df['PA # Tester'] = df.apply(lambda x: HousingToolBox.PATesterClean(x['Gen Pub Assist Case Number']), axis=1)
         
         #Test if case number is correct format (don't need one if it's brief, advice, or out-of-court)
         
@@ -94,8 +98,24 @@ def upload_TRCCovidClean():
         
         #Test if social security number is correct format (or ignore it if there's a valid PA number)
         
+        def SSNumClean (CaseNum):
+            CaseNum = str(CaseNum)
+            First3 = CaseNum[0:3]
+            Middle2 = CaseNum[4:6]
+            Last4 = CaseNum[7:11]
+            FirstDash = CaseNum[3:4]
+            SecondDash = CaseNum[6:7]
+            
+            if First3 == '000' and Middle2 == '00' and Last4 == '0000':
+                return ''
+            elif First3 == '000' and Middle2 == '00':
+                return 'Needs  Full SS#'
+            elif str.isnumeric(First3) == True and str.isnumeric(Middle2) == True and str.isnumeric(Last4) == True and FirstDash == '-' and SecondDash == '-': 
+                return ''
+            else:
+                return "Needs Correct SS # Format"
                 
-        df['SS # Tester'] = df.apply(lambda x: HousingToolBox.SSNumClean(x['Social Security #'],x['Gen Pub Assist Case Number']), axis=1)
+        df['SS # Tester'] = df.apply(lambda x: SSNumClean(x['Social Security #']), axis=1)
         
         #Test Housing Activity Indicator - can't be blank for closed cases that are full rep state or full rep federal(housing level of service) and eviction cases(housing type of case: non-payment holdover illegal lockout nycha housing termination)
        
@@ -112,7 +132,7 @@ def upload_TRCCovidClean():
         #Could you flag when the form of regulation and/or LPC is public housing when the case is neither 3011 or does not have a referral source of Family Justice Center or HRA? also, only for post 9/1/20 eligibility date cases
         
         df['DateConstruct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['HAL Eligibility Date']), axis=1)
-        
+        """
         def PublicHousingTester(ProblemCode, FormOfRegulation, FundingCode, ReferralSource, EligDate):
             if EligDate != '':
                 if int(EligDate) >= 20200901:
@@ -130,10 +150,21 @@ def upload_TRCCovidClean():
             else: 
                 return ''
         df['Public Housing Review Tester'] = df.apply(lambda x: PublicHousingTester(x['Legal Problem Code'],x['Housing Form Of Regulation'],x['Primary Funding Code'],x['Referral Source'],x['DateConstruct']),axis = 1)        
-       
+        """
         
-        
-        df['Non-Housing Case Tester']  = df.apply(lambda x: HousingToolBox.NonHousingTester(x['Legal Problem Code'],x['DateConstruct']),axis = 1)
+        def NonHousingTester (ProblemCode, EligConstruct, FundingCode, ReferralSource):
+            if ProblemCode.startswith('6') == True or ProblemCode.startswith('0') == True:
+                return ''
+            elif FundingCode.startswith('3011') == True or ReferralSource.startswith('FJC') == True:
+                return ''
+            elif EligConstruct != '':
+                if EligConstruct > 20200930:
+                    return 'Needs Review'
+                else:
+                    return ''
+            else:
+                return ''
+        df['Non-Housing Case Tester']  = df.apply(lambda x: NonHousingTester(x['Legal Problem Code'],x['DateConstruct'],x['Primary Funding Code'],x['Referral Source']),axis = 1)
         
         #COVID Modifications - make the testers blank if it's an advice only pre-3/1 case!
         
@@ -146,7 +177,7 @@ def upload_TRCCovidClean():
         #CovidException testers to erase clean-up requests
 
         
-        df['PA # Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['PA # Tester'],x['Primary Funding Code']), axis=1)
+        #df['PA # Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['PA # Tester'],x['Primary Funding Code']), axis=1)
         
         df['SS # Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['SS # Tester'],x['Primary Funding Code']), axis=1)
         
@@ -176,9 +207,9 @@ def upload_TRCCovidClean():
         
         df['HRA Release Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['HRA Release Tester'],x['Primary Funding Code']), axis=1)
         
-        df['Housing Type Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Housing Type Tester'],x['Primary Funding Code']), axis=1)
+        #df['Housing Type Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Housing Type Tester'],x['Primary Funding Code']), axis=1)
         
-        
+        """
         #DuplicateTester
         #add client name and birth year and eligiblity date into one ID string
         #identify duplicates based on ID string
@@ -208,19 +239,19 @@ def upload_TRCCovidClean():
                     
             tdf = tdf.append(y)
         df = tdf
-        
+        """
        
-       #***make it so that duplicates only show up if there's an eligibility date
+        #***make it so that duplicates only show up if there's an eligibility date
     
         #Is everything okay with a case? 
 
-        def TesterTester (ReleaseTester,TypeTester,LevelTester,BuildingTester,ReferralTester,RentTester,UnitTester,RegulationTester,SubsidyTester,YearsTester,LanguageTester,PostureTester,IncomeVerification,PATester,CaseNumberTester,SSTester,ActivityTester,ServicesTester,OutcomeTester,EligibilityDate,DuplicateTally,PublicHousingTester,NonHousingTester):
-            if ReleaseTester == '' and TypeTester == '' and LevelTester == '' and BuildingTester == '' and ReferralTester == '' and RentTester == '' and UnitTester == '' and RegulationTester == '' and SubsidyTester == '' and YearsTester == '' and LanguageTester == '' and PostureTester == '' and IncomeVerification == '' and PATester == '' and CaseNumberTester == '' and SSTester == '' and ActivityTester == '' and ServicesTester == '' and OutcomeTester == '' and DuplicateTally == '' and PublicHousingTester == '' and EligibilityDate != '' and NonHousingTester != '':
+        def TesterTester (ReleaseTester,TypeTester,LevelTester,BuildingTester,ReferralTester,RentTester,UnitTester,RegulationTester,SubsidyTester,YearsTester,LanguageTester,PostureTester,IncomeVerification,CaseNumberTester,SSTester,ActivityTester,ServicesTester,OutcomeTester,EligibilityDate,NonHousingTester):
+            if ReleaseTester == '' and TypeTester == '' and LevelTester == '' and BuildingTester == '' and ReferralTester == '' and RentTester == '' and UnitTester == '' and RegulationTester == '' and SubsidyTester == '' and YearsTester == '' and LanguageTester == '' and PostureTester == '' and IncomeVerification == '' and CaseNumberTester == '' and SSTester == '' and ActivityTester == '' and ServicesTester == '' and OutcomeTester == '' and EligibilityDate != '' and NonHousingTester != '':
                 return 'No Cleanup Necessary'
             else:
                 return 'Case Needs Attention'
             
-        df['Tester Tester'] = df.apply(lambda x: TesterTester(x['HRA Release Tester'],x['Housing Type Tester'],x['Housing Level Tester'],x['Building Case Tester'],x['Referral Tester'],x['Rent Tester'],x['Unit Tester'],x[ 'Regulation Tester'],x['Subsidy Tester'],x['Years in Apartment Tester'],x['Language Tester'],x['Posture Tester'],x['Income Verification Tester'],x['PA # Tester'],x['Case Number Tester'],x['SS # Tester'],x['Housing Activity Tester'],x['Housing Services Tester'],x['Outcome Tester'],x['HAL Eligibility Date'],x['Duplicate Tester'],x['Public Housing Review Tester'],x['Non-Housing Case Tester']),axis=1)
+        df['Tester Tester'] = df.apply(lambda x: TesterTester(x['HRA Release Tester'],x['Housing Type Tester'],x['Housing Level Tester'],x['Building Case Tester'],x['Referral Tester'],x['Rent Tester'],x['Unit Tester'],x[ 'Regulation Tester'],x['Subsidy Tester'],x['Years in Apartment Tester'],x['Language Tester'],x['Posture Tester'],x['Income Verification Tester'],x['Case Number Tester'],x['SS # Tester'],x['Housing Activity Tester'],x['Housing Services Tester'],x['Outcome Tester'],x['HAL Eligibility Date'],x['Non-Housing Case Tester']),axis=1)
         
         
         
@@ -259,7 +290,8 @@ def upload_TRCCovidClean():
         "Housing Subsidy Type",'Subsidy Tester',
         "Housing Years Living In Apartment",'Years in Apartment Tester',
         "Language",'Language Tester',
-        "Gen Pub Assist Case Number",'PA # Tester',
+        "Gen Pub Assist Case Number",
+        #'PA # Tester',
         "Social Security #","SS # Tester",
         "Referral Source",'Referral Tester',
         "Housing Activity Indicators",'Housing Activity Tester',
@@ -270,14 +302,14 @@ def upload_TRCCovidClean():
         "Percentage of Poverty",
         "Total Annual Income ",
         "Total Annual Income ",
-        'Public Housing Review Tester',
+        #'Public Housing Review Tester',
         "Housing Date Of Waiver Approval",
         "Housing TRC HRA Waiver Categories",
         "Date of Birth",
         "Apt#/Suite#","Legal Problem Code","Case Disposition",
-        'DupEligID',
+        #'DupEligID',
         #'DuplicatedClient&EligDate?Bool',
-        'Duplicate Tester',
+        #'Duplicate Tester',
         'Non-Housing Case Tester',
         #"Assigned Branch/CC",
         "Tester Tester",
