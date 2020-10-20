@@ -129,7 +129,7 @@ def TRCExternalPrepCovid():
         #Flag cases that don't have housing-based legal problem codes for Kim's review, after 9/30
         
     
-        df['Non-Housing Case Tester'] = df.apply(lambda x: HousingToolBox.NonHousingTester(x['Legal Problem Code'],x['Date Construct']), axis=1)
+        df['Non-Housing Case Tester'] = df.apply(lambda x: HousingToolBox.NonHousingTester(x['Legal Problem Code'],x['DateConstruct']), axis=1)
         
       
         

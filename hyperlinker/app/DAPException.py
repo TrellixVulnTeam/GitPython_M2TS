@@ -154,8 +154,8 @@ def DAPException():
                 return 'Needs Higher Level Outcome'
             elif DAPOutcome in NoBenefitsList and DIBMonthly > 0:
                 return 'Needs Higher Level Outcome'
-            elif LevelOfRep == 'ALJ Hearing' and DAPOutcome == 'Short or other services':
-                return 'Needs Higher Level Outcome'
+            #elif LevelOfRep == 'ALJ Hearing' and DAPOutcome == 'Short or other services':
+            #    return 'Needs Higher Level Outcome'
             else :
                 return ''
         df ['DAP Outcome Tester'] = df.apply(lambda x : DAPOutcomeTester(x['DAP Outcome'],x['DAP Retroactive Award'],x['Interim Assistance'],x['Monthly SSI Award'],x['Monthly DIB Award'],NoBenefitsList,x['DAP Level Of Representation']), axis = 1)
@@ -271,7 +271,10 @@ def DAPException():
         df['Client SS#'] = df['S.S.N.']
         df['Client DOB'] = df['Date of Birth']
         df['Client gender'] = df['Gender']
-        df['Client ethnicity'] = df['Race']
+        
+        
+        df['Client ethnicity'] = df['Race'].str.replace('Latina/o','Hispanic')
+        
         df['Client county'] = df['County of Residence']
         df['Client ZIP code'] = df['Zip Code']
         df['Client disabilities'] = ''
