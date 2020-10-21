@@ -178,6 +178,8 @@ def upload_UAHPLPCovidClean():
         
         df['Housing Type Tester'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['Housing Type Tester']), axis=1)
         
+        df['Building Case Tester'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['Building Case Tester']), axis=1)
+        
     
         #Is everything okay with a case? 
 
