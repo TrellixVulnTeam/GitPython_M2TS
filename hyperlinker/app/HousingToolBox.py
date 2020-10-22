@@ -470,8 +470,6 @@ def TRCServiceType(LevelOfService,LegalProblemCode):
         return "Advice Only"
     elif LegalProblemCode.startswith("3") == True or LegalProblemCode.startswith("5") == True or LegalProblemCode.startswith("7") == True:
         return "Advice Only"
-    elif LegalProblemCode.startswith("0") == True:
-        return "Needs Review"
     elif LevelOfService == "Brief Service" or LevelOfService == "Out-of-Court Advocacy" or LevelOfService == "Hold For Review":
         return "Pre-Litigation Strategies"
     elif LevelOfService == "Representation - Admin. Agency" or LevelOfService == "Representation-EOIR" or LevelOfService == "Representation - Federal Court" or LevelOfService == "Representation - State Court":
