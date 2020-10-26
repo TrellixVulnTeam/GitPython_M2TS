@@ -39,10 +39,8 @@ def upload_TRCtallyCovid():
                 return 1
             elif service_type.startswith("Advice Only") == True and referral_source == 'Family Justice Center':
                 return 1
-            elif service_type.startswith("Advice Only") == True and PreThreeOne == "Yes":
+            elif service_type.startswith("Advice Only") == True:
                 return .25
-            elif service_type.startswith("Advice Only") == True and PreThreeOne == "No":
-                return 1
             elif caseid == '':
                 return ''
             else:
