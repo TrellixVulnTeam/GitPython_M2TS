@@ -121,7 +121,7 @@ def MLSIntakeConsolidatedHousingCleaner():
         #assign casehandlers to Intake Paralegals:
         
         Evelyn_Casehandlers = ['Allen, Sharette','Delgadillo, Omar','Heller, Steven E','Latterner, Matt J','Robles-Castillo, Camila J','Tilyayeva, Rakhil','Almanzar, Yocari']
-        Dianas_Casehandlers = ['Abbas, Sayeda','Basu, Shantonu J','Evers, Erin C.','Hao, Lindsay','He, Ricky','Shah, Ami Mahendra','Sharma, Sagar','Spencer, Eleanor G','Wilkes, Nicole','Allen, Sharette','Duffy-Greaves, Kevin','Freeman, Daniel A','Frierson, Jerome C','Gokhale, Aparna S','Gonzalez, Matias','Gonzalez, Matias G','Ortiz, Matthew B','Sun, Dao','Labossiere, Samantha J.']
+        Dianas_Casehandlers = ['Abbas, Sayeda','Basu, Shantonu J','Evers, Erin C.','Hao, Lindsay','He, Ricky','Shah, Ami Mahendra','Sharma, Sagar','Spencer, Eleanor G','Wilkes, Nicole','Allen, Sharette','Duffy-Greaves, Kevin','Freeman, Daniel A','Frierson, Jerome C','Gokhale, Aparna S','Gonzalez, Matias','Gonzalez, Matias G','Ortiz, Matthew B','Sun, Dao','Labossiere, Samantha J.','Risener, Jennifer A','Orsini, Mary K']
         Keiannis_Casehandlers = ['Almanzar, Milagros','Briggs, John M','Dittakavi, Archana','Gonzalez-Munoz, Rossana G','Honan, Thomas J','James, Lelia','Kelly, Kitanya','Mottley, Darlene','Vega, Rita','Yamasaki, Emily Woo J','McCune, Mary']
         Dennis_Casehandlers = ['Braudy, Erica','Kulig, Jessica M','Mercedes, Jannelys J']
         Rosa_Casehandlers = ['Acron, Denise D','Anunkor, Ifeoma O','Reyes, Nicole V']
@@ -234,7 +234,7 @@ def MLSIntakeConsolidatedHousingCleaner():
     </form>
     <h3>Instructions:</h3>
     <ul type="disc">
-    <li>This tool is meant to be used in conjunction with the LegalServer report called <a href="https://lsnyc.legalserver.org/report/dynamic?load=2314" target="_blank">MLS Consolidated Housing Cleanup Report</a>.</li>
+    <li>This tool is meant to be used in conjunction with the LegalServer report called <a href="https://lsnyc.legalserver.org/report/dynamic?load=2315" target="_blank">MLS Consolidated Housing Cleanup Report</a>.</li>
     
    
     </br>
