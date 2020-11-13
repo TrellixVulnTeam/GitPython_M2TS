@@ -154,7 +154,7 @@ def TRCExternalPrepCovid():
         #Only have to report birth year 
         def RedactBirthday(ServiceType, PreThreeOne,DOB,PrimaryFunding):
             if ServiceType == "Advice Only" and PreThreeOne == "No" and PrimaryFunding != "3011 TRC FJC Initiative":
-                return "01/01/"+ DOB[6:]
+                return DOB[6:]
             else:
                 return DOB
         df['DOB'] = df.apply(lambda x: RedactBirthday(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['Date of Birth'],x['Primary Funding Code']), axis=1)

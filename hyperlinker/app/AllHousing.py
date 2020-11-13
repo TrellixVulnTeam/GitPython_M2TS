@@ -166,7 +166,10 @@ def AllHousing():
         
         def SSDoubleTester(SSTester, PATester, PANum):
             PANum = str(PANum)
-            if PATester == '' and PANum != '' and len(PANum) >= 9:
+            SecondCharacter = PANum [1:2]
+            if PANum == '' or PANum == 'None' or PANum == 'NONE' or SecondCharacter == 'o' or SecondCharacter == 'n':
+                return SSTester
+            elif PATester == '' and len(PANum) >= 9:
                 return 'Unnecessary due to PA #'
             else:
                 return SSTester
@@ -324,12 +327,12 @@ def AllHousing():
 
         #Test if Poverty Percentage > 1000%
         
-        def PovertyPercentTester (PovertyPercent):
-            if PovertyPercent > 1000:
+        def PovertyPercentTester (PovertyPercent,WaiverCategory):
+            if PovertyPercent > 1000 and WaiverCategory != "Income Waiver":
                 return "Needs Income Review"
             else:
                 return ""
-        df['Poverty Percent Tester'] = df.apply(lambda x: PovertyPercentTester(x['Percentage of Poverty']), axis = 1)
+        df['Poverty Percent Tester'] = df.apply(lambda x: PovertyPercentTester(x['Percentage of Poverty'],x['Housing TRC HRA Waiver Categories']), axis = 1)
         
         #Test # of adults (can't be 0)
         
@@ -395,7 +398,7 @@ def AllHousing():
         
         
         #COVID Modifications - make the testers blank if it's an advice only pre-3/1 case!
-        
+        """
         #Differentiate pre- and post- 3/1/20 eligibility date cases
            
         df['EligConstruct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['HAL Eligibility Date']), axis=1)
@@ -403,56 +406,76 @@ def AllHousing():
         
         def PreThreeOne(EligibilityDate,OpenedDate):
             if isinstance(EligibilityDate, int) == False:
-                if OpenedDate >= 20200701:
-                    return "No"
-                else:
-                    return "Yes"
-
+                return 'Eligbility Date Missing'
             elif EligibilityDate < 20200301:
                 return "Yes"
             elif EligibilityDate >= 20200301:
                 return "No"
         df['Pre-3/1/20 Elig Date?'] = df.apply(lambda x: PreThreeOne(x['EligConstruct'],x['OpenedConstruct']), axis=1)
         
-        df['Post-3/1 Limited Service Tester'] = df.apply(lambda x: HousingToolBox.NeedsRedactingTester(x['Housing Level of Service'],x['Pre-3/1/20 Elig Date?'],x['Funding Code Sorter']), axis=1)
+        
+        def NeedsRedactingTester(LevelOfService,PreThreeOne,FundingCodeSorter,LegalProblemCode,EligDate,DateOpened):
+            if isinstance(EligDate, int) == False:
+                EligDate = 0            
+                
+                if DateOpened >= 20200301 and LevelOfService.startswith("Advice") == True:
+                    return "Needs Redacting"
+                elif DateOpened >= 20200301 and LevelOfService.startswith("Brief") == True and FundingCodeSorter == "UAHPLP":
+                    return "Needs Redacting"
+                elif LegalProblemCode.startswith("6") == False and DateOpened <= 20200930 and DateOpened >= 20200301:
+                    return "Needs Redacting"
+                else:
+                    return ""
+            elif LevelOfService.startswith("Advice") == True and PreThreeOne == "No":
+                return "Needs Redacting"
+            elif LevelOfService.startswith("Brief") == True and PreThreeOne == "No" and FundingCodeSorter == "UAHPLP":
+                return "Needs Redacting"
+            elif LegalProblemCode.startswith("6") == False and EligDate <= 20200930 and EligDate >= 20200301:
+                return "Needs Redacting"
+            else:
+                return ""
+        df['Post-3/1 Limited Service Tester'] = df.apply(lambda x: NeedsRedactingTester(x['Housing Level of Service'],x['Pre-3/1/20 Elig Date?'],x['Funding Code Sorter'],x['Legal Problem Code'],x['EligConstruct'],x['OpenedConstruct']), axis=1)
 
         #CovidException testers to erase clean-up requests
 
+        def AllHousingRedactForCovid(LimitedServiceTester, ToRedact):
+            if LimitedServiceTester == "Needs Redacting":
+                return ""
+            else:   
+                return ToRedact
         
-        df['PA # Tester'] = df.apply(lambda x: HousingToolBox.AllHousingRedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['PA # Tester'],x['Funding Code Sorter']), axis=1)
+        df['PA # Tester'] = df.apply(lambda x: AllHousingRedactForCovid(x['Post-3/1 Limited Service Tester'], x['PA # Tester']), axis=1)
         
-        df['SS # Tester'] = df.apply(lambda x: HousingToolBox.AllHousingRedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['SS # Tester'],x['Funding Code Sorter']), axis=1)
+        df['SS # Tester'] = df.apply(lambda x: AllHousingRedactForCovid(x['Post-3/1 Limited Service Tester'], x['SS # Tester']), axis=1)
         
-        df['Case Number Tester'] = df.apply(lambda x: HousingToolBox.AllHousingRedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Case Number Tester'],x['Funding Code Sorter']), axis=1)
+        df['Case Number Tester'] = df.apply(lambda x: AllHousingRedactForCovid(x['Post-3/1 Limited Service Tester'], x['Case Number Tester']), axis=1)
         
-        df['Rent Tester'] = df.apply(lambda x: HousingToolBox.AllHousingRedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Rent Tester'],x['Funding Code Sorter']), axis=1)
-        
+        df['Rent Tester'] = df.apply(lambda x: AllHousingRedactForCovid(x['Post-3/1 Limited Service Tester'], x['Rent Tester']), axis=1)       
        
         
-        df['Years in Apartment Tester'] = df.apply(lambda x: HousingToolBox.AllHousingRedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Years in Apartment Tester'],x['Funding Code Sorter']), axis=1)
+        df['Years in Apartment Tester'] = df.apply(lambda x: AllHousingRedactForCovid(x['Post-3/1 Limited Service Tester'], x['Years in Apartment Tester']), axis=1)
         
-        df['Referral Tester'] = df.apply(lambda x: HousingToolBox.AllHousingRedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Referral Tester'],x['Funding Code Sorter']), axis=1)
+        df['Referral Tester'] = df.apply(lambda x: AllHousingRedactForCovid(x['Post-3/1 Limited Service Tester'], x['Referral Tester']), axis=1)
+
         
-        #df['Income Verification Tester'] = df.apply(lambda x: HousingToolBox.AllHousingRedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Income Verification Tester'],x['Funding Code Sorter']), axis=1)
+        df['Posture Tester'] = df.apply(lambda x: AllHousingRedactForCovid(x['Post-3/1 Limited Service Tester'], x['Posture Tester']), axis=1)
         
-        df['Posture Tester'] = df.apply(lambda x: HousingToolBox.AllHousingRedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Posture Tester'],x['Funding Code Sorter']), axis=1)
+        df['Unit Tester'] = df.apply(lambda x: AllHousingRedactForCovid(x['Post-3/1 Limited Service Tester'], x['Unit Tester']), axis=1)
         
-        df['Unit Tester'] = df.apply(lambda x: HousingToolBox.AllHousingRedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Unit Tester'],x['Funding Code Sorter']), axis=1)
+        df['Regulation Tester'] = df.apply(lambda x: AllHousingRedactForCovid(x['Post-3/1 Limited Service Tester'], x['Regulation Tester']), axis=1)
         
-        df['Regulation Tester'] = df.apply(lambda x: HousingToolBox.AllHousingRedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Regulation Tester'],x['Funding Code Sorter']), axis=1)
+        df['Subsidy Tester'] = df.apply(lambda x: AllHousingRedactForCovid(x['Post-3/1 Limited Service Tester'], x['Subsidy Tester']), axis=1)
         
-        df['Subsidy Tester'] = df.apply(lambda x: HousingToolBox.AllHousingRedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Subsidy Tester'],x['Funding Code Sorter']), axis=1)
+        df['Outcome Tester'] = df.apply(lambda x: AllHousingRedactForCovid(x['Post-3/1 Limited Service Tester'], x['Outcome Tester']), axis=1)
         
-        df['Outcome Tester'] = df.apply(lambda x: HousingToolBox.AllHousingRedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Outcome Tester'],x['Funding Code Sorter']), axis=1)
+        df['Housing Services Tester'] = df.apply(lambda x: AllHousingRedactForCovid(x['Post-3/1 Limited Service Tester'], x['Housing Services Tester']), axis=1)
         
-        df['Housing Services Tester'] = df.apply(lambda x: HousingToolBox.AllHousingRedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Housing Services Tester'],x['Funding Code Sorter']), axis=1)
+        df['Housing Activity Tester'] = df.apply(lambda x: AllHousingRedactForCovid(x['Post-3/1 Limited Service Tester'], x['Housing Activity Tester']), axis=1)
         
-        df['Housing Activity Tester'] = df.apply(lambda x: HousingToolBox.AllHousingRedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Housing Activity Tester'],x['Funding Code Sorter']), axis=1)
+        df['Release & Elig Tester'] = df.apply(lambda x: AllHousingRedactForCovid(x['Post-3/1 Limited Service Tester'], x['Release & Elig Tester']), axis=1)
         
-        df['Release & Elig Tester'] = df.apply(lambda x: HousingToolBox.AllHousingRedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Release & Elig Tester'],x['Funding Code Sorter']), axis=1)
-        
-        df['Building Case Tester'] = df.apply(lambda x: HousingToolBox.AllHousingRedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Building Case Tester'],x['Funding Code Sorter']), axis=1)
-        
+        df['Building Case Tester'] = df.apply(lambda x: AllHousingRedactForCovid(x['Post-3/1 Limited Service Tester'], x['Building Case Tester']), axis=1)
+        """
         #Tester Tester
         
         def TesterTester(ReleaseEligTester,PostureTester,CaseNumberTester,HousingTypeTester,HousingLevelTester,BuildingCaseTester,ReferralTester,PATester,SSTester,UnitTester,RegulationTester,SubsidyTester,YearsAptTester,LanguageTester,HousingActivityTester,HousingServicesTester,OutcomeTester,OverEighteenTester,PovertyPercentTester,WaiverTester,FundingTester):
@@ -573,7 +596,7 @@ def AllHousing():
         "Case Involves Covid-19",
         "Legal Problem Code",
         "Agency",
-        'Post-3/1 Limited Service Tester'
+        #'Post-3/1 Limited Service Tester'
         
 
         ]]      
@@ -594,7 +617,7 @@ def AllHousing():
                 regular_format = workbook.add_format({'font_color':'black'})
                 problem_format = workbook.add_format({'bg_color':'yellow'})
                 bad_problem_format = workbook.add_format({'bg_color':'red'})
-                medium_problem_format = workbook.add_format({'bg_color':'orange'})
+                medium_problem_format = workbook.add_format({'bg_color':'cyan'})
                 ws.set_column('A:A',20,link_format)
                 ws.set_column('B:ZZ',25)
                 ws.set_column('C:C',32)
@@ -651,7 +674,7 @@ def AllHousing():
                                                  'format': medium_problem_format})
                 ws.conditional_format('C1:BO1',{'type': 'text',
                                                  'criteria': 'containing',
-                                                 'value': 'Percentage of Poverty',
+                                                 'value': 'Funding Code',
                                                  'format': medium_problem_format})
                 ws.conditional_format('C2:BO100000',{'type': 'text',
                                                  'criteria': 'containing',

@@ -168,9 +168,9 @@ def UAHPLPExternalPrepCovid():
         #Only have to report birth year 
         def RedactBirthday(ServiceType, PreThreeOne,DOB):
             if ServiceType == "Advice Only" and PreThreeOne == "No":
-                return "01/01/"+ DOB[6:]
+                return DOB[6:]
             if ServiceType == "Brief Legal Assistance" and PreThreeOne == "No":
-                return "01/01/"+ DOB[6:]
+                return DOB[6:]
             else:
                 return DOB
         df['DOB'] = df.apply(lambda x: RedactBirthday(x['service_type'], x['Pre-3/1/20 Elig Date?'], x['Date of Birth']), axis=1)

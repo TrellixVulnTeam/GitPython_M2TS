@@ -29,6 +29,14 @@ def ComplianceConsolidater():
         df['Matter/Case ID#'] = df.apply(lambda x : DataWizardTools.RemoveNoCaseID(x['Matter/Case ID#']),axis=1)        
         df = df[df['Matter/Case ID#'] != 'No Case ID']
         
+        #Checkbox determines if it does lsu or all non-LSU
+        if request.form.get('LSU'):
+            df = df[df['Assigned Branch/CC'] == "Legal Support Unit"]
+        else:
+            df = df[df['Assigned Branch/CC'] != "Legal Support Unit"]
+        
+        
+        
         #Create Hyperlinks
         df['Hyperlinked CaseID#'] = df.apply(lambda x : DataWizardTools.Hyperlinker(x['Matter/Case ID#']),axis=1)     
         
@@ -192,8 +200,8 @@ def ComplianceConsolidater():
         
         #Case needs a retainer if it's closed with higher level of service than A or B
         
-        def RetainerTester(Retainer,CloseReason,LevelOfService,CaseStatus):
-            if Retainer == 'Yes' or CaseStatus == 'Assigned Pro Bono':
+        def RetainerTester(Retainer,CloseReason,LevelOfService,PAICase):
+            if Retainer == 'Yes' or PAICase == 'Yes':
                 return ''
             elif CloseReason.startswith('F') == True or CloseReason.startswith('G') == True or CloseReason.startswith('H') == True or CloseReason.startswith('IA') == True or CloseReason.startswith('IB') == True or CloseReason.startswith('IC') == True or CloseReason.startswith('L') == True:
                 return 'Needs Retainer'
@@ -201,7 +209,7 @@ def ComplianceConsolidater():
                 return 'Needs Retainer'
             else:
                 return ''
-        df['Retainer Tester'] = df.apply(lambda x : RetainerTester(x['Retainer on File'],x['Close Reason'],x['Level of Service'],x['Case Status']),axis=1)
+        df['Retainer Tester'] = df.apply(lambda x : RetainerTester(x['Retainer on File'],x['Close Reason'],x['Level of Service'],x['PAI Case?']),axis=1)
         
         
         
@@ -221,10 +229,44 @@ def ComplianceConsolidater():
         
         #Putting everything in the right order
         
-        df = df[['Hyperlinked CaseID#','Assigned Branch/CC','Primary Advocate Name','Client First Name','Client Last Name','No Legal Assistance Documented Tester','No Time Entered for 90 Days Tester','200% of Poverty Tester','125-200% of Poverty Tester','Funding Code 4000 Tester','No Age for Client Tester','Untimely Closed Tester','Untimely Closed Overridden Tester','Citizenship & Immigration Tester','Active Advocate Tester','Retainer Tester','Caseworker Name','Compliance Check Untimely Closed','Compliance Check Untimely Closed Overwritten','Compliance Check 125 to 200 Poverty Income Ineligible','Compliance Check 200 Poverty Income Eligible','Compliance Check Citizenship and Immigration','Attestation on File?','Staff Verified Non-Citizenship Documentation','Did any Staff Meet Client in Person?','Close Reason','Date Closed','Date Opened','CSR: Is Legal Assistance Documented?','Age in Days','Percentage of Poverty','LSC Eligible?','CSR Eligible','Income Eligible','Primary Funding Codes','Secondary Funding Codes','DOB Information','Group','CSR: Timely Closing?','Was Timely Closed overridden?','Case Status','Level of Service','Retainer on File']]
+        df = df[['Hyperlinked CaseID#','Assigned Branch/CC','Primary Advocate Name','Client First Name','Client Last Name','No Legal Assistance Documented Tester','No Time Entered for 90 Days Tester','200% of Poverty Tester','125-200% of Poverty Tester','Funding Code 4000 Tester','No Age for Client Tester','Untimely Closed Tester','Untimely Closed Overridden Tester','Citizenship & Immigration Tester','Active Advocate Tester','Retainer Tester','Caseworker Name','Compliance Check Untimely Closed','Compliance Check Untimely Closed Overwritten','Compliance Check 125 to 200 Poverty Income Ineligible','Compliance Check 200 Poverty Income Eligible','Compliance Check Citizenship and Immigration','Attestation on File?','Staff Verified Non-Citizenship Documentation','Did any Staff Meet Client in Person?','Close Reason','Date Closed','Date Opened','CSR: Is Legal Assistance Documented?','Age in Days','Percentage of Poverty','LSC Eligible?','CSR Eligible','Income Eligible','Primary Funding Codes','Secondary Funding Codes','DOB Information','Group','CSR: Timely Closing?','Was Timely Closed overridden?','Case Status','PAI Case?','Level of Service','Retainer on File']]
         
         
         
+        #LSU Splitter:
+        
+        ProBonoList = [
+        "Cardenas, Lizeth",
+        "Chua, Janice W",
+        "Heintz, Adam J",
+        "McCormick, James H",
+        "Morales-Robinson, Ana Y.",
+        "Sahai, Chelsea E"]
+        
+        VeronicaList = ["Cook, Veronica J"]
+        EdList = ["Josephson, Edward"]
+        ImmigrationList = ["Chen, Rex J"]
+        BankruptcyList = ["Kransdorf, William Z","Miranda, Stephanie"]
+        IntakeList = ["Eagan, Emilie A."]
+        
+        def TabSplitter(PrimaryAdvocate):
+            if PrimaryAdvocate in ProBonoList:
+                return "Pro Bono"
+            elif PrimaryAdvocate in EdList:
+                return "Ed"
+            elif PrimaryAdvocate in ImmigrationList:
+                return "Immigration"
+            elif PrimaryAdvocate in BankruptcyList:
+                return "Bankruptcy"
+            elif PrimaryAdvocate in IntakeList:
+                return "Intake"
+            elif PrimaryAdvocate in VeronicaList:
+                return "Veronica"
+            else:
+                return "Not LSU"
+        
+        if request.form.get('LSU'):
+            df['Assigned Branch/CC'] = df.apply(lambda x : TabSplitter(x['Primary Advocate Name']),axis = 1)
         
         #Preparing Excel Document
 
@@ -252,7 +294,8 @@ def ComplianceConsolidater():
                     worksheet.write(0, col_num, value, header_format)
                 worksheet.autofilter('A1:P1')
                 worksheet.set_column('A:A',15,link_format)
-                worksheet.set_column('B:P',20)
+                worksheet.set_column('C:P',20)
+                worksheet.set_column('B:B',0)
                 worksheet.set_column('Q:ZZ',0)
                 worksheet.set_row(0,60)
                 worksheet.write_comment('F1',
@@ -313,6 +356,12 @@ def ComplianceConsolidater():
     <h1>Summary of Compliance Reports</h1>
     <form action="" method=post enctype=multipart/form-data>
     <p><input type=file name=file><input type=submit value=Comply!!>
+    
+    </br>
+    </br>
+    <input type="checkbox" id="LSU" name="LSU" value="LSU">
+    <label for="LSU"> LSU Compliance</label><br>
+    
     </form>
     <h3>Instructions:</h3>
     <ul type="disc">
