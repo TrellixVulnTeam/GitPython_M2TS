@@ -167,7 +167,7 @@ def AllHousing():
         def SSDoubleTester(SSTester, PATester, PANum):
             PANum = str(PANum)
             SecondCharacter = PANum [1:2]
-            if PANum == '' or PANum == 'None' or PANum == 'NONE' or SecondCharacter == 'o' or SecondCharacter == 'n':
+            if PANum == '' or PANum == 'None' or PANum == 'NONE' or SecondCharacter == 'o' or SecondCharacter == 'n' or PANum == '000000000':
                 return SSTester
             elif PATester == '' and len(PANum) >= 9:
                 return 'Unnecessary due to PA #'
