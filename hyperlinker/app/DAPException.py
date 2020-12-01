@@ -274,6 +274,8 @@ def DAPException():
         
         
         df['Client ethnicity'] = df['Race'].str.replace('Latina/o','Hispanic')
+        df['Client ethnicity'] = df['Client ethnicity'].str.replace('Self-Identified/Other','Other')
+        df['Client ethnicity'] = df['Client ethnicity'].str.replace('Native American/American Indian','Native American')
         
         df['Client county'] = df['County of Residence']
         df['Client ZIP code'] = df['Zip Code']

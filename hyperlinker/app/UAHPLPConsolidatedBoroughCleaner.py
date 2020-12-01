@@ -146,8 +146,9 @@ def UAHPLPConsolidatedBoroughCleaner():
         
         
         "Gen Pub Assist Case Number",
-        "Housing Signed DHCI Form",
-
+        
+        "Housing Income Verification",
+        #"Housing Signed DHCI Form",
         
         "Housing Outcome",
         "Housing Outcome Date",
