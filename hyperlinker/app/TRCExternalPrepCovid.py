@@ -161,8 +161,9 @@ def TRCExternalPrepCovid():
         
         #DHCI Blank
         def RedactAnything(ServiceType, PreThreeOne, ToRedact, PrimaryFunding, ProblemCode, Consent):
-            if ProblemCode.startswith('6') == False and Consent == 'Yes':
-                return ToRedact
+            
+            if ProblemCode.startswith('6') == False and ServiceType == 'Advice Only' and PrimaryFunding != "3011 TRC FJC Initiative":
+                return ""
             elif ServiceType == "Advice Only" and PreThreeOne == "No" and PrimaryFunding != "3011 TRC FJC Initiative":
                 return ""
             else:
