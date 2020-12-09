@@ -41,9 +41,7 @@ def upload_TRCDuplicateIdentifier():
         #identify duplicates based on ID string
         #make new column identifying repeat values
         
-        df['DupEligID'] = df["Client First Name"]+df["Client Last Name"]+df["Date of Birth"] +df["HAL Eligibility Date"] + df["Gen Case Index Number"].astype(str) + df["Housing Level of Service"] + df["Housing Type Of Case"]
-        
-        
+        df['DupEligID'] = df["Client First Name"]+df["Client Last Name"]+df["Date of Birth"] +df["HAL Eligibility Date"]
         
         df['DuplicatedClient&EligDate?Bool'] = df.duplicated(['DupEligID'])
         
