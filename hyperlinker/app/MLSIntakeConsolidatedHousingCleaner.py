@@ -120,8 +120,8 @@ def MLSIntakeConsolidatedHousingCleaner():
 
         #assign casehandlers to Intake Paralegals:
         
-        Evelyn_Casehandlers = ['Allen, Sharette','Delgadillo, Omar','Heller, Steven E','Latterner, Matt J','Robles-Castillo, Camila J','Tilyayeva, Rakhil','Almanzar, Yocari']
-        Dianas_Casehandlers = ['Abbas, Sayeda','Basu, Shantonu J','Evers, Erin C.','Hao, Lindsay','He, Ricky','Shah, Ami Mahendra','Sharma, Sagar','Spencer, Eleanor G','Wilkes, Nicole','Allen, Sharette','Duffy-Greaves, Kevin','Freeman, Daniel A','Frierson, Jerome C','Gokhale, Aparna S','Gonzalez, Matias','Gonzalez, Matias G','Ortiz, Matthew B','Sun, Dao','Labossiere, Samantha J.','Risener, Jennifer A','Orsini, Mary K']
+        Evelyn_Casehandlers = ['Delgadillo, Omar','Heller, Steven E','Latterner, Matt J','Robles-Castillo, Camila J','Tilyayeva, Rakhil','Almanzar, Yocari']
+        Dianas_Casehandlers = ['Allen, Sharette','Abbas, Sayeda','Basu, Shantonu J','Evers, Erin C.','Hao, Lindsay','He, Ricky','Shah, Ami Mahendra','Sharma, Sagar','Spencer, Eleanor G','Wilkes, Nicole','Allen, Sharette','Duffy-Greaves, Kevin','Freeman, Daniel A','Frierson, Jerome C','Gokhale, Aparna S','Gonzalez, Matias','Gonzalez, Matias G','Ortiz, Matthew B','Sun, Dao','Labossiere, Samantha J.','Risener, Jennifer A','Orsini, Mary K']
         Keiannis_Casehandlers = ['Almanzar, Milagros','Briggs, John M','Dittakavi, Archana','Gonzalez-Munoz, Rossana G','Honan, Thomas J','James, Lelia','Kelly, Kitanya','Mottley, Darlene','Vega, Rita','Yamasaki, Emily Woo J','McCune, Mary']
         Dennis_Casehandlers = ['Braudy, Erica','Kulig, Jessica M','Mercedes, Jannelys J']
         Rosa_Casehandlers = ['Acron, Denise D','Anunkor, Ifeoma O','Reyes, Nicole V']
