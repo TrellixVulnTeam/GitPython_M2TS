@@ -156,6 +156,8 @@ def LSCCovidPrep():
                 return "Remove"
             elif DateClosed != "" and CSRElig != "Yes":
                 return "Remove"
+            elif CSRElig == "No":
+                return "Remove"
             elif OpenedInReportingQuarter == "Yes" or ClosedInReportingQuarter == "Yes":
                 return "Include"
             

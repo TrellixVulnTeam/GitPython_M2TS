@@ -203,9 +203,7 @@ def DAPException():
         
         def SSITester (ReceivedSSI,SSIMonthly,ReceivedDIB,DAPOutcome):
             SSIMonthly = int(SSIMonthly)
-            if ReceivedSSI == 'Yes' and SSIMonthly == 0:
-                return 'Needs SSI Award Amount'
-            elif ReceivedSSI != 'Yes' and SSIMonthly > 0:
+            if ReceivedSSI != 'Yes' and SSIMonthly > 0:
                 return 'Needs Received SSI? = Yes'
             elif DAPOutcome == 'Client won/received only retroactive benefits' and ReceivedDIB != 'Yes' and ReceivedSSI != 'Yes':
                 return 'Needs Received DIB or SSI = Yes'
@@ -219,9 +217,7 @@ def DAPException():
         
         def DIBTester (ReceivedDIB,DIBMonthly,ReceivedSSI,DAPOutcome):
             DIBMonthly = int(DIBMonthly)
-            if ReceivedDIB == 'Yes' and DIBMonthly == 0:
-                return 'Needs DIB Award Amount'
-            elif ReceivedDIB != 'Yes' and DIBMonthly > 0:
+            if ReceivedDIB != 'Yes' and DIBMonthly > 0:
                 return 'Needs Received DIB? = Yes'
             elif DAPOutcome == 'Client won/received only retroactive benefits' and ReceivedDIB != 'Yes' and ReceivedSSI != 'Yes':
                 return 'Needs Received DIB or SSI = Yes'
@@ -234,21 +230,31 @@ def DAPException():
         
         def WithdrewTester(DAPOutcome):
             if DAPOutcome == 'Client withdrew/failed to return':
-                return 'Client Withdrew - Should Not Report'
+                return 'Client Withdrew - Should Not Report - Change to Another Funding Source'
             else:
                 return ''
         
         df ['Withdrew Tester'] = df.apply(lambda x : WithdrewTester(x['DAP Outcome']),axis = 1)
         
+        #County Tester
+        
+        def CountyTester(County):
+            if County == "Kings" or County == "Bronx" or County == "Queens" or County == "Richmond" or County == "New York":
+                return ''
+            else:
+                return 'County Needs to be in NYC'
+                
+        df['County Tester'] = df.apply(lambda x : CountyTester(x['County of Residence']),axis = 1)
+        
         #Tester Tester
         
-        def TesterTester (SSTester,IncomeTypeTester,LegalProblemTester,LevelofRepTester,ALJNameTester,MonthlyAwardTester,RetroAwardTester,BlankOutcomeTester,OutcomeTester,MonthlyBenefitsTester,RetroBenefitsTester,NoBenefitsTester,SSITester,DIBTester,WithdrewTester):
-            if SSTester == '' and IncomeTypeTester == "" and LegalProblemTester  == "" and LevelofRepTester == "" and ALJNameTester == "" and MonthlyAwardTester == "" and RetroAwardTester == "" and BlankOutcomeTester == '' and OutcomeTester == "" and MonthlyBenefitsTester == "" and RetroBenefitsTester == "" and NoBenefitsTester == '' and SSITester == '' and DIBTester == '' and WithdrewTester == '':
+        def TesterTester (SSTester,IncomeTypeTester,LegalProblemTester,LevelofRepTester,ALJNameTester,MonthlyAwardTester,RetroAwardTester,BlankOutcomeTester,OutcomeTester,MonthlyBenefitsTester,RetroBenefitsTester,NoBenefitsTester,SSITester,DIBTester,WithdrewTester,CountyTester):
+            if SSTester == '' and IncomeTypeTester == "" and LegalProblemTester  == "" and LevelofRepTester == "" and ALJNameTester == "" and MonthlyAwardTester == "" and RetroAwardTester == "" and BlankOutcomeTester == '' and OutcomeTester == "" and MonthlyBenefitsTester == "" and RetroBenefitsTester == "" and NoBenefitsTester == '' and SSITester == '' and DIBTester == '' and WithdrewTester == '' and CountyTester == '':
                 return 'Prepared for Submission'
             else:
                 return 'Case Needs Attention'
                 
-        df ['Case Attention Tester'] = df.apply(lambda x: TesterTester(x['SS # Tester'],x['DAP Income Type Tester'],x['DAP Legal Problem Tester'],x['DAP Level of Representation Tester'],x['DAP ALJ Name Tester'],x['Monthly Award Tester'],x['Retro Award Tester'],x['Blank Outcome Tester'],x['DAP Outcome Tester'],x['DAP Monthly Benefits Tester'],x['DAP Retro Tester'],x['No Benefits Tester'],x['SSI Tester'],x['DIB Tester'],x['Withdrew Tester']), axis = 1)
+        df ['Case Attention Tester'] = df.apply(lambda x: TesterTester(x['SS # Tester'],x['DAP Income Type Tester'],x['DAP Legal Problem Tester'],x['DAP Level of Representation Tester'],x['DAP ALJ Name Tester'],x['Monthly Award Tester'],x['Retro Award Tester'],x['Blank Outcome Tester'],x['DAP Outcome Tester'],x['DAP Monthly Benefits Tester'],x['DAP Retro Tester'],x['No Benefits Tester'],x['SSI Tester'],x['DIB Tester'],x['Withdrew Tester'],x['County Tester']), axis = 1)
         
         #Columns for Formatted Report
         
@@ -276,6 +282,7 @@ def DAPException():
         df['Client ethnicity'] = df['Race'].str.replace('Latina/o','Hispanic')
         df['Client ethnicity'] = df['Client ethnicity'].str.replace('Self-Identified/Other','Other')
         df['Client ethnicity'] = df['Client ethnicity'].str.replace('Native American/American Indian','Native American')
+        df['Client ethnicity'] = df['Client ethnicity'].str.replace('South Asian','Asian or Pacific Islander')
         
         df['Client county'] = df['County of Residence']
         df['Client ZIP code'] = df['Zip Code']
@@ -433,6 +440,7 @@ def DAPException():
         'No Benefits Tester',
         'Received SSI?','SSI Tester',
         'Received DIB?','DIB Tester',
+        'County of Residence','County Tester',
         'Agency',
         'Region',
         'Agency Office',

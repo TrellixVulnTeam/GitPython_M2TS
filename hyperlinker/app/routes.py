@@ -25,9 +25,11 @@ def index():
     <li><a href="/Hyperlinker">Hyperlinker</a></li>
     <li><a href="/BoroughSplitter">Borough Splitter</a></li>
     <li><a href="/ComplianceConsolidater">Compliance Consolidater</a></li>
+    <li><a href="/ComplianceConsolidaterYearEnd">Year End Compliance Consolidater</a></li>
     <li><a href="/SuperSplitter">MLS Supervisor Splitter</a></li>
     <li><a href="/AdvocateSplitter">Advocate Splitter</a></li>
     <li><a href="/LSCCovidPrep">LSC Covid Report Prep</a></li>
+    <li><a href="/CSRDeterminer">Determine CSR Eligibility</a></li>
     </ul>
     
     <b>Housing Tools:</b>

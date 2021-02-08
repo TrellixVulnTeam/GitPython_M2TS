@@ -8,8 +8,8 @@ from datetime import datetime
 import pandas as pd
 import os
 
-@app.route("/ComplianceConsolidater", methods=['GET', 'POST'])
-def ComplianceConsolidater():
+@app.route("/ComplianceConsolidaterYearEnd", methods=['GET', 'POST'])
+def ComplianceConsolidaterYearEnd():
     #upload file from computer
     if request.method == 'POST':
         print(request.files['file'])
@@ -48,6 +48,7 @@ def ComplianceConsolidater():
         
         
         #No Legal Assistance Documented Compliance Check
+        #Is Case Closed?
         #Is "CSR CSR: Is Legal Assistance Document? = No"
         
         def NoAssistanceTester(NoAssistance):
@@ -57,8 +58,9 @@ def ComplianceConsolidater():
                 return ''
                  
         df['No Legal Assistance Documented Tester'] = df.apply(lambda x : NoAssistanceTester(x['CSR: Is Legal Assistance Documented?']),axis=1)
-        
+        """
         #No Time Entered for 90 Days
+        
         #just open cases
         #is 'Age in Days' larger than 90? (need to de-duplicate to get just cases with most recent service date?)
         
@@ -70,7 +72,7 @@ def ComplianceConsolidater():
                 return ''
         
         df['No Time Entered for 90 Days Tester'] = df.apply(lambda x : AgeTester(x['Date Closed'],x['Age in Days']),axis=1)
-        
+        """
         
         #200 percent of poverty income eligible
         #if percentage of poverty is > 200 AND
@@ -186,7 +188,7 @@ def ComplianceConsolidater():
             
             
         df['Citizenship & Immigration Tester'] = df.apply(lambda x : CitImmTester(x['Attestation on File?'],x['Staff Verified Non-Citizenship Documentation'],x['Did any Staff Meet Client in Person?'],x['Close Reason'],x['Compliance Check Citizenship and Immigration']),axis=1)
-        
+        """
         #Active Advocate Tester
         
         def ActiveAdvocateTester(ActiveAdvocate):
@@ -196,7 +198,7 @@ def ComplianceConsolidater():
                 return ''
                  
         df['Active Advocate Tester'] = df.apply(lambda x : ActiveAdvocateTester(x['Login Active']),axis=1)
-        
+        """
         #Case needs a retainer if it's closed with higher level of service than A or B
         
         def RetainerTester(Retainer,CloseReason,LevelOfService,PAICase):
@@ -215,12 +217,12 @@ def ComplianceConsolidater():
         #also add in code related to checking the boxes they check if something has been compliance-reviewed
         
         #Make a tester tester
-        def TesterTester(NoAssistanceTester,AgeTester,TwoHundredPercentTester,OneTwentyFivePercentTester,LSCCSRTester,NoAgeTester,UntimelyClosedTester,UntimelyClosedOverriddenTester,CitImmTester,ActAdvTester,RetainerTester):
-            if NoAssistanceTester != "" or AgeTester != "" or TwoHundredPercentTester != "" or OneTwentyFivePercentTester != "" or LSCCSRTester != "" or NoAgeTester != "" or UntimelyClosedTester != "" or UntimelyClosedOverriddenTester != "" or CitImmTester != "" or ActAdvTester != "" or RetainerTester != "":
+        def TesterTester(NoAssistanceTester,TwoHundredPercentTester,OneTwentyFivePercentTester,LSCCSRTester,NoAgeTester,UntimelyClosedTester,UntimelyClosedOverriddenTester,CitImmTester,RetainerTester):
+            if NoAssistanceTester != "" or TwoHundredPercentTester != "" or OneTwentyFivePercentTester != "" or LSCCSRTester != "" or NoAgeTester != "" or UntimelyClosedTester != "" or UntimelyClosedOverriddenTester != "" or CitImmTester != "" or RetainerTester != "":
                 return "Needs Review"
             else:
                 return ""
-        df['Tester Tester'] = df.apply(lambda x : TesterTester(x['No Legal Assistance Documented Tester'],x['No Time Entered for 90 Days Tester'],x['200% of Poverty Tester'],x['125-200% of Poverty Tester'],x['Funding Code 4000 Tester'],x['No Age for Client Tester'],x['Untimely Closed Tester'],x['Untimely Closed Overridden Tester'],x['Citizenship & Immigration Tester'],x['Active Advocate Tester'],x['Retainer Tester']),axis=1)        
+        df['Tester Tester'] = df.apply(lambda x : TesterTester(x['No Legal Assistance Documented Tester'],x['200% of Poverty Tester'],x['125-200% of Poverty Tester'],x['Funding Code 4000 Tester'],x['No Age for Client Tester'],x['Untimely Closed Tester'],x['Untimely Closed Overridden Tester'],x['Citizenship & Immigration Tester'],x['Retainer Tester']),axis=1)        
         
         #remove cases that don't need compliance review
         df = df[df['Tester Tester'] == "Needs Review"]
@@ -228,7 +230,7 @@ def ComplianceConsolidater():
         
         #Putting everything in the right order
         
-        df = df[['Hyperlinked CaseID#','Assigned Branch/CC','Primary Advocate Name','Client First Name','Client Last Name','No Legal Assistance Documented Tester','No Time Entered for 90 Days Tester','200% of Poverty Tester','125-200% of Poverty Tester','Funding Code 4000 Tester','No Age for Client Tester','Untimely Closed Tester','Untimely Closed Overridden Tester','Citizenship & Immigration Tester','Active Advocate Tester','Retainer Tester','Caseworker Name','Compliance Check Untimely Closed','Compliance Check Untimely Closed Overwritten','Compliance Check 125 to 200 Poverty Income Ineligible','Compliance Check 200 Poverty Income Eligible','Compliance Check Citizenship and Immigration','Attestation on File?','Staff Verified Non-Citizenship Documentation','Did any Staff Meet Client in Person?','Close Reason','Date Closed','Date Opened','CSR: Is Legal Assistance Documented?','Age in Days','Percentage of Poverty','LSC Eligible?','CSR Eligible','Income Eligible','Primary Funding Codes','Secondary Funding Codes','DOB Information','Group','CSR: Timely Closing?','Was Timely Closed overridden?','Case Status','PAI Case?','Level of Service','Retainer on File']]
+        df = df[['Hyperlinked CaseID#','Assigned Branch/CC','Primary Advocate Name','Client First Name','Client Last Name','200% of Poverty Tester','125-200% of Poverty Tester','Funding Code 4000 Tester','No Age for Client Tester','Untimely Closed Tester','Untimely Closed Overridden Tester','Citizenship & Immigration Tester','Retainer Tester','No Legal Assistance Documented Tester','CSR: Section 1636 Affirmative Litigation Compliant?','Does this case involve affirmative litigation?','Caseworker Name','Compliance Check Untimely Closed','Compliance Check Untimely Closed Overwritten','Compliance Check 125 to 200 Poverty Income Ineligible','Compliance Check 200 Poverty Income Eligible','Compliance Check Citizenship and Immigration','Attestation on File?','Staff Verified Non-Citizenship Documentation','Did any Staff Meet Client in Person?','Close Reason','Date Closed','Date Opened','CSR: Is Legal Assistance Documented?','Age in Days','Percentage of Poverty','LSC Eligible?','CSR Eligible','Income Eligible','Primary Funding Codes','Secondary Funding Codes','DOB Information','Group','CSR: Timely Closing?','Was Timely Closed overridden?','Case Status','PAI Case?','Level of Service','Retainer on File']]
         
         
         
@@ -240,7 +242,8 @@ def ComplianceConsolidater():
         "Heintz, Adam J",
         "McCormick, James H",
         "Morales-Robinson, Ana Y.",
-        "Sahai, Chelsea E"]
+        "Sahai, Chelsea E",
+        "Colins, Lisa"]
         
         VeronicaList = ["Cook, Veronica J"]
         EdList = ["Josephson, Edward"]
@@ -297,43 +300,42 @@ def ComplianceConsolidater():
                 worksheet.set_column('B:B',0)
                 worksheet.set_column('Q:ZZ',0)
                 worksheet.set_row(0,60)
+                
                 worksheet.write_comment('F1',
-                    'No Legal Assistance Documented: If we close a case as something other than ZZ, we must have some documentation of the legal assistance provided. For these, whoever closed the case may have misunderstood the meaning of “legal assistance” or “documented.” Please review and add the legal assistance documented in case notes. If there was no legal assistance, change the closing code to ZZ.',
-                    {'height':70,'width':500,'x_offset':-30})
-                worksheet.write_comment('G1',
-                    'No Time in 90 Days: These are cases for which no time has been entered in 90 days. Please make sure these are all active. If they are active and pending in a court or other forum, enter a case note stating this. We have come across cases opened as long as four or five years ago for which no time had been entered since the year of opening, and which should have been closed in the same year they were opened.',
-                    {'height':70,'width':500})
-                worksheet.write_comment('H1',
                     '200% of Poverty Income Eligible: Please confirm that the overrides were completed properly in these cases; these are rarely correct, but it is possible. If they were properly done, there is no need to do anything else.',
                     {'height':70,'width':500})
-                worksheet.write_comment('I1',
+                worksheet.write_comment('G1',
                     '125-200 Poverty Income Ineligible with Type of Income: These are cases where the client is between 125% and 200% of poverty and the financial override was not completed. In most cases it can be; please make sure that the override is completed.',
                     {'height':70,'width':500})
-                worksheet.write_comment('J1',
+                worksheet.write_comment('H1',
                     'LSC or CSR No 4000: These are cases for which the funding code is “4000 LSC” but are marked as “LSC or CSR No.” With the exception of untimely closings, we should probably switch the funding codes here.',
                     {'height':70,'width':500})
-                worksheet.write_comment('K1',
+                worksheet.write_comment('I1',
                     'No Age for Client: This report is of cases where no date of birth is reported. Please review the documents in the case file to see if there is an age or DOB on one of them that didn’t get entered into the correct fields. It is acceptable to put in an approximate date of birth and estimated age.',
                     {'height':70,'width':500})
-                worksheet.write_comment('L1',
+                worksheet.write_comment('J1',
                     'Untimely closed: These are cases where the date of closing is long past the date opened. For example, a case opened in November of 2017 and closed as A (Counsel and Advice) or B (Brief Service) in April of 2019. All A/B cases should be closed in the year that they were opened, unless they were opened after October 1st of the year or after, unless there is a good reason. If a case was closed A/B outside that rule, there must be an override with a documented reason. Higher levels of service can be closed in the calendar year after the work is completed.',
                     {'height':70,'width':500})
-                worksheet.write_comment('M1',
+                worksheet.write_comment('K1',
                     'Untimely Closed Overridden: Please review the reason for the override and make sure it is legitimate. Keep in mind that whether it is a “good reason” applies to us as a law firm and not the individual case handler. Reasons that are not legitimate include advocates not noticing the case had been assigned to them, or the file being lost/unassigned for a year and then an advocate closing it as soon it is assigned to them.',
                     {'height':70,'width':500})
-                worksheet.write_comment('N1',
+                worksheet.write_comment('L1',
                     'Citizenship and Immigration Compliance: These are cases for which we should have the immigrant/citizenship compliance completed but do not, such as those where we met the client in person or we provided more than Advice or Brief Service. If a client is eligible under the anti-abuse statutes and all we need is a description of the basis of eligibility, the case note acts as verification. When you fix these, please remember to edit the closing information so that the CSR calculation is updated.',
                     {'height':70,'width':500})
-                worksheet.write_comment('O1',
-                    'Active Advocate Tester: These are cases for which the Primary Advocate does not have an active user profile in LegalServer. All Cases must be assigned to a currently-active case handler',
-                    {'height':70,'width':500})
-                worksheet.write_comment('P1',
+                worksheet.write_comment('M1',
                     'Retainer Tester: Cases that have a Close Reason showing more than Advice/Brief Service, or a Level of Service indicating representation has been provided must have retainers.',
                     {'height':70,'width':500})
+                worksheet.write_comment('N1',
+                    'No Legal Assistance Documented: If we close a case as something other than ZZ, we must have some documentation of the legal assistance provided. For these, whoever closed the case may have misunderstood the meaning of “legal assistance” or “documented.” Please review and add the legal assistance documented in case notes. If there was no legal assistance, change the closing code to ZZ.',
+                    {'height':70,'width':500,'x_offset':-30})
                     
                 worksheet.conditional_format('D2:BO100000',{'type': 'text',
                                                          'criteria': 'containing',
                                                          'value': 'Needs',
+                                                         'format': problem_format})
+                worksheet.conditional_format('O2:O100000',{'type': 'text',
+                                                         'criteria': 'containing',
+                                                         'value': 'No',
                                                          'format': problem_format})
                 worksheet.freeze_panes(1,1)
             writer.save()
@@ -349,10 +351,10 @@ def ComplianceConsolidater():
 #what the user-facing site looks like
     return '''
     <!doctype html>
-    <title>Compliance Consolidater</title>
+    <title>Year End Compliance Consolidater</title>
     <link rel="stylesheet" href="/static/css/main.css">  
     <link rel="stylesheet" href="/static/css/main.css"> 
-    <h1>Summary of Compliance Reports</h1>
+    <h1>Year End Summary of Compliance Reports</h1>
     <form action="" method=post enctype=multipart/form-data>
     <p><input type=file name=file><input type=submit value=Comply!!>
     

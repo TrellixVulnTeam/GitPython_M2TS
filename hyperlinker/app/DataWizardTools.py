@@ -32,6 +32,26 @@ def DateMaker (Date):
             else:
                 return int(DateYear + DateMonth + DateDay)
 
+#List of Social Workers
+
+LSNYCSocialWorkers = ["Morace, Jana D.",
+                      "Maldonado, Brenda J.",
+                      "Acevedo, Vanessa",
+                      "Chamak, Fatematuz Z",
+                      "Molina, Gardenia I",
+                      "Kash, Julie H",
+                      "Aguilar, Alena E",
+                      "Bisignano, Stacy",
+                      "Smith-Menjivar, Eleise C",
+                      "Islam, Tasnim M",
+                      "Smith, Rebecca",
+                      "Erner, Tobi A.",
+                      "Marder, Samantha M",
+                      "Rinck Manfredini, Laura",
+                      "Lambert, Tara",
+                      "Lupo, Melinda T."]
+                      
+
 
 #Turn the Queens micro-cities into just saying 'queens'       
 QueensNeighborhoods = ["Arverne",
