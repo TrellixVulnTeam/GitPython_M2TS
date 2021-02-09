@@ -71,12 +71,12 @@ def UAHPLPConsolidatedBoroughCleaner():
             elif PreThreeOne == "No" and LevelOfService.startswith("Advice") and OpenDate >= 20200301:
                 return "Unnecessary due to post-3/1 limited service"
             
-            elif DHCI == "Yes" and PANum == "":
+            elif DHCI == "DHCI Form" and PANum == "":
                 return "Not Needed due to DHCI"
             else:
                 return PANum
             
-        df['Gen Pub Assist Case Number'] = df.apply(lambda x: PATester(x['Gen Pub Assist Case Number'],x['Housing Signed DHCI Form'],x['Pre-3/1/20 Elig Date?'],x["Housing Level of Service"],x['EligDateConstruct'],x['OpenedDateConstruct']),axis = 1)
+        df['Gen Pub Assist Case Number'] = df.apply(lambda x: PATester(x['Gen Pub Assist Case Number'],x['Housing Income Verification'],x['Pre-3/1/20 Elig Date?'],x["Housing Level of Service"],x['EligDateConstruct'],x['OpenedDateConstruct']),axis = 1)
         
         #Outcome Tester - date no outcome or outcome no date
         
