@@ -279,7 +279,7 @@ def DAPException():
         df['Client gender'] = df['Gender']
         
         
-        df['Client ethnicity'] = df['Race'].str.replace('Latina/o','Hispanic')
+        df['Client ethnicity'] = df['Race'].str.replace('Latina/o/x','Hispanic')
         df['Client ethnicity'] = df['Client ethnicity'].str.replace('Self-Identified/Other','Other')
         df['Client ethnicity'] = df['Client ethnicity'].str.replace('Native American/American Indian','Native American')
         df['Client ethnicity'] = df['Client ethnicity'].str.replace('South Asian','Asian or Pacific Islander')
