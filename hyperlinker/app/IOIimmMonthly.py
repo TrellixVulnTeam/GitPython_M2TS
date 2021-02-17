@@ -108,9 +108,9 @@ def upload_IOIimmMonthly():
         df['Open Year'] = df['Eligibility_Date'].apply(lambda x: str(x)[6:])
         df['Open Construct'] = df['Open Year'] + df['Open Month'] + df['Open Day']
 
-        df['Subs Month'] = df['Date of Substantial Activity'].apply(lambda x: str(x)[:2])
-        df['Subs Day'] = df['Date of Substantial Activity'].apply(lambda x: str(x)[3:5])
-        df['Subs Year'] = df['Date of Substantial Activity'].apply(lambda x: str(x)[6:])
+        df['Subs Month'] = df['IOI Date FY21 Substantial Activity Performed'].apply(lambda x: str(x)[5:7])
+        df['Subs Day'] = df['IOI Date FY21 Substantial Activity Performed'].apply(lambda x: str(x)[8:])
+        df['Subs Year'] = df['IOI Date FY21 Substantial Activity Performed'].apply(lambda x: str(x)[:4])
         df['Subs Construct'] = df['Subs Year'] + df['Subs Month'] + df['Subs Day']
         df['Subs Construct'] = df.apply(lambda x : x['Subs Construct'] if x['Subs Construct'] != '' else 0, axis = 1)
 
@@ -144,21 +144,23 @@ def upload_IOIimmMonthly():
         df['Needs DHCI?'] = df.apply(lambda x: DHCI_Needed(x['Has Declaration of Household Composition and Income (DHCI) Form?'],x['Open Construct'],x['Level of Service']), axis=1)
 
 
-        #Needs Substantial Activity to Rollover into FY'20
+       
+       #Needs Substantial Activity to Rollover into FY'20
 
-        def Needs_Rollover(Open_Construct,Substantial_Activity,Substantial_Activity_Date,CaseID,ReportedFY19):
-            if int(Open_Construct) >= 20190701:
+        
+        #Needs Substantial Activity to Rollover into FY'21
+        
+        def Needs_Rollover(Open_Construct,Substantial_Activity, Substantial_Activity_Date,CaseID) :
+            if int(Open_Construct) >= 20200701:
                 return ''
-            elif Substantial_Activity != '' and int(Substantial_Activity_Date) >= 20190701 and int(Substantial_Activity_Date) <= 20200630:
+            elif Substantial_Activity != '' and int(Substantial_Activity_Date) >20200701 and int(Substantial_Activity_Date) <=20210630:
                 return ''
-            elif CaseID in ReportedFY19:
-                return 'Needs Substantial Activity in FY20'
-            else:
-                return ''
-                
-        df['Needs Substantial Activity?'] = df.apply(lambda x: Needs_Rollover(x['Open Construct'],x['Substantial Activity'],x['Subs Construct'],x['Matter/Case ID#'], ImmigrationToolBox.ReportedFY19), axis=1)
-
-
+            elif CaseID in ImmigrationToolBox.ReportedFY20 or CaseID in ImmigrationToolBox.ReportedFY19:
+                return 'Needs Substantial Activity in FY21'
+            else: return ''
+        df['Needs Substantial Activity?'] = df.apply(lambda x: Needs_Rollover(x['Open Construct'],x['IOI FY21 Substantial Activity (Choose One)'],x['Subs Construct'],x['Matter/Case ID#']), axis=1)  
+        
+        
         #Outcomes
 
                 
@@ -347,7 +349,7 @@ def upload_IOIimmMonthly():
                                                  'format': problem_format})
                 worksheet.conditional_format('I1:I100000',{'type': 'cell',
                                                  'criteria': '==',
-                                                 'value': '"Needs Substantial Activity in FY20"',
+                                                 'value': '"Needs Substantial Activity in FY21"',
                                                  'format': problem_format})
                 worksheet.conditional_format('J1:K100000',{'type': 'cell',
                                                  'criteria': '==',

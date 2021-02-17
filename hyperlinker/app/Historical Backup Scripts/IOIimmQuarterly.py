@@ -42,6 +42,7 @@ def upload_IOIimmQuarterly():
         df['HRA Level of Service'] = df.apply(lambda x: ImmigrationToolBox.HRA_Level_Service(x['Close Reason'],x['Level of Service']), axis=1)
         
         
+        
        #HRA Case Coding
        #Putting Cases into HRA's Baskets!  
         df['HRA Case Coding'] = df.apply(lambda x: ImmigrationToolBox.HRA_Case_Coding(x['Legal Problem Code'],x['Special Legal Problem Code'],x['HRA Level of Service'],x['IOI Does Client Have A Criminal History? (IOI 2)']), axis=1)
@@ -107,9 +108,9 @@ def upload_IOIimmQuarterly():
         df['Open Year'] = df['Eligibility_Date'].apply(lambda x: str(x)[6:])
         df['Open Construct'] = df['Open Year'] + df['Open Month'] + df['Open Day']
         
-        df['Subs Month'] = df['IOI Date FY21 Substantial Activity Performed'].apply(lambda x: str(x)[5:7])
-        df['Subs Day'] = df['IOI Date FY21 Substantial Activity Performed'].apply(lambda x: str(x)[8:])
-        df['Subs Year'] = df['IOI Date FY21 Substantial Activity Performed'].apply(lambda x: str(x)[:4])
+        df['Subs Month'] = df['Date of Substantial Activity'].apply(lambda x: str(x)[:2])
+        df['Subs Day'] = df['Date of Substantial Activity'].apply(lambda x: str(x)[3:5])
+        df['Subs Year'] = df['Date of Substantial Activity'].apply(lambda x: str(x)[6:])
         df['Subs Construct'] = df['Subs Year'] + df['Subs Month'] + df['Subs Day']
         df['Subs Construct'] = df.apply(lambda x : x['Subs Construct'] if x['Subs Construct'] != '' else 0, axis = 1)
         
@@ -145,22 +146,17 @@ def upload_IOIimmQuarterly():
         
         #Needs Substantial Activity to Rollover into FY'20
         
-        
-        
-         #Needs Substantial Activity to Rollover into FY'21
-        
-        
-        def Needs_Rollover(Open_Construct,Substantial_Activity, Substantial_Activity_Date,CaseID) :
-            if int(Open_Construct) >= 20200701:
+        def Needs_Rollover(Open_Construct,Substantial_Activity,Substantial_Activity_Date,CaseID,ReportedFY19):
+            if int(Open_Construct) >= 20190701:
                 return ''
-            elif Substantial_Activity != '' and int(Substantial_Activity_Date) >20200701 and int(Substantial_Activity_Date) <=20210630:
+            elif Substantial_Activity != '' and int(Substantial_Activity_Date) >= 20190701 and int(Substantial_Activity_Date) <= 20200630:
                 return ''
-            elif CaseID in ImmigrationToolBox.ReportedFY20 or CaseID in ImmigrationToolBox.ReportedFY19:
-                return 'Needs Substantial Activity in FY21'
-            else: return ''
-        df['Needs Substantial Activity?'] = df.apply(lambda x: Needs_Rollover(x['Open Construct'],x['IOI FY21 Substantial Activity (Choose One)'],x['Subs Construct'],x['Matter/Case ID#']), axis=1)  
-        
-        
+            elif CaseID in ReportedFY19:
+                return 'Needs Substantial Activity in FY20'
+            else:
+                return ''
+                
+        df['Needs Substantial Activity?'] = df.apply(lambda x: Needs_Rollover(x['Open Construct'],x['Substantial Activity'],x['Subs Construct'],x['Matter/Case ID#'], ImmigrationToolBox.ReportedFY19), axis=1)
 
 
         #Outcomes
@@ -221,12 +217,10 @@ def upload_IOIimmQuarterly():
         
         #Deliverable Categories
         
-        def Deliverable_Category(HRA_Coded_Case,Income_Cleanup,Age_at_Intake,ClientsNames):
+        def Deliverable_Category(HRA_Coded_Case,Income_Cleanup,Age_at_Intake):
             if Income_Cleanup == 'Needs Income Waiver':
                 return 'Needs Cleanup'
             elif HRA_Coded_Case == 'T2-RD' and Age_at_Intake <= 21:
-                return 'Tier 2 (minor removal)'
-            elif HRA_Coded_Case == 'T2-RD' and ClientsNames in ImmigrationToolBox.AtlasClientsNames :
                 return 'Tier 2 (minor removal)'
             elif HRA_Coded_Case == 'T2-RD':
                 return 'Tier 2 (removal)'
@@ -239,7 +233,7 @@ def upload_IOIimmQuarterly():
             else:
                 return 'Needs Cleanup'
 
-        df['Deliverable Tally'] = df.apply(lambda x: Deliverable_Category(x['HRA Case Coding'],x['Exclude due to Income?'],x['Age at Intake'], x['Client Name']), axis=1)
+        df['Deliverable Tally'] = df.apply(lambda x: Deliverable_Category(x['HRA Case Coding'],x['Exclude due to Income?'],x['Age at Intake']), axis=1)
         
         #make all cases for any client that has a minor removal tally, into also being minor removal cases
         
@@ -341,11 +335,8 @@ def upload_IOIimmQuarterly():
         #Prior Enrollment
         
         def PriorEnrollment (casenumber):
-            if casenumber in ImmigrationToolBox.ReportedFY20:
-                return 'FY 20'
-            elif casenumber in ImmigrationToolBox.ReportedFY19:
+            if casenumber in ImmigrationToolBox.ReportedFY19:
                 return 'FY 19'
-                
                 
         df['Prior_Enrollment_FY'] = df.apply(lambda x:PriorEnrollment(x['Matter/Case ID#']), axis = 1)
         
@@ -400,7 +391,7 @@ def upload_IOIimmQuarterly():
                                                  'format': problem_format})
         worksheet.conditional_format('I1:I100000',{'type': 'cell',
                                                  'criteria': '==',
-                                                 'value': '"Needs Substantial Activity in FY21"',
+                                                 'value': '"Needs Substantial Activity in FY20"',
                                                  'format': problem_format})
         worksheet.conditional_format('J1:K100000',{'type': 'cell',
                                                  'criteria': '==',
