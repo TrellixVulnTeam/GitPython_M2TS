@@ -143,16 +143,16 @@ def PostureClean (Posture,EligibilityDate,Type,Level):
         return ''
 
 #TRC Housing Income Verification can't be blank or none and other stuff with kids and poverty level and you just give up if it's closed
-def IncomeVerificationClean (IncomeVerification, Children, PovertyPercent, Disposition):
-    if Children > 0 and PovertyPercent <= 200.99 and IncomeVerification == '':
+def IncomeVerificationClean (IncomeVerification, Children, PovertyPercent, Disposition, LevelOfService):
+    if LevelOfService == 'Advice':
+        return ''
+    elif Children > 0 and PovertyPercent <= 200.99 and IncomeVerification == '':
         return 'Must Have DHCI or PA#'
     elif Children > 0 and PovertyPercent <= 200.99 and IncomeVerification == 'None':
         return 'Must Have DHCI or PA#'
     elif Disposition == 'Closed' and IncomeVerification =='None':
         return ''
     elif IncomeVerification == '':
-        return 'Needs Income Verification'
-    elif IncomeVerification == 'None':
         return 'Needs Income Verification'
     else:
         return ''
@@ -637,11 +637,9 @@ def NeedsRedactingTester(LevelOfService, PreThreeOne,FundingCodeSorter):
         return ""
         
       
-def TRCRedactForCovid(LevelOfService, PreThreeOne, ToRedact,PrimaryFunding,NonHousingPostNineThirty):
+def TRCRedactForCovid(LevelOfService, PreThreeOne, ToRedact,PrimaryFunding,):
             LevelOfService = str(LevelOfService)
             if LevelOfService.startswith("Advice") == True and PreThreeOne == "No" and ToRedact != "" and PrimaryFunding != "3011 TRC FJC Initiative":
-                return ""
-            elif NonHousingPostNineThirty == "Needs Review":
                 return ""
             else:   
                 return ToRedact

@@ -1,6 +1,6 @@
-
-#list of previously reported cases for 'substantial activity' question
+#list of previously reported cases for 'substantial activity' question (maybe we should add this list to our DataWizardtoolbox?)
 ReportedFY19= [
+
                     "All Cases Reported FY19",
                     "18-1869227",
                     "19-1889205",
@@ -2113,7 +2113,7 @@ ReportedFY19= [
                     "17-1843525",
                     
                     ]
-#list of previously reported cases for 'substantial activity' question
+                  
 ReportedFY20= [ "All Cases Reported FY20",
                     "20-1931447",
                     "19-1900274",
@@ -4750,155 +4750,117 @@ ReportedFY20= [ "All Cases Reported FY20",
                     "19-1902567",
                     "19-1902228",
                     "19-1898905",
-                    "19-1895145",]
+                    "19-1895145"]                  
 
-#Atlas Clients Names
-AtlasClientsNames = ["Ixtos Ortiz, Alonzo A",
-    "Hernandez Lozano",    
-    "Maria Argelia",
-    "Elazab, Mohamed Haytham Ebrahim Mohamed",
-    "Lin, Qian", 
-    "Herrera Rodas, Jose Luis", 
-    "Caceres Ortiz, Angelica",
-    "Cupil Istazuy, Ismael", ]
-    
-#HRA Case Coding
-#Putting Cases into HRA's Baskets!
-def HRA_Case_Coding(LPC,SLPC,HRA_LoS,Crim):
-    LPC = str(LPC)
-    SLPC = str(SLPC)
-    if HRA_LoS == '***Needs Cleanup***':
-        return ""
-    elif HRA_LoS == 'Hold For Review':
-        return 'Hold For Review'
-    elif LPC.startswith('2') == True and HRA_LoS == 'Advice':
-        return 'B -EMP'
-    elif LPC.startswith('2') == True and HRA_LoS == 'Brief Service':
-        return 'B -EMP'
-    elif SLPC == 'G-639' and HRA_LoS == 'Advice':
-        return 'B -INQ'
-    elif SLPC == 'G-639' and HRA_LoS == 'Brief Service':
-        return 'B -INQ'
-    elif SLPC == 'I-914' and HRA_LoS == 'Advice':
-        return 'B -CERT'
-    elif SLPC == 'I-914' and HRA_LoS == 'Brief Service':
-        return 'B -CERT'
-    elif SLPC == 'I-918' and HRA_LoS == 'Advice':
-        return 'B -CERT'
-    elif SLPC == 'I-918' and HRA_LoS == 'Brief Service':
-        return 'B -CERT'
-    elif HRA_LoS == 'Advice' or HRA_LoS == 'Brief Service':
-        return 'B -ADVI'
-    elif SLPC == "Emergency Planning":
-        return 'B -APD'    
-    elif SLPC == "Parental Designation Form":
-        return 'B -OTH_Parental Designation Form'
-    elif Crim == "Yes":
-        return 'T2-OTH_CRM'
-    elif SLPC == "I-589 Affirmative" or SLPC == "I-730":
-        return 'T2-AR'
-    elif SLPC == "I-589 Defensive" or SLPC == "Removal Defense" or SLPC == "EOIR-40" or SLPC == "EOIR-42A"or SLPC == "EOIR-42B" or SLPC == "I-212" or SLPC == "I-485 Defensive":
-        return 'T2-RD'
-    elif SLPC == "I-912":
-        return 'T1-OTH_I-912'
-    elif SLPC == "I-130 (spouse)":
-        return 'T2-MAR'
-    elif SLPC == "I-129F" or SLPC == "I-130" or SLPC == "I-751" or SLPC == "I-864"or SLPC == "I-864EZ" or SLPC == "AOS I-130":
-        return 'T1-FAM'
-    elif SLPC == "204(L)":
-        return 'T2-HO_204(L)'
-    elif SLPC == "AR-11":
-        return 'T1-OTH_AR-11'    
-    elif SLPC == "DS-160" or SLPC == "DS-260":
-        return 'T1-CON'
-    elif SLPC == "EOIR 27" or SLPC == "Mandamus Action" or SLPC == "EOIR-26":
-        return 'T2-FED'    
-    elif SLPC == "EOIR-29 BIA Appeal" or SLPC.startswith("I-290B") == True or SLPC == "N-336" or SLPC == "EOIR-29":
-        return 'T2-APO'
-    elif SLPC == "G-639":
-        return 'T1-OTH_G639'
-    elif SLPC == "I-102":
-        return 'T1-OTH_I102'
-    elif SLPC.startswith("I-131") == True:
-        return 'T1-TRV'
-    elif SLPC == "I-192":
-        return 'T2-OTH_I-192'
-    elif SLPC == "I-360 SIJS" or LPC == "44 Minor Guardianship / Conservatorship" or LPC == "42 Neglected/Abused/Dependent":
-        return 'T2-SIJS'
-    elif SLPC == "I-360 VAWA Self-Petition":
-        return 'T2-VAWA'
-    elif SLPC == "I-539":
-        return 'T1-OTH_I539'
-    elif SLPC == "I-601" or SLPC == "I-601A":
-        return 'T2-WOI'
-    elif SLPC == "I-765":
-        return 'T1-EAD'
-    elif SLPC == "I-821":
-        return 'T1-TPS'
-    elif SLPC == "I-821D":
-        return 'T1-DACA'
-    elif SLPC == "I-824":
-        return 'T1-OTH_I824'
-    elif SLPC == "I-864W":
-        return 'T2-VAWA'
-    elif SLPC == "I-881":
-        return 'T2-HO_I881'
-    elif SLPC == "I-90":
-        return 'T1-GCR'
-    elif SLPC == "I-914" or SLPC == "I-914A":
-        return 'T2-HO_I914'
-    elif SLPC == "I-918" or SLPC == "I-918A":
-        return 'T2-HO_I918'
-    elif SLPC == "I-929":
-        return 'T2-HO_I929'
-    elif SLPC == "I-942":
-        return 'T1-OTH_I942'
-    elif SLPC == "N-400" or SLPC == "N-565" or SLPC == "N-600" or SLPC == "N-648":
-        return 'T1-CIT'
-    elif SLPC == "327 Uncontested Divorce":
-        return 'T1-SC'
-    elif SLPC == "Contested Divorce":
-        return 'T2-SC'
-    elif SLPC == "340 Name Change":
-        return 'T1-OTH_NameChange'
-    elif SLPC == "311 Custody" or SLPC == "SIJS Guardianship Proceeding" or SLPC == "339 Guardianship"or SLPC == "330 Guardianship Children" or SLPC == "314 Relative Custody":
-        return 'T2-FC'
-    
-    elif SLPC == 'Legal Rep - Employment Law':
-        return 'T1-EMP'
-    elif SLPC == 'AOS (Not I-130)' or SLPC == "I-485 Affirmative" :
-        return 'T1-AOS'
-    elif SLPC == "I-485 Affirmative with I-944":
-        return 'T2-AOSDSS'
-    elif SLPC == "EOIR-26A":
-        return 'T2-OTH_EOIR26a'
-    elif SLPC == "EOIR-33/BIA" or SLPC == 'EOIR-33/IC':
-        return 'T2-OTH_EOIR33'
-    elif SLPC == "I-134":
-        return 'T2-OTH_I134'
-    else:
-        return 'Something is wrong'
+
+
+
+# Group Case Number
+GroupCaseNumber = ["20-1927410","20-1928389","20-1927216"]
+
+
+#Putting Employment Work in HRA Baskets
         
- #Determining 'level of service' from 3 fields       
-def HRA_Level_Service(Close_Reason,LS_LoS):
-    Close_Reason = str(Close_Reason)
-    LS_LoS = str(LS_LoS)                
-    if Close_Reason.startswith("A") == True:
-        return 'Advice'
-    elif Close_Reason.startswith("B") == True:
-        return 'Brief Service'
-    elif Close_Reason.startswith("H") == True or Close_Reason.startswith("I") == True or Close_Reason.startswith("L"):
-        return 'Full Rep or Extensive Service'
-    elif LS_LoS == 'Advice':
-        return 'Advice'
-    elif LS_LoS == 'Hold For Review':
-        return 'Hold For Review'
-    elif LS_LoS == 'Brief Service' or LS_LoS == 'Out-of-Court Advocacy':
-        return 'Brief Service'
-    elif LS_LoS.startswith('Rep') == True:
-        return 'Full Rep or Extensive Service'
+def HRA_Case_Coding(LoS,LPC,SLPC,Retainer,CaseNumber):
+    if LoS.startswith('Advice') and Retainer.startswith('Investigation'):
+        return "T1-EMPOTH_"
+    elif CaseNumber in GroupCaseNumber:
+        return "T2-EMPOTH_Group"
+    elif LoS.startswith('Brief') and Retainer.startswith('Investigation'):
+        return "T1-EMPOTH_"
+    elif LoS.startswith('Advice') and SLPC.startswith('295'):
+        return "B -RAP"
+    elif LoS.startswith('Brief') and SLPC.startswith('295'):
+        return "B -RAP"
+    elif LoS.startswith('Advice') and SLPC.startswith('296'):
+        return "B -CRD"
+    elif LoS.startswith('Brief') and SLPC.startswith('296'):
+        return "B -CRD"   
+    elif LoS.startswith('Advice') and SLPC.startswith('297'):
+        return "B -CGC"
+    elif LoS.startswith('Brief') and SLPC.startswith('297'):
+        return "B -CGC"
+    elif LoS.startswith('Advice') or LoS.startswith('Brief'):
+        return "B -EMP"
+    elif LoS.startswith('Out-of-Court'):
+        return "T1-PRELIT"
+    elif LoS.startswith('Rep') and LPC.startswith('76'):
+        return "T1-UIWC"
+    elif LoS.startswith('Rep') and LPC.startswith('93'):
+        return "T1-LICE"
+    elif LoS.startswith('Rep') and SLPC.startswith('22-1'):
+        return "T2-WAGE"
+    elif LoS.startswith('Rep') and SLPC.startswith('22-2'):
+        return "T2-WAGE"    
+    elif LoS.startswith('Rep') and SLPC.startswith('22-3'):
+        return "T2-WAGE"
+    elif LoS.startswith('Rep') and LPC.startswith('01 Bank'):
+        return "T2-BANK"
+    elif LoS.startswith('Representation') and LPC == '21 Employment Discrimination':
+        return "T2-DIS"
+    elif LoS.startswith('Rep') and SLPC.startswith('293'):
+        return "T2-FML"
+    elif LoS.startswith('Rep') and SLPC.startswith('22-4'):
+        return "T2-WB"
+    elif LoS.startswith('Rep') and SLPC.startswith('22-5'):
+        return "T2-WB"
+    elif LoS.startswith('Rep'):
+        return "T1-EMPOTH_"
+    elif SLPC == "Mandamus Action": 
+        return 'T2-FED'
+    elif SLPC == "EOIR-26" or SLPC == "EOIR-27":
+        return 'T2-FED'
     else:
-        return ""
+        return "***Needs Cleanup***"        
+
+#Does case need special legal problem code?
+def SPLC_problem(LoS,SPLC,HRACode):
+    if LoS == 'Hold For Review':
+        return SPLC
+    elif HRACode.startswith('***') and LoS != "":
+        return '***Needs SPLC***'
+    else:
+        return SPLC
+
+
+#Can case be reported based on income?
+        
+def Income_Exclude(IncomePct,Waiver):
+    IncomePct = int(IncomePct)
+    Waiver = str(Waiver)
+    if IncomePct > 200 and Waiver.startswith('Y') == False:
+        return 'Needs Income Waiver'
+    else:
+        return ''
+        
+        
+#DHCI form needed?
+        
+def DHCI_Needed(DHCI,LoS,Open_Construct):
+    if LoS.startswith('Advice'):
+        return ''
+    elif LoS.startswith('Brief'):
+        return ''
+    elif int(Open_Construct) < 20181115:
+        return ''
+    elif DHCI != 'Yes':
+        return 'Needs DHCI'
+    else:
+        return ''
+
+
+#Substantial Activity for Rollover FY21?
+                
+        
+def Needs_Rollover(Open_Construct,Substantial_Activity,Substantial_Activity_Date,CaseID):
+    if int(Open_Construct) >= 20200701:
+        return ''
+    elif Substantial_Activity != '' and int(Substantial_Activity_Date) >= 20200701 and int(Substantial_Activity_Date) <= 20210630:
+        return ''
+    elif CaseID in ReportedFY19 or CaseID in ReportedFY20:
+        return 'Needs Substantial Activity in FY21'
+    else:
+        return ''
 
 def UoSCalculator(CaseCoding):
     if CaseCoding.startswith('T2') == True:
@@ -4910,14 +4872,40 @@ def UoSCalculator(CaseCoding):
     else:
         return 0
 
-def ReportableTester(Income,DHCI,SubsActivity,DeliverableTally):
+def ReportableTester(Income,DHCI,SubsActivity,CaseCoding):
     if Income != '':
         return 'No'
     elif DHCI != '':
         return 'No'
     elif SubsActivity != '':
         return 'No'
-    elif DeliverableTally == 'Needs Cleanup':
+    elif CaseCoding == '***Needs Cleanup***':
         return 'No'
     else:
         return 'Reportable'
+
+"""
+
+#Determining 'level of service' from 3 fields       
+def HRA_Service_Type(Employment_Tier):
+    Employment_Tier = str(Employment_Tier)
+    
+    if Employment_Tier.startswith("Advice-No Retainer") == True:
+        return 'B'
+    elif Employment_Tier.startswith("UI Representation") == True:
+        return 'T1'
+    elif Employment_Tier.startswith("Advice-Investigation Retainer") == True:
+        return 'T1'
+    elif Employment_Tier.startswith("Demand Letter-Negotiation") == True:
+        return 'T1'
+    elif Employment_Tier.startswith("Admin Rep") == True:
+        return 'T2'
+    elif Employment_Tier.startswith("Litigation") == True:
+        return 'T2'
+    else:
+        return '***Needs Cleanup***'
+df['HRA Service Type'] = df.apply(lambda x: HRA_Service_Type(x['HRA IOI Employment Law IOI Employment Tier Category:']), axis=1)
+
+df['HRA Proceeding Type'] = 'EMP'
+
+"""

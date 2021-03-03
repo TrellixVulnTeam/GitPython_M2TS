@@ -59,10 +59,9 @@ def index():
     <ul type="disc">
     <li><a href="/IOIimmMonthly">Monthly IOI Immigration</a></li>
     <li><a href="/IOIimmQuarterly">Quarterly IOI Immigration</a></li>
+    <br>
     <li><a href="/IOIempMonthly">Monthly IOI Employment</a></li>
     <li><a href="/IOIempQuarterly">Quarterly IOI Employment</a></li>
-    <li><a href="/IOIimmCentral">Tool for Central Monthly Immigration Reports</a></li>
-    <li><a href="/IOIempCentral">Tool for Central Monthly Employment Reports</a></li>
     </ul>
     
     <b>DAP Tools:</b>
@@ -74,6 +73,11 @@ def index():
     <ul type="disc">
     <li><a href="/IOLADollarCleaner">IOLA $ Cleaner</a></li>
     </ul>
+    <b>Foreclosure Tools:</b>
+    <ul type="disc">
+    <li><a href="/CNYCNCleaner">CNYCN Cleaner</a></li>
+    </ul>
+    
     <br>
     <b>Development Sandbox:</b>
     <ul type="disc">

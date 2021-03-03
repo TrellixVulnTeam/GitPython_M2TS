@@ -145,7 +145,7 @@ def upload_IOIimmMonthly():
 
 
        
-       #Needs Substantial Activity to Rollover into FY'20
+        #Needs Substantial Activity to Rollover into FY'20
 
         
         #Needs Substantial Activity to Rollover into FY'21
@@ -160,7 +160,7 @@ def upload_IOIimmMonthly():
             else: return ''
         df['Needs Substantial Activity?'] = df.apply(lambda x: Needs_Rollover(x['Open Construct'],x['IOI FY21 Substantial Activity (Choose One)'],x['Subs Construct'],x['Matter/Case ID#']), axis=1)  
         
-        
+
         #Outcomes
 
                 
@@ -224,95 +224,18 @@ def upload_IOIimmMonthly():
         df['Deliverable Tally'] = df.apply(lambda x: Deliverable_Category(x['HRA Case Coding'],x['Exclude due to Income?'],x['Age at Intake']), axis=1)
 
 
-        #add LSNYC to start of case numbers 
-
-        df['Unique_ID'] = 'LSNYC'+df['Matter/Case ID#']
-
-        #take second letters of first and last names
-
-        df['Last_Initial'] = df['Client Last Name'].str[1]
-        df['First_Initial'] = df['Client First Name'].str[1]
-
-        #Year of birth
-        df['Year_of_Birth'] = df['Date of Birth'].str[-4:]
-
-        #gender
-        def HRAGender (gender):
-            if gender == 'Male' or gender == 'Female':
-                return gender
-            else:
-                return 'Other'
-        df['Gender'] = df.apply(lambda x: HRAGender(x['Gender']), axis=1)
-
-        #county=borough
-        df['Borough'] = df['County of Residence']
-
-        #household size etc.
-        df['Household_Size'] = df['Number of People under 18'].astype(int) + df['Number of People 18 and Over'].astype(int)
-        df['Number_of_Children'] = df['Number of People under 18']
-
-        #Income Eligible?
-        df['Annual_Income'] = df['Total Annual Income ']
-        def HRAIncElig (PercentOfPoverty):
-            if PercentOfPoverty > 200:
-                return 'NO'
-            else:
-                return 'YES'
-        df['Income_Eligible'] = df.apply(lambda x: HRAIncElig(x['Percentage of Poverty']), axis=1)
-
-        def IncWaiver (eligible,waiverdate):
-            if eligible == 'NO' and waiverdate != '':
-                return 'Income'
-            else:
-                return ''
-        df['Waiver_Type'] = df.apply(lambda x: IncWaiver(x['Income_Eligible'],x['IOI HRA WAIVER APPROVAL DATE if over 200% of FPL (IOI 2)']), axis=1)
-
-        def IncWaiverDate (waivertype,date):
-            if waivertype != '':
-                return date
-            else:  
-                return ''
-                
-        df['Waiver_Approval_Date'] = df.apply(lambda x: IncWaiverDate(x['Waiver_Type'],x['IOI HRA WAIVER APPROVAL DATE if over 200% of FPL (IOI 2)']), axis = 1)
-
-        #Referrals
-        def Referral (referral):
-            if referral == "Action NY":
-                return "ActionNYC"
-            elif referral == "HRA":
-                return "HRA-DSS"
-            elif referral == "Other":
-                return "Other"
-            elif referral == "":
-                return "None"
-            else:
-                return ""
-                
-        df['Referral_Source'] = df.apply(lambda x: Referral(x['IOI Referral Source (IOI 2)']), axis = 1)
-
-        #Pro Bono Involvement
-        def ProBonoCase (branch, pai):
-            if branch == "LSU" or pai == "Yes":
-                return "YES"
-            else:
-                return "NO"
-                
-        df['Pro_Bono'] = df.apply(lambda x:ProBonoCase(x['Assigned Branch/CC'], x['PAI Case?']), axis = 1)
-
-                 
-
-        #Other Cleanup
-        df['Service_Type_Code'] = df['HRA Service Type']
-        df['Proceeding_Type_Code'] = df['HRA Proceeding Type']
-        df['Outcome'] = df['Outcome To Report']
-        df['Outcome_Date'] = df['Outcome Date To Report']
-        df['Seized_at_Border'] = df['IOI Was client apprehended at border? (IOI 2&3)']
-        df['Group'] = ''
-        df['Prior_Enrollment_FY'] = 'Jay does this manually later'
+        #Unit of Service Calculator
+        df['Units of Service'] = df.apply(lambda x: ImmigrationToolBox.UoSCalculator(x['HRA Case Coding']),axis=1)
+        
+        #Reportable?
+        
+        df['Reportable?'] = df.apply(lambda x: ImmigrationToolBox.ReportableTester(x['Exclude due to Income?'],x['Needs DHCI?'],x['Needs Substantial Activity?'],x['Deliverable Tally']),axis=1)
+        
+ 
         df = df.sort_values(by=['Primary Advocate'])
           
         #CLEANUP VERSION Put everything in the right order
-        df = df[['Hyperlinked Case #','Office','Primary Advocate','Client Name','Special Legal Problem Code','Level of Service','Needs DHCI?','Exclude due to Income?','Needs Substantial Activity?','Country of Origin','Language','Outcome To Report','IOI Was client apprehended at border? (IOI 2&3)','Deliverable Tally']]
+        df = df[['Hyperlinked Case #','Office','Primary Advocate','Client Name','Special Legal Problem Code','Level of Service','Needs DHCI?','Exclude due to Income?','Needs Substantial Activity?','Country of Origin','Language','Outcome To Report','IOI Was client apprehended at border? (IOI 2&3)','Deliverable Tally','Units of Service','Reportable?']]
 
         #Preparing Excel Document
 
@@ -369,7 +292,7 @@ def upload_IOIimmMonthly():
 
         save_xls(dict_df = borough_dictionary, path = "app\\sheets\\" + output_filename)
 
-        return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = "Cleaned " + f.filename)
+        return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = "Cleanup " + f.filename)
     return '''
     <!doctype html>
     <title>IOI Immigration Monthly</title>
