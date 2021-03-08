@@ -44,18 +44,48 @@ def CNYCNCleaner():
         #If closed, has outcome - see if it comes up
         #if mortgage modified, has NewPay? - see if it comes up 
         
+        #add benefits column together (even if funds obtained is in crappy format):
         
+        def Floatifier(FundsObtained):
+            if FundsObtained == '':
+                return 0
+            elif isinstance(FundsObtained,int) == True or isinstance(FundsObtained,float) == True:
+                return FundsObtained
+            elif ',' in FundsObtained or '$' in FundsObtained:
+                FundsObtained = FundsObtained.replace(',','')
+                FundsObtained = FundsObtained.replace('$','')
+                try: 
+                    FundsObtained = float(FundsObtained)
+                    return FundsObtained
+                except:
+                    print('did not float')
+                    return 'Needs Fixing'
+            else:
+                return 'Needs Fixing'
+        
+        df['Funds Obtained'] = df.apply(lambda x: Floatifier(x['Funds Obtained']),axis = 1)
+        
+        def BenefitsSum (FundsObtained, DebtDischarged, SettlementAmount,TotalSavedFromRate,PrincipalReduction):
+            
+            if isinstance(FundsObtained,int) == True or isinstance(FundsObtained,float) == True:
+                BenefitSum = DebtDischarged + SettlementAmount + TotalSavedFromRate + PrincipalReduction + FundsObtained
+                return BenefitSum
+            elif FundsObtained == 'Needs Fixing':
+                return 'Fix Funds Obtained'
+            
+        df['Benefits'] = df.apply(lambda x: BenefitsSum(x['Funds Obtained'],x['Debt Discharged In Short Sales'],x['Settlement Amount'],x['Total Saved Due To Rate Reduction'],x['Amount Of Principal Reduction']),axis = 1)
         
         #Giving things the CNYCN name:
         
-        def FundingSourceNamer(FundsNum):
+        def FundingSourceNamer(FundsNum,FundsNum2):
             FundsNum = str(FundsNum)
-            if FundsNum.startswith('2') == True:
+            if FundsNum.startswith('2') == True or FundsNum2.startswith('2') == True:
                 return 'HOPP'
-            elif FundsNum.startswith('5') == True:
+            elif FundsNum.startswith('5') == True or FundsNum2.startswith('5') == True:
                 return 'CNYCN'
             else:   
                 return 'Funding Code Error'
+                
                 
         def EthnicityGuesser(Race,Language):
             if Race == "Latina/o/x" or Race == "Hispanic":
@@ -64,12 +94,53 @@ def CNYCNCleaner():
                 return 'Hispanic'
             else:
                 return 'Non-Hispanic'
-                
-        df['FundingSource'] = df.apply(lambda x: FundingSourceNamer(x['FundsNum']),axis = 1)
+        
+        def RaceNamer(Race):
+            if Race == "Black/African American/African Descent":
+                return "Black/African American"
+            elif Race == "White (Not Hispanic)":
+                return "White"
+            elif Race == "Asian or Pacific Islander":
+                return "Asian"
+            elif Race == "Hispanic" or Race == "Latina/o/x":
+                return "Other"
+            else: 
+                return Race
+        
+        def OutcomeReplacer(Outcome):
+            if Outcome == "Obtained credit/budget counseling" or Outcome == "Referred to legal services":
+                return "Referral"
+            elif Outcome == "Resolved non-mortgage lien issue":
+                return "Resolved Non-mortgage Lien"
+            elif Outcome == "Mortgage Refinanced-In House":
+                return "Mortgage Modified - In House"
+            else:
+                return Outcome
+        
+        def ModStatusReplacer(ModStatus):
+            if ModStatus == "Lender/Servicer Requested Addition Documents":
+                return "Lender/Servicer Requested Additional Documents"
+            else:
+                return ModStatus
+        
+        def LegalAssistanceReplacer(LegalAssistance):
+            if LegalAssistance == "Representation in Good Faith Proceeding":
+                return "Litigation"
+            else:
+                return LegalAssistance
+        
+        
+        def NewPayNoZeroes(NewPay):
+            if NewPay == 0:
+                return ''
+            else:
+                return NewPay
+        
+        df['FundingSource'] = df.apply(lambda x: FundingSourceNamer(x['FundsNum'],x['Secondary Funding Codes']),axis = 1)
         df['Staff'] = df['Caseworker Name']
         df['IntakeDate'] = df['Date Opened']
         df['ServDate'] = df['Time Updated']
-        df['Race'] = df['Race (CNYCN)']
+        df['Race'] = df.apply(lambda x: RaceNamer(x['Race (CNYCN)']),axis = 1)
         df['Ethnicity'] = df.apply(lambda x: EthnicityGuesser(x['Race (CNYCN)'],x['Language']),axis = 1)
         df['Language'] = ''
         df['Children'] = df['Number of People under 18']
@@ -106,7 +177,7 @@ def CNYCNCleaner():
         df['LPDate'] = ''
         df['Servicer'] = df['Servicer']
         df['LoanNumber'] = ''
-        df['Servicer2'] = ''
+        df['Servicer2'] = df['Servicer2']
         df['LoanNumber2'] = ''
         df['Violation'] = ''
         df['Violation2'] = ''
@@ -116,52 +187,78 @@ def CNYCNCleaner():
         df['FirstConference'] = ''
         df['BadFaith'] = ''
         df['LegalHr'] = ''
-        df['PrimaryLegal'] = df['Type Of Assistance']
-        df['SecondLegal'] = df['Secondary Assistance Type']
+        df['PrimaryLegal'] = df.apply(lambda x: LegalAssistanceReplacer(x['Type Of Assistance']),axis=1)
+        df['SecondLegal'] = df.apply(lambda x: LegalAssistanceReplacer(x['Secondary Assistance Type']),axis=1)
         df['PrimarySandy'] = ''
         df['SecondSandy'] = ''
-        df['ModStatus'] = df['Loan Modification Status']
-        df['ModStatus2'] = df['Loan Modification Status 2']
-        df['PrimaryOutcome'] = df['FPU Primary Outcome']
-        df['SecondOutcome'] = df['FPU Secondary Outcome']
-        
-        
-        """
-        ***DO the rest of the Sheet
-        df[''] = ''
-        df[''] = ''
-        df[''] = ''
-        df[''] = ''
-        df[''] = df['']
-        df[''] = df['']
-        df[''] = df['']
-        df[''] = df['']
-        """
-        
-        
+        df['ModStatus'] = df.apply(lambda x: ModStatusReplacer(x['Loan Modification Status']),axis =1)
+        df['ModStatus2'] = df.apply(lambda x: ModStatusReplacer(x['Loan Modification Status 2']),axis =1)
+        df['PrimaryOutcome'] = df.apply(lambda x: OutcomeReplacer(x['FPU Primary Outcome']),axis = 1)
+        df['SecondOutcome'] = df.apply(lambda x: OutcomeReplacer(x['FPU Secondary Outcome']),axis = 1)
+        df['PrimaryOutcome2'] = ''
+        df['SecondaryOutcome2'] = ''
+        df['NewPrincipal'] = ''
+        df['NewPrincipal2'] = ''
+        df['NewTerm'] = ''
+        df['NewTerm2'] = ''
+        df['NewType'] = ''
+        df['NewType2'] = ''
+        df['NewRate'] = ''
+        df['NewRate2'] = ''
+        df['NewPay'] = df.apply(lambda x: NewPayNoZeroes(x['FPU Mod PITI Payment - 1st']),axis = 1)
+        df['NewPay2'] = df.apply(lambda x: NewPayNoZeroes(x['FPU Mod PITI Payment - 2nd']),axis = 1)
+        df['PrincipalForgive'] = ''
+        df['PrincipalForgive2'] = ''
+        df['ForbearAmt'] = ''
+        df['ForbearAmt2'] = ''
+        df['SSPrice'] = ''
+        df['SSDate'] = ''
+        df['Forgiven'] = ''
+        df['DILDate'] = ''
+        #df['Benefits'] = 'Slightly More Complicated - see above'
+        df['NewHousing'] = ''
+        df['CaseClose'] = ''
+
         #Putting everything in the right order
         df = df.sort_values(by=['Caseworker Name'])
         df = df.sort_values(by=['FundsNum'])
         
+        #split good for formatting
+        df['Branch&Report'] = df['Assigned Branch/CC'] + df['FundingSource']
+        
+        #Wacky Apostrophes coming out of LegalServer
+        df = df.replace("’","'",regex = True)
+        
+        #Remove Unreportables (servicer, Servdate, primary distress, primarylegal)
+        
+        def Unreportables(Servicer,Servdate,PrimaryDistress,PrimaryLegal):
+            if Servicer == '' or Servdate == '' or PrimaryDistress == '' or PrimaryLegal == '':
+                return 'Unreportable'
+        
+        if request.form.get('remover'):
+            df['Unreportable'] = df.apply(lambda x: Unreportables(x['Servicer'],x['ServDate'],x['PrimaryDist'],x['PrimaryLegal']),axis=1)
+            df = df[df['Unreportable'] != "Unreportable"]
         
         #Formatting Version
         
         if request.form.get('formatter'):
             
-            #***separate HOPP from CNYCN (by sort or sheet)
-            df = df[['FundingSource','ClientID','Staff','IntakeDate','ServDate','Race','Ethnicity','Language','Children','Adults','Seniors','Income','Household','ZIP','County','PrimaryDist','SecondaryDist','Units','PurchaseDate','OrigDate','OrigDate2','OrigAmount','OrigAmount2','OrigTerm','OrigTerm2','LoanOwner','LoanOwner2','IntakePrincipal','IntakePrincipal2','IntakeProd','IntakeProd2','IntakeRate','IntakeRate2','IntakePay','IntakePay2','InterestOnly','InterestOnly2','LoanStatus','LoanStatus2','LPDate','Servicer','LoanNumber','Servicer2','LoanNumber2','Violation','Violation2','ServicerChange','ServicerChange2','Conference#','FirstConference','BadFaith','LegalHr','PrimaryLegal','SecondLegal','PrimarySandy','SecondSandy','ModStatus','ModStatus2','PrimaryOutcome','SecondOutcome','Assigned Branch/CC']]
+            
+            df = df[['FundingSource','ClientID','Staff','IntakeDate','ServDate','Race','Ethnicity','Language','Children','Adults','Seniors','Income','Household','ZIP','County','PrimaryDist','SecondaryDist','Units','PurchaseDate','OrigDate','OrigDate2','OrigAmount','OrigAmount2','OrigTerm','OrigTerm2','LoanOwner','LoanOwner2','IntakePrincipal','IntakePrincipal2','IntakeProd','IntakeProd2','IntakeRate','IntakeRate2','IntakePay','IntakePay2','InterestOnly','InterestOnly2','LoanStatus','LoanStatus2','LPDate','Servicer','LoanNumber','Servicer2','LoanNumber2','Violation','Violation2','ServicerChange','ServicerChange2','Conference#','FirstConference','BadFaith','LegalHr','PrimaryLegal','SecondLegal','PrimarySandy','SecondSandy','ModStatus','ModStatus2','PrimaryOutcome','SecondOutcome','PrimaryOutcome2','SecondaryOutcome2','NewPrincipal','NewPrincipal2','NewTerm','NewTerm2','NewType','NewType2','NewRate','NewRate2','NewPay','NewPay2','PrincipalForgive','PrincipalForgive2','ForbearAmt','ForbearAmt2','SSPrice','SSDate','Forgiven','DILDate','Benefits','NewHousing','CaseClose','Branch&Report']]
             
         #Cleanup Version
         else:
         
-            df = df[['Case ID#','Caseworker Name','Client First Name','Client Last Name','Type Of Assistance','FPU Prim Src Client Prob','Servicer','FPU Primary Outcome','Loan Modification Status','FPU Mod PITI Payment - 1st','Assigned Branch/CC','FundsNum','Date Opened','Time Updated','Race (CNYCN)','Number of People 18 and Over','Number of People under 18','Number Of Seniors In Household','Total Annual Income ','Zip Code','County of Residence','FPU Sec Src Client Prob','FPU Num Prop Units','Secondary Assistance Type','Loan Modification Status 2','FPU Secondary Outcome','FPU Mod PITI Payment - 2nd','Funds Obtained','Debt Discharged In Short Sales','Settlement Amount','Total Saved Due To Rate Reduction','Amount Of Principal Reduction']]
+            df = df[['Case ID#','Caseworker Name','Client First Name','Client Last Name','Type Of Assistance','FPU Prim Src Client Prob','Servicer','FPU Primary Outcome','FPU Secondary Outcome','Loan Modification Status','FPU Mod PITI Payment - 1st','Benefits','Funds Obtained','Assigned Branch/CC','FundsNum','Date Opened','Time Updated','Race (CNYCN)','Number of People 18 and Over','Number of People under 18','Number Of Seniors In Household','Total Annual Income ','Zip Code','County of Residence','FPU Sec Src Client Prob','FPU Num Prop Units','Secondary Assistance Type','Loan Modification Status 2','FPU Secondary Outcome','FPU Mod PITI Payment - 2nd','Debt Discharged In Short Sales','Settlement Amount','Total Saved Due To Rate Reduction','Amount Of Principal Reduction']]
         
         
         
         
         #Preparing Excel Document
-
-        borough_dictionary = dict(tuple(df.groupby('Assigned Branch/CC')))
+        if request.form.get('formatter'):
+            borough_dictionary = dict(tuple(df.groupby('Branch&Report')))
+        else:
+            borough_dictionary = dict(tuple(df.groupby('Assigned Branch/CC')))
 
         def save_xls(dict_df, path):
             writer = pd.ExcelWriter(path, engine = 'xlsxwriter')
@@ -174,14 +271,17 @@ def CNYCNCleaner():
                 worksheet = writer.sheets[i]
                 
                 if request.form.get('formatter'):
-                    worksheet.set_column('A:CC',20)
+                    worksheet.set_column('A:CE',20)
                 else:
                     worksheet.set_column('A:A',12,link_format)
                     worksheet.set_column('B:B',20)
                     worksheet.set_column('C:D',15)
-                    worksheet.set_column('E:J',30)
-                    worksheet.set_column('K:AF',0)
-
+                    worksheet.set_column('E:L',30)
+                    worksheet.set_column('M:AG',0)
+                    worksheet.conditional_format('K1:K10000',{'type': 'text',
+                                                 'criteria': 'containing',
+                                                 'value': 'Fix',
+                                                 'format': problem_format})
                     worksheet.conditional_format('E2:G100000',{'type': 'blanks',
                                                              'format': problem_format})
                     worksheet.freeze_panes(1,1)
@@ -189,8 +289,13 @@ def CNYCNCleaner():
         output_filename = f.filename
 
         save_xls(dict_df = borough_dictionary, path = "app\\sheets\\" + output_filename)
-
-        return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = "Cleanup " + f.filename)
+        
+        if request.form.get('formatter'):
+            FilePrefix = "Formatted "
+        else:
+            FilePrefix = "Cleanup "
+        
+        return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = FilePrefix + f.filename)
         
         #***#
        
@@ -210,6 +315,11 @@ def CNYCNCleaner():
 
     <input type="checkbox" id="formatter" name="formatter" value="formatter">
     <label for="formatter"> Format for Submission</label><br>
+    
+    </br>
+
+    <input type="checkbox" id="remover" name="remover" value="remover">
+    <label for="remover"> Remove Unreportables for Formatted Report</label><br>
     
     </form>
     <h3>Instructions:</h3>

@@ -77,7 +77,7 @@ def CSRDeterminer():
             CloseReason = str(CloseReason)   
             if AttestationOnFile == "Yes" or StaffVerified == "Yes":
                 return ''
-            elif CloseReason.startswith(('A','B')) == True:
+            elif CloseReason.startswith(('A','B')) == True and ClientInPerson == 'No':
                 return ''
             else:
                 return 'CSR No'
