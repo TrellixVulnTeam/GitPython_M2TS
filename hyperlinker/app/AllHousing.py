@@ -189,7 +189,7 @@ def AllHousing():
             First2 = CaseNum[0:2]
             Middle6 = CaseNum[3:9]
             
-            if Level == 'Advice' or Level == 'Brief Service' or Level == 'Out-of-Court Advocacy' or Level == 'Hold For Review':
+            if Level == 'Advice' or Level == 'Brief Service' or Level == 'Out-of-Court Advocacy' or Level == 'Hold For Review' or Level.startswith('UAC') == True:
                 return '' 
             elif Middle6 == '000000':
                 return "Needs Correct Case # Format"
@@ -217,14 +217,9 @@ def AllHousing():
         
         #Test Housing Services Rendered - can't be blank for closed cases that are full rep state or full rep federal(housing level of service)
          
-        def ServicesTesterClean(HousingServices,Disposition,Level,Type):
-            
-            if Level == 'Representation - Admin. Agency' and HousingServices == '':
-                return 'Needs Services Rendered'
-            else:
-                return ''
+
          
-        df['Housing Services Tester'] = df.apply(lambda x: ServicesTesterClean(x['Housing Services Rendered to Client'],x['Case Disposition'],x['Housing Level of Service'],x['Housing Type Of Case']), axis = 1)
+        df['Housing Services Tester'] = df.apply(lambda x: HousingToolBox.ServicesTesterClean(x['Housing Services Rendered to Client'],x['Case Disposition'],x['Housing Level of Service'],x['Housing Type Of Case']), axis = 1)
         
         #Housing Type of Case Eviction-Types:
         evictiontypes = ['Holdover','Non-payment','Illegal Lockout']

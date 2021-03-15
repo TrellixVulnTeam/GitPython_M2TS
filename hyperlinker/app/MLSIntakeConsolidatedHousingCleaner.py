@@ -50,7 +50,7 @@ def MLSIntakeConsolidatedHousingCleaner():
         def ReleaseTester(HRARelease,PreThreeOne,LevelOfService):
             LevelOfService = str(LevelOfService)
             if PreThreeOne == "No" and LevelOfService.startswith("Advice"):
-                return "Unnecessary post-3/1 advice/brief"
+                return "Unnecessary advice/brief"
             else:
                 return HRARelease
        
@@ -64,7 +64,7 @@ def MLSIntakeConsolidatedHousingCleaner():
         def PATester (PANum,DHCI,PreThreeOne,LevelOfService):
             LevelOfService = str(LevelOfService)
             if PreThreeOne == "No" and LevelOfService.startswith("Advice"):
-                return "Unnecessary post-3/1 advice/brief"
+                return "Unnecessary advice/brief"
             elif DHCI == "DHCI Form" and PANum == "":
                 return "Not Needed due to DHCI"
             else:

@@ -52,24 +52,27 @@ def UAHPLPConsolidatedBoroughCleaner():
         df['OpenedDateConstruct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['Date Opened']), axis=1)
        
         #don't need consent form if it's post-covid advice/brief
-        def ReleaseTester(HRARelease,PreThreeOne,LevelOfService,EligDate,OpenDate):
+        def ReleaseTester(HRARelease,LevelOfService,EligDate,IndexNum):
             LevelOfService = str(LevelOfService)
-            if PreThreeOne == "No" and LevelOfService.startswith("Advice") and EligDate != '':
-                return "Unnecessary due to post-3/1 limited service"
-            elif PreThreeOne == "No" and LevelOfService.startswith("Advice") and OpenDate >= 20200301:
-                return "Unnecessary due to post-3/1 limited service"
+            IndexNum = str(IndexNum)
+            if LevelOfService.startswith("Advice") or LevelOfService.startswith("Brief"):
+        
+                if IndexNum == '' or IndexNum.startswith('N') == True or IndexNum.startswith('n') == True:
+                    return 'Unnecessary due to Limited Service'
+                else:
+                    return HRARelease
             else:
                 return HRARelease
        
-        df['HRA Release?'] = df.apply(lambda x: ReleaseTester(x['HRA Release?'],x['Pre-3/1/20 Elig Date?'],x["Housing Level of Service"],x['EligDateConstruct'],x['OpenedDateConstruct']),axis = 1)
+        df['HRA Release?'] = df.apply(lambda x: ReleaseTester(x['HRA Release?'],x["Housing Level of Service"],x['EligDateConstruct'],x['Gen Case Index Number']),axis = 1)
        
         #PA Tester if theres no dhci, not needed for post-covid advice/brief cases
         def PATester (PANum,DHCI,PreThreeOne,LevelOfService,EligDate,OpenDate):
             LevelOfService = str(LevelOfService)
             if PreThreeOne == "No" and LevelOfService.startswith("Advice") and EligDate != '':
-                return "Unnecessary due to post-3/1 limited service"
+                return "Unnecessary due limited service"
             elif PreThreeOne == "No" and LevelOfService.startswith("Advice") and OpenDate >= 20200301:
-                return "Unnecessary due to post-3/1 limited service"
+                return "Unnecessary due to limited service"
             
             elif DHCI == "DHCI Form" and PANum == "":
                 return "Not Needed due to DHCI"
@@ -152,6 +155,7 @@ def UAHPLPConsolidatedBoroughCleaner():
         
         "Housing Outcome",
         "Housing Outcome Date",
+        "Gen Case Index Number", 
         "Tester Tester",
         "Assigned Branch/CC"
         

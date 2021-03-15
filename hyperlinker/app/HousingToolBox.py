@@ -133,10 +133,13 @@ def LanguageClean (Language):
 #Housing Posture of Case can't be blank if there is an eligibility date
         
 def PostureClean (Posture,EligibilityDate,Type,Level):
-    if Type in evictiontypes and Level.startswith("Rep") == True:
+    if Type in evictiontypes:
+        if Level.startswith("Rep") == True:
         
-        if EligibilityDate  != '' and Posture == '':
-            return 'Needs Posture of Case'
+            if EligibilityDate  != '' and Posture == '':
+                return 'Needs Posture of Case'
+            else:
+                return ''
         else:
             return ''
     else:
@@ -213,7 +216,7 @@ def CaseNumClean (CaseNum,Level):
     First6 = CaseNum[0:6]
     First2 = CaseNum[0:2]
     
-    if Level == 'Advice' or Level == 'Brief Service' or Level == 'Out-of-Court Advocacy' or Level == 'Hold For Review':
+    if Level == 'Advice' or Level == 'Brief Service' or Level == 'Out-of-Court Advocacy' or Level == 'Hold For Review' or Level.startswith('UAC') == True:
         return ''            
     #City LT Case format LT-123456-19/XX
     elif len(CaseNum) == 15 and First3 == 'LT-' and ThirdFromEnd == '/':
@@ -276,6 +279,8 @@ def ServicesTesterClean(HousingServices,Disposition,Level,Type):
     if Disposition == 'Closed' and Level in leveltypes and HousingServices == '':
         return 'Needs Services Rendered'
     elif Level == 'Representation - Admin. Agency' and Disposition == 'Closed' and HousingServices == '':
+        return 'Needs Services Rendered'
+    elif Level.startswith('UAC') == True and Disposition == 'Closed' and HousingServices == '':
         return 'Needs Services Rendered'
     else:
         return ''
@@ -487,9 +492,6 @@ def UACServiceType(LevelOfService,UAorNonUA,CloseReason,LegalProblemCode):
             return "Brief Legal Assistance"
         elif UAorNonUA == "Non-UA":
             return "Advice Only"
-    
-    
-    
     elif CloseReason.startswith(("F","G","H","IA","IB","L")) == True:
         return "Full Rep"
     elif LevelOfService == "Advice" or LevelOfService == "Brief Service" or LevelOfService == "Out-of-Court Advocacy":
@@ -499,7 +501,7 @@ def UACServiceType(LevelOfService,UAorNonUA,CloseReason,LegalProblemCode):
             return "Advice Only"
     elif LevelOfService == "Hold For Review":
         return "Hold For Review"
-    elif LevelOfService == "Representation - Admin. Agency" or LevelOfService == "Representation-EOIR" or LevelOfService == "Representation - Federal Court" or LevelOfService == "Representation - State Court":
+    elif LevelOfService == "Representation - Admin. Agency" or LevelOfService == "Representation-EOIR" or LevelOfService == "Representation - Federal Court" or LevelOfService == "Representation - State Court" or LevelOfService.startswith('UAC') == True:
         return "Full Rep"
  
 #Housing Regulation Type: mapping down - we have way more categories, rent regulated, market rate, or other (mapping to be confirmed). can't be blank     
