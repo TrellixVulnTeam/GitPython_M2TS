@@ -193,21 +193,19 @@ def upload_TRCCovidClean():
                 return ''
         df['Public Housing Review Tester'] = df.apply(lambda x: PublicHousingTester(x['Legal Problem Code'],x['Housing Form Of Regulation'],x['Primary Funding Code'],x['Referral Source'],x['DateConstruct']),axis = 1)        
         """
-        """
-        def NonHousingTester (ProblemCode, EligConstruct, FundingCode, ReferralSource):
-            if ProblemCode.startswith('6') == True or ProblemCode.startswith('0') == True:
-                return ''
-            elif FundingCode.startswith('3011') == True or ReferralSource.startswith('FJC') == True:
-                return ''
+        
+        def NonHousingAdviceConverter (ProblemCode, EligConstruct, FundingCode, ReferralSource, HousingLevelOfService):
+            if ProblemCode.startswith('6') == True or ProblemCode.startswith('0') == True or FundingCode.startswith('3011') == True or ReferralSource.startswith('FJC') == True:
+                return HousingLevelOfService
             elif EligConstruct != '':
-                if EligConstruct > 20200930:
-                    return 'Needs Review'
+                if EligConstruct < 20201001:
+                    return 'Advice'
                 else:
-                    return ''
+                    return HousingLevelOfService
             else:
-                return ''
-        df['Non-Housing Case Tester']  = df.apply(lambda x: NonHousingTester(x['Legal Problem Code'],x['DateConstruct'],x['Primary Funding Code'],x['Referral Source']),axis = 1)
-        """
+                return HousingLevelOfService
+        df['Housing Level of Service']  = df.apply(lambda x: NonHousingAdviceConverter(x['Legal Problem Code'],x['DateConstruct'],x['Primary Funding Code'],x['Referral Source'],x['Housing Level of Service']),axis = 1)
+        
         #COVID Modifications - make the testers blank if it's an advice only pre-3/1 case!
         
         #Differentiate pre- and post- 3/1/20 eligibility date cases

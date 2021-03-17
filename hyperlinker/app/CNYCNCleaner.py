@@ -136,10 +136,18 @@ def CNYCNCleaner():
             else:
                 return NewPay
         
+        def DateTexter (Date):
+            Date = str(Date)
+            if ":" in Date:
+                return '=TEXT("' + Date + '","mm/dd/yyyy")'
+            else:   
+                return Date
+            
+        
         df['FundingSource'] = df.apply(lambda x: FundingSourceNamer(x['FundsNum'],x['Secondary Funding Codes']),axis = 1)
         df['Staff'] = df['Caseworker Name']
-        df['IntakeDate'] = df['Date Opened']
-        df['ServDate'] = df['Time Updated']
+        df['IntakeDate'] = df.apply(lambda x: DateTexter(x['Date Opened']),axis = 1)
+        df['ServDate'] = df.apply(lambda x: DateTexter(x['Time Updated']),axis = 1)
         df['Race'] = df.apply(lambda x: RaceNamer(x['Race (CNYCN)']),axis = 1)
         df['Ethnicity'] = df.apply(lambda x: EthnicityGuesser(x['Race (CNYCN)'],x['Language']),axis = 1)
         df['Language'] = ''
