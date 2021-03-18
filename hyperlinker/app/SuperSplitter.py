@@ -28,9 +28,13 @@ def split_by_supervisor():
             data_xls['Primary Assignment'] = data_xls['Primary Advocate']
         
         if 'Matter/Case ID#' not in data_xls.columns:
-            data_xls['Matter/Case ID#'] = data_xls['Hyperlinked Case #']
+            try:
+                data_xls['Matter/Case ID#'] = data_xls['Hyperlinked Case #']
+                del data_xls['Hyperlinked Case #']
+            except: 
+                data_xls['Matter/Case ID#'] = data_xls['Hyperlinked CaseID#']
+                del data_xls['Hyperlinked CaseID#']
         
-        del data_xls['Hyperlinked Case #']
         
         #apply hyperlink methodology with splicing and concatenation
       
