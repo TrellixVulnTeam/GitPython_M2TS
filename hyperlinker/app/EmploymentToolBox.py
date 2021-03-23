@@ -4855,6 +4855,8 @@ def DHCI_Needed(DHCI,LoS,Open_Construct):
 def Needs_Rollover(Open_Construct,Substantial_Activity,Substantial_Activity_Date,CaseID):
     if int(Open_Construct) >= 20200701:
         return ''
+    elif Substantial_Activity != '' and Substantial_Activity_Date == '':
+        return 'Needs Substantial Activity Date'
     elif Substantial_Activity != '' and int(Substantial_Activity_Date) >= 20200701 and int(Substantial_Activity_Date) <= 20210630:
         return ''
     elif CaseID in ReportedFY19 or CaseID in ReportedFY20:

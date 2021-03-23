@@ -166,6 +166,10 @@ def upload_IOIempMonthly():
                                                  'criteria': '==',
                                                  'value': '"Needs Substantial Activity in FY21"',
                                                  'format': problem_format})
+                worksheet.conditional_format('I1:I100000',{'type': 'cell',
+                                                 'criteria': '==',
+                                                 'value': '"Needs Substantial Activity Date"',
+                                                 'format': problem_format})
                 worksheet.conditional_format('J1:J100000',{'type': 'cell',
                                                  'criteria': '==',
                                                  'value': '""',

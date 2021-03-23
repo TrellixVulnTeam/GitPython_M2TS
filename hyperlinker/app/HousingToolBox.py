@@ -338,14 +338,14 @@ def UAHPLPOutcomeTesterClean (Disposition,Outcome,OutcomeDate,Level,Type,EligDat
 #Functions to be used in TRC/UAHPLP Housing Report Prep 
 
 #Translation based on HRA Specs
-def TRCProceedingType(TypeOfCase,LegalProblemCode,LevelOfService):
-    if LegalProblemCode.startswith("0") == True:
+def TRCProceedingType(TypeOfCase,LegalProblemCode,LevelOfService,EligDate):
+    if EligDate < 20201001 and LegalProblemCode.startswith("0") == True:
         return "CON"
-    elif LegalProblemCode.startswith("3") == True:
+    elif EligDate < 20201001 and LegalProblemCode.startswith("3") == True:
         return "FAM"
-    elif LegalProblemCode.startswith("5") == True:
+    elif EligDate < 20201001 and LegalProblemCode.startswith("5") == True:
         return "HEA"
-    elif LegalProblemCode.startswith("7") == True:
+    elif EligDate < 20201001 and LegalProblemCode.startswith("7") == True:
         return "BEN"
     elif TypeOfCase == "HP Action":
         return "HP"

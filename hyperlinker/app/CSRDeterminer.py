@@ -110,7 +110,7 @@ def CSRDeterminer():
         
         df['Case?'] = "Yes"
         
-        df = df[['Hyperlinked CaseID#','Assigned Branch/CC','Primary Advocate Name','LSC Tester','No Legal Assistance Documented Tester','Untimely Closed Tester','Citizenship & Immigration Tester','Python CSR Tester','CSR Eligible','Agreement Tester','Staff Verified Non-Citizenship Documentation','Did any Staff Meet Client in Person?','Close Reason','Date Closed','Date Opened','CSR: Is Legal Assistance Documented?','LSC Eligible?','CSR Eligible','Income Eligible','CSR: Timely Closing?','Level of Service','Case?','Retainer on File','Was Timely Closed overridden?','Percentage of Poverty','Attestation on File?']]
+        df = df[['Hyperlinked CaseID#','Assigned Branch/CC','Primary Advocate Name','LSC Tester','No Legal Assistance Documented Tester','Untimely Closed Tester','Citizenship & Immigration Tester','Python CSR Tester','CSR Eligible','Agreement Tester','Staff Verified Non-Citizenship Documentation','Did any Staff Meet Client in Person?','Close Reason','Date Closed','Date Opened','CSR: Is Legal Assistance Documented?','LSC Eligible?','CSR Eligible','Income Eligible','CSR: Timely Closing?','Level of Service','Case?','Retainer on File','Was Timely Closed overridden?','Percentage of Poverty','Attestation on File?','PAI Case?','Group','Is Domestic Violence a factor in this case?','Number of People under 18','Number of People 18 and Over','Age at Intake','Gender','Race','Veteran','Language','Legal Problem Code']]
         
         
         
