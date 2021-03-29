@@ -73,16 +73,20 @@ def CSRDeterminer():
         #or close reason starts with = F,G,H,I,or L
         
         
-        def CitImmTester(AttestationOnFile,StaffVerified,ClientInPerson,CloseReason):
-            CloseReason = str(CloseReason)   
-            if AttestationOnFile == "Yes" or StaffVerified == "Yes":
+        def CitImmTester(CitizenshipStatus,AttestationOnFile,StaffVerified,ClientInPerson,CloseReason):
+            CloseReason = str(CloseReason)
+            
+            if AttestationOnFile == "Yes" and CitizenshipStatus == "Citizen":
+                return ''
+            elif CitizenshipStatus == "Non-Citizen" and StaffVerified == "Yes":
                 return ''
             elif CloseReason.startswith(('A','B')) == True and ClientInPerson == 'No':
                 return ''
             else:
-                return 'CSR No'
-
-        df['Citizenship & Immigration Tester'] = df.apply(lambda x : CitImmTester(x['Attestation on File?'],x['Staff Verified Non-Citizenship Documentation'],x['Did any Staff Meet Client in Person?'],x['Close Reason']),axis=1)
+                return 'Needs Review'
+            
+            
+        df['Citizenship & Immigration Tester'] = df.apply(lambda x : CitImmTester(x['Citizenship Status'],x['Attestation on File?'],x['Staff Verified Non-Citizenship Documentation'],x['Did any Staff Meet Client in Person?'],x['Close Reason']),axis=1)
         
         def CSRTester (LSCTester,LegalAssistTester,UntimelyTester,CitImmTester):
             if LSCTester == 'CSR No' or LegalAssistTester == 'CSR No' or UntimelyTester == 'CSR No' or CitImmTester == 'CSR No':

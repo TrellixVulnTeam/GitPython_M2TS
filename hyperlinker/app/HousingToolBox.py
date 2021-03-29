@@ -117,7 +117,7 @@ def SubsidyClean (Subsidy):
 def YearsClean (Years):
     if Years == 0:
         return 'Needs Years In Apartment'
-    elif Years < -1:
+    elif Years < -1 or Years > 99:
         return 'Needs Valid Number'
     else:
         return ''

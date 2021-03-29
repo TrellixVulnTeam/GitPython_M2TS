@@ -60,8 +60,14 @@ def AllHousing():
         df['Housing Type Tester'] = df.apply(lambda x: HousingToolBox.HousingTypeClean(x['Housing Type Of Case']), axis=1)
         
         #Has to have a Housing Level of Service 
-
-        df['Housing Level Tester'] = df.apply(lambda x: HousingToolBox.HousingLevelClean(x['Housing Level of Service'],x['Housing Type Of Case']), axis=1)
+        
+        def HousingLevelClean (HousingLevel):
+            if HousingLevel == '' or HousingLevel == 'Hold For Review':
+                return 'Needs Level of Service'
+            else:
+                return '' 
+        
+        df['Housing Level Tester'] = df.apply(lambda x: HousingLevelClean(x['Housing Level of Service']), axis=1)
         
         #Has to say whether or not it's a building case 
       
@@ -216,13 +222,22 @@ def AllHousing():
 
         
         #Test Housing Services Rendered - can't be blank for closed cases that are full rep state or full rep federal(housing level of service)
-         
 
-         
-        df['Housing Services Tester'] = df.apply(lambda x: HousingToolBox.ServicesTesterClean(x['Housing Services Rendered to Client'],x['Case Disposition'],x['Housing Level of Service'],x['Housing Type Of Case']), axis = 1)
+                
+        def ServicesTesterClean(HousingServices,Disposition,Level,Type):
+            
+            if Level == 'Representation - State Court' or Level == 'Representation - Admin. Agency' or Level == 'Representation - Federal Court' or Level == 'UAC Out of Court Advocacy WITH Retainer':
+                if HousingServices == '':
+                    return 'Needs Services Rendered'
+                else:
+                    return ''
+            else:
+                return ''
+
+        df['Housing Services Tester'] = df.apply(lambda x: ServicesTesterClean(x['Housing Services Rendered to Client'],x['Case Disposition'],x['Housing Level of Service'],x['Housing Type Of Case']), axis = 1)
         
         #Housing Type of Case Eviction-Types:
-        evictiontypes = ['Holdover','Non-payment','Illegal Lockout']
+        evictiontypes = ['Holdover','Non-payment','Illegal Lockout','NYCHA Housing Termination']
         #Highest Level of Service Reps
         leveltypes = ['Representation - State Court','Representation - Federal Court']
         
@@ -262,68 +277,62 @@ def AllHousing():
         
         #Test Housing Activity Indicator - can't be blank for cases that are full rep state or full rep federal(housing level of service) and eviction cases(housing type of case: non-payment holdover illegal lockout or nycha housing termination for over-62s)
         
-        def ActivityTesterClean(HousingActivity,Over62,Level,Type):
-            if Level in leveltypes and Type in evictiontypes and HousingActivity == '':
-                return 'Needs Activity Indicator'
-            elif Level in leveltypes and Type == "NYCHA Housing Termination" and Over62 == "Yes" and HousingActivity == '':
-                return 'Needs Activity Indicator'
+        def ActivityTesterClean(HousingActivity,Level,Type):
+            if Level == 'Representation - State Court' or Level == 'Representation - Admin. Agency' or Level == 'Representation - Federal Court' or Level == 'UAC Out of Court Advocacy WITH Retainer':
+                if Type in evictiontypes and HousingActivity == '':
+                    return 'Needs Activity Indicator'
+                else:
+                    return ''  
             else:
                 return ''
-        df['Housing Activity Tester'] = df.apply(lambda x: ActivityTesterClean(x['Housing Activity Indicators'],x['Over 62?'],x['Housing Level of Service'],x['Housing Type Of Case']), axis = 1)
+        df['Housing Activity Tester'] = df.apply(lambda x: ActivityTesterClean(x['Housing Activity Indicators'],x['Housing Level of Service'],x['Housing Type Of Case']), axis = 1)
 
         
         #Housing Posture of Case can't be blank if there is an eligibility date
         
-        def PostureClean (Posture,EligibilityDate,Type,Level,Over62):
-            if Type in evictiontypes and Level.startswith("Rep") == True:
-                if EligibilityDate  != '' and Posture == '':
+        def PostureClean (Posture,EligibilityDate,Type,Level):
+            if Level == 'Representation - State Court' or Level == 'Representation - Admin. Agency' or Level == 'Representation - Federal Court' or Level == 'UAC Out of Court Advocacy WITH Retainer':
+                if Type in evictiontypes and EligibilityDate != '' and Posture == '':
                     return 'Needs Posture of Case'
+                elif EligibilityDate == '':
+                    return 'Needs Eligibility Date'
                 else:
-                    return ''
-            if Type == "NYCHA Housing Termination" and Over62 == "Yes" and Level.startswith("Rep") == True:
-                if EligibilityDate  != '' and Posture == '':
-                    return 'Needs Posture of Case'
-                else:
-                    return ''
+                    return '' 
             else:
                 return ''
         
-        df['Posture Tester'] = df.apply(lambda x: PostureClean(x['Housing Posture of Case on Eligibility Date'],x['HAL Eligibility Date'],x['Housing Type Of Case'],x['Housing Level of Service'],x['Over 62?']), axis=1)
+        df['Posture Tester'] = df.apply(lambda x: PostureClean(x['Housing Posture of Case on Eligibility Date'],x['HAL Eligibility Date'],x['Housing Type Of Case'],x['Housing Level of Service']), axis=1)
         
         
         
         #Outcome Tester - needs outcome and date for eviction cases that are full rep at state or federal level (not admin)
         
-        def OutcomeTesterClean (Over62,Outcome,OutcomeDate,Level,Type,Disposition):
+        def OutcomeTesterClean (Outcome,OutcomeDate,Level,Type,Disposition):
             
-            if Level in leveltypes and Type in evictiontypes and Disposition == "Closed":
-                if Outcome == '' and OutcomeDate == '':
-                    return 'Needs Outcome & Date'
-                elif  Outcome == '':
-                    return 'Needs Outcome'
-                elif OutcomeDate == '':
-                    return 'Needs Outcome Date'
-                else:
-                    return ""
-            elif Level in leveltypes and Over62 == "Yes" and Type == "NYCHA Housing Termination" and Disposition == "Closed":
-                if Outcome == '' and OutcomeDate == '':
-                    return 'Needs Outcome & Date'
-                elif  Outcome == '':
-                    return 'Needs Outcome'
-                elif OutcomeDate == '':
-                    return 'Needs Outcome Date'
-                else:
+            if Level == 'Representation - State Court' or Level == 'Representation - Admin. Agency' or Level == 'Representation - Federal Court' or Level == 'UAC Out of Court Advocacy WITH Retainer':
+                if Type in evictiontypes and Disposition == "Closed":
+                    if Outcome == '' and OutcomeDate == '':
+                        return 'Needs Outcome & Date'
+                    elif  Outcome == '':
+                        return 'Needs Outcome'
+                    elif OutcomeDate == '':
+                        return 'Needs Outcome Date'
+                    else:
+                        return ""
+                else: 
                     return ""
             else:
                 return ''
         
-        df['Outcome Tester'] = df.apply(lambda x: OutcomeTesterClean(x['Over 62?'],x['Housing Outcome'],x['Housing Outcome Date'],x['Housing Level of Service'],x['Housing Type Of Case'],x['Case Disposition']), axis = 1)
+        df['Outcome Tester'] = df.apply(lambda x: OutcomeTesterClean(x['Housing Outcome'],x['Housing Outcome Date'],x['Housing Level of Service'],x['Housing Type Of Case'],x['Case Disposition']), axis = 1)
         
 
         #Test if Poverty Percentage > 1000%
         
         def PovertyPercentTester (PovertyPercent,WaiverCategory):
-            if PovertyPercent > 1000 and WaiverCategory != "Income Waiver":
+            if WaiverCategory == "Income Waiver" or WaiverCategory == "FJC Waiver":
+                return ""
+            elif PovertyPercent > 1000 :
                 return "Needs Income Review"
             else:
                 return ""
@@ -331,8 +340,11 @@ def AllHousing():
         
         #Test # of adults (can't be 0)
         
-        def AdultTester (HouseholdAdults,BirthDate):
-            if BirthDate == '':
+        def AdultTester (HouseholdAdults,Under18s,BirthDate):
+            if HouseholdAdults == 0 and Under18s == 0:
+                    return "Needs Household Members"
+            
+            elif BirthDate == '':
                 return 'Needs Date of Birth'
             
             elif BirthDate != '':
@@ -353,6 +365,8 @@ def AllHousing():
                 #BirthDateConstruct = int(BirthDateYear + BirthDateMonth + BirthDateDay)
                 #TodayConstruct = int(TodayYear + TodayMonth + TodayDay)
                 
+                
+                
                 if TodayYear - BirthDateYear > 18:
                     if HouseholdAdults == 0:
                         return "Needs Over-18 Household Member"
@@ -367,7 +381,7 @@ def AllHousing():
                     return "Client Needs to be Over 18"
             else:
                 return ""
-        df['Over-18 Tester'] = df.apply(lambda x: AdultTester(x['Number of People 18 and Over'],x['Date of Birth']), axis = 1)
+        df['Over-18 Tester'] = df.apply(lambda x: AdultTester(x['Number of People 18 and Over'],x['Number of People under 18'],x['Date of Birth']), axis = 1)
         
         #date of waiver approval & waiver categories - if there's something in one but not the other, then flag it. 
         
@@ -671,6 +685,27 @@ def AllHousing():
                                                  'criteria': 'containing',
                                                  'value': 'Funding Code',
                                                  'format': medium_problem_format})
+                                                 
+                ws.conditional_format('C1:BO1',{'type': 'text',
+                                                 'criteria': 'containing',
+                                                 'value': 'HRA Release?',
+                                                 'format': medium_problem_format})
+                                                 
+                ws.conditional_format('C1:BO1',{'type': 'text',
+                                                 'criteria': 'containing',
+                                                 'value': 'Number of People 18 and Over',
+                                                 'format': medium_problem_format})                                                 
+                ws.conditional_format('C1:BO1',{'type': 'text',
+                                                 'criteria': 'containing',
+                                                 'value': 'Number of People under 18',
+                                                 'format': medium_problem_format})                                                 
+                                                 
+                ws.conditional_format('C1:BO1',{'type': 'text',
+                                                 'criteria': 'containing',
+                                                 'value': 'Date of Birth',
+                                                 'format': medium_problem_format})                                                 
+                                                 
+                                                 
                 ws.conditional_format('C2:BO100000',{'type': 'text',
                                                  'criteria': 'containing',
                                                  'value': 'Must Have DHCI or PA#',

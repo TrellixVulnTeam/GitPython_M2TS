@@ -169,10 +169,12 @@ def ComplianceConsolidater():
         #or close reason starts with = F,G,H,I,or L
         
         
-        def CitImmTester(AttestationOnFile,StaffVerified,ClientInPerson,CloseReason,ComplianceCheck):
+        def CitImmTester(CitizenshipStatus,AttestationOnFile,StaffVerified,ClientInPerson,CloseReason,ComplianceCheck):
             CloseReason = str(CloseReason)
             
-            if AttestationOnFile == "Yes" or StaffVerified == "Yes":
+            if AttestationOnFile == "Yes" and CitizenshipStatus == "Citizen":
+                return ''
+            elif CitizenshipStatus == "Non-Citizen" and StaffVerified == "Yes":
                 return ''
             elif ComplianceCheck == "Yes":
                 return ''
@@ -182,10 +184,7 @@ def ComplianceConsolidater():
                 return 'Needs Review'
             
             
-            
-            
-            
-        df['Citizenship & Immigration Tester'] = df.apply(lambda x : CitImmTester(x['Attestation on File?'],x['Staff Verified Non-Citizenship Documentation'],x['Did any Staff Meet Client in Person?'],x['Close Reason'],x['Compliance Check Citizenship and Immigration']),axis=1)
+        df['Citizenship & Immigration Tester'] = df.apply(lambda x : CitImmTester(x['Citizenship Status'],x['Attestation on File?'],x['Staff Verified Non-Citizenship Documentation'],x['Did any Staff Meet Client in Person?'],x['Close Reason'],x['Compliance Check Citizenship and Immigration']),axis=1)
         
         #Active Advocate Tester
         
@@ -225,15 +224,41 @@ def ComplianceConsolidater():
         df['Closed Before Opened Tester'] = df.apply(lambda x: ClosedBeforeOpenedTester(x['Opened Construct'],x['Closed Construct']),axis=1)        
                 
         
-        #also add in code related to checking the boxes they check if something has been compliance-reviewed
+        def PythonCSRTester(DateClosed,LSCTester,LegalAssistTester,UntimelyTester,CitImmTester):
+            if DateClosed == '':
+                return "N/A Not Closed"
+            elif LSCTester != 'Yes' or 'Needs' in LegalAssistTester or 'Needs' in UntimelyTester or 'Needs' in CitImmTester:
+                return 'No'
+            else:
+                return 'Yes'
+        df['Python CSR Tester'] = df.apply(lambda x : PythonCSRTester(x['Date Closed'],x['LSC Eligible?'],x['No Legal Assistance Documented Tester'],x['Untimely Closed Tester'],x['Citizenship & Immigration Tester']),axis=1)
+        
+        def CSRAgreementTester (DateClosed,LegalServerCSR,PythonCSR):
+            if DateClosed == '':
+                return ''
+            elif LegalServerCSR == 'Yes' and PythonCSR == 'Yes':
+                return ''
+            elif LegalServerCSR == 'No' and PythonCSR == 'No':
+                return ''
+            elif LegalServerCSR == 'Yes' and PythonCSR == 'No':
+                return 'Needs Review'
+            elif LegalServerCSR == 'No' and PythonCSR == 'Yes':
+                return 'Needs Review'
+            else:
+                return 'How?!'
+                
+        df['CSR Agreement Tester'] = df.apply(lambda x : CSRAgreementTester(x['Date Closed'],x['CSR Eligible'],x['Python CSR Tester']),axis=1)
+        
+        
+        
         
         #Make a tester tester
-        def TesterTester(NoAssistanceTester,AgeTester,TwoHundredPercentTester,OneTwentyFivePercentTester,LSCCSRTester,NoAgeTester,UntimelyClosedTester,UntimelyClosedOverriddenTester,CitImmTester,ActAdvTester,RetainerTester,ClosedBeforeOpenedTester):
-            if NoAssistanceTester != "" or AgeTester != "" or TwoHundredPercentTester != "" or OneTwentyFivePercentTester != "" or LSCCSRTester != "" or NoAgeTester != "" or UntimelyClosedTester != "" or UntimelyClosedOverriddenTester != "" or CitImmTester != "" or ActAdvTester != "" or RetainerTester != "" or ClosedBeforeOpenedTester != "":
+        def TesterTester(NoAssistanceTester,AgeTester,TwoHundredPercentTester,OneTwentyFivePercentTester,LSCCSRTester,NoAgeTester,UntimelyClosedTester,UntimelyClosedOverriddenTester,CitImmTester,ActAdvTester,RetainerTester,ClosedBeforeOpenedTester,CSRAgreementTester):
+            if NoAssistanceTester != "" or AgeTester != "" or TwoHundredPercentTester != "" or OneTwentyFivePercentTester != "" or LSCCSRTester != "" or NoAgeTester != "" or UntimelyClosedTester != "" or UntimelyClosedOverriddenTester != "" or CitImmTester != "" or ActAdvTester != "" or RetainerTester != "" or ClosedBeforeOpenedTester != "" or CSRAgreementTester != "":
                 return "Needs Review"
             else:
                 return ""
-        df['Tester Tester'] = df.apply(lambda x : TesterTester(x['No Legal Assistance Documented Tester'],x['No Time Entered for 90 Days Tester'],x['200% of Poverty Tester'],x['125-200% of Poverty Tester'],x['Funding Code 4000 Tester'],x['No Age for Client Tester'],x['Untimely Closed Tester'],x['Untimely Closed Overridden Tester'],x['Citizenship & Immigration Tester'],x['Active Advocate Tester'],x['Retainer Tester'],x['Closed Before Opened Tester']),axis=1)        
+        df['Tester Tester'] = df.apply(lambda x : TesterTester(x['No Legal Assistance Documented Tester'],x['No Time Entered for 90 Days Tester'],x['200% of Poverty Tester'],x['125-200% of Poverty Tester'],x['Funding Code 4000 Tester'],x['No Age for Client Tester'],x['Untimely Closed Tester'],x['Untimely Closed Overridden Tester'],x['Citizenship & Immigration Tester'],x['Active Advocate Tester'],x['Retainer Tester'],x['Closed Before Opened Tester'],x['CSR Agreement Tester']),axis=1)        
         
         #remove cases that don't need compliance review
         df = df[df['Tester Tester'] == "Needs Review"]
@@ -241,7 +266,7 @@ def ComplianceConsolidater():
         
         #Putting everything in the right order
         
-        df = df[['Hyperlinked CaseID#','Assigned Branch/CC','Primary Advocate Name','Client First Name','Client Last Name','No Legal Assistance Documented Tester','No Time Entered for 90 Days Tester','200% of Poverty Tester','125-200% of Poverty Tester','Funding Code 4000 Tester','No Age for Client Tester','Untimely Closed Tester','Untimely Closed Overridden Tester','Citizenship & Immigration Tester','Active Advocate Tester','Retainer Tester','Closed Before Opened Tester','Caseworker Name','Compliance Check Untimely Closed','Compliance Check Untimely Closed Overwritten','Compliance Check 125 to 200 Poverty Income Ineligible','Compliance Check 200 Poverty Income Eligible','Compliance Check Citizenship and Immigration','Attestation on File?','Staff Verified Non-Citizenship Documentation','Did any Staff Meet Client in Person?','Close Reason','Date Closed','Date Opened','CSR: Is Legal Assistance Documented?','Age in Days','Percentage of Poverty','LSC Eligible?','CSR Eligible','Income Eligible','Primary Funding Codes','Secondary Funding Codes','DOB Information','Group','CSR: Timely Closing?','Was Timely Closed overridden?','Case Status','PAI Case?','Level of Service','Retainer on File']]
+        df = df[['Hyperlinked CaseID#','Assigned Branch/CC','Primary Advocate Name','Client First Name','Client Last Name','No Legal Assistance Documented Tester','No Time Entered for 90 Days Tester','200% of Poverty Tester','125-200% of Poverty Tester','Funding Code 4000 Tester','No Age for Client Tester','Untimely Closed Tester','Untimely Closed Overridden Tester','Citizenship & Immigration Tester','Active Advocate Tester','Retainer Tester','Closed Before Opened Tester','CSR Agreement Tester','Caseworker Name','Compliance Check Untimely Closed','Compliance Check Untimely Closed Overwritten','Compliance Check 125 to 200 Poverty Income Ineligible','Compliance Check 200 Poverty Income Eligible','Compliance Check Citizenship and Immigration','Citizenship Status','Attestation on File?','Staff Verified Non-Citizenship Documentation','Did any Staff Meet Client in Person?','Close Reason','Date Closed','Date Opened','CSR: Is Legal Assistance Documented?','Age in Days','Percentage of Poverty','LSC Eligible?','CSR Eligible','Income Eligible','Primary Funding Codes','Secondary Funding Codes','DOB Information','Group','CSR: Timely Closing?','Was Timely Closed overridden?','Case Status','PAI Case?','Level of Service','Retainer on File','Python CSR Tester']]
         
         
         
@@ -304,11 +329,11 @@ def ComplianceConsolidater():
                 #Add column header data back in
                 for col_num, value in enumerate(df.columns.values):
                     worksheet.write(0, col_num, value, header_format)
-                worksheet.autofilter('A1:Q1')
+                worksheet.autofilter('A1:R1')
                 worksheet.set_column('A:A',15,link_format)
-                worksheet.set_column('C:Q',20)
+                worksheet.set_column('C:R',20)
                 worksheet.set_column('B:B',0)
-                worksheet.set_column('R:ZZ',0)
+                worksheet.set_column('S:ZZ',0)
                 worksheet.set_row(0,60)
                 worksheet.write_comment('F1',
                     'No Legal Assistance Documented: If we close a case as something other than ZZ, we must have some documentation of the legal assistance provided. For these, whoever closed the case may have misunderstood the meaning of “legal assistance” or “documented.” Please review and add the legal assistance documented in case notes. If there was no legal assistance, change the closing code to ZZ.',
@@ -345,6 +370,9 @@ def ComplianceConsolidater():
                     {'height':70,'width':500})
                 worksheet.write_comment('Q1',
                     'Closed Before Opened Tester: The date that a case was closed must be equal to or later than the date on which it was opened.',
+                    {'height':70,'width':500})
+                worksheet.write_comment('R1',
+                    'CSR Agreement Tester: The underlying case data seems to contradict the CSR value calculated by LegalServer. Please review this case to ensure that CSR was recalculated appropriately or that a manual override was performed for valid reasons.',
                     {'height':70,'width':500})
                     
                 worksheet.conditional_format('D2:BO100000',{'type': 'text',
