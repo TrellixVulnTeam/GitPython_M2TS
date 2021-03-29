@@ -135,7 +135,7 @@ def LSCCovidPrep():
             if Date == "":
                 return ""
             
-            elif Date >= 20201001 and Date <= 20201231:
+            elif Date >= 20210101 and Date <= 20210331:
                 return "Yes"
             else:
                 return "No"
@@ -144,25 +144,48 @@ def LSCCovidPrep():
        
         df['OpenedInReportingQuarter'] = df.apply(lambda x: DateInQuarter(x['OpenedDateConstruct']), axis = 1)
         
+        def CSRDeterminer(LSCEligible,AssistanceDocumented,TimelyClosing,CitizenshipStatus,AttestationOnFile,VerifiedNonCitizenship,ClientInPerson,CloseReason,LegalServerCSR):
+            if CloseReason == '':
+                return LegalServerCSR
+            elif LSCEligible != 'Yes':
+                return 'No'
+            elif AssistanceDocumented != 'Yes':
+                return 'No'
+            elif TimelyClosing != 'Yes':
+                return 'No'
+            else:
+                if CitizenshipStatus == 'Citizen' and AttestationOnFile == 'Yes':
+                    return 'Yes'
+                elif CitizenshipStatus == 'Non-Citizen' and VerifiedNonCitizenship == 'Yes':
+                    return 'Yes'
+                elif CloseReason.startswith(('A','B')) == True and ClientInPerson == 'No':
+                    return 'Yes'
+                else:
+                    return 'No'
+                    
+        df['Python CSR Status'] = df.apply(lambda x: CSRDeterminer(x['LSC Eligible?'],x['CSR: Is Legal Assistance Documented?'],x['CSR: Timely Closing?'],x['Citizenship Status'],x['Attestation on File?'],x['Staff Verified Non-Citizenship Documentation'],x['Did any Staff Meet Client in Person?'],x['Close Reason'],x['CSR Eligible']), axis = 1)
+        
+        
+        
         #Should a case be included in the report or deleted?
         #All Cases must be LSC/CSR Eligible (CSR can't be no, but only has to be yes [non-blank] if it's closed)
         #All Cases must be Covid-Related
         #From what remains, just report cases Opened or Closed in reporting period
         
-        def IncludeInReport(InvolvesCovid,LSCElig,CSRElig,DateClosed,OpenedInReportingQuarter,ClosedInReportingQuarter):
+        def IncludeInReport(InvolvesCovid,LSCElig,PythonCSRElig,DateClosed,OpenedInReportingQuarter,ClosedInReportingQuarter):
             if InvolvesCovid != "Yes":
                 return "Remove"
             elif LSCElig != "Yes":
                 return "Remove"
-            elif DateClosed != "" and CSRElig != "Yes":
+            elif DateClosed != "" and PythonCSRElig != "Yes":
                 return "Remove"
-            elif CSRElig == "No":
+            elif PythonCSRElig == "No":
                 return "Remove"
             elif OpenedInReportingQuarter == "Yes" or ClosedInReportingQuarter == "Yes":
                 return "Include"
             
 
-        df['IncludeInReport?'] = df.apply(lambda x: IncludeInReport(x['Case Involves Covid-19'],x['LSC Eligible?'],x['CSR Eligible'],x['Date Closed'],x['OpenedInReportingQuarter'],x['ClosedInReportingQuarter']), axis = 1)
+        df['IncludeInReport?'] = df.apply(lambda x: IncludeInReport(x['Case Involves Covid-19'],x['LSC Eligible?'],x['Python CSR Status'],x['Date Closed'],x['OpenedInReportingQuarter'],x['ClosedInReportingQuarter']), axis = 1)
 
         #Put everything in the right order
         
@@ -192,6 +215,7 @@ def LSCCovidPrep():
         'OpenedInReportingQuarter',
         'ClosedInReportingQuarter',
         'CSR Eligible',
+        'Python CSR Status',
         'LSC Eligible?',
         'IncludeInReport?'
         ]]      
