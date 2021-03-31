@@ -30,6 +30,7 @@ def index():
     <li><a href="/AdvocateSplitter">Advocate Splitter</a></li>
     <li><a href="/LSCCovidPrep">LSC Covid Report Prep</a></li>
     <li><a href="/CSRDeterminer">Determine CSR Eligibility</a></li>
+    <li><a href="/RadSearcher">Identify Clients in RAD Buildings</a></li>
     </ul>
     
     <b>Housing Tools:</b>
