@@ -39,7 +39,7 @@ def UAHPLPExternalPrepCovid():
         df['num_children'] = df['Number of People under 18']
         df['Unit'] = df['Apt#/Suite#']
         
-        df['zip'] = df['Zip Code']
+        df['zip'] = df['Zip Code'].apply(lambda x: '{0:0>5}'.format(x))
         df['waiver_approval_date'] = df['Housing Date Of Waiver Approval']
         df['waiver'] = df['Housing TRC HRA Waiver Categories']
         df['rent'] = df['Housing Total Monthly Rent']
