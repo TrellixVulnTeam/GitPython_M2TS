@@ -65,12 +65,15 @@ def upload_IOIempQuarterly():
          
         #Manipulable Dates (this seems like a mess, i would like to fix it later - Jay)            
         
-        def Eligibility_Date(Effective_Date,Date_Opened):
-            if Effective_Date != '':
+        def Eligibility_Date(Substantial_Activity_Date,Effective_Date,Date_Opened):
+            if Substantial_Activity_Date != '':
+                return Substantial_Activity_Date
+            elif Effective_Date != '':
                 return Effective_Date
             else:
                 return Date_Opened
-        df['Eligibility_Date'] = df.apply(lambda x : Eligibility_Date(x['IOI HRA Effective Date (optional) (IOI 2)'],x['Date Opened']), axis = 1)
+        df['Eligibility_Date'] = df.apply(lambda x : Eligibility_Date(x['HRA IOI Employment Law HRA Date Substantial Activity Performed 2021'],x['IOI HRA Effective Date (optional) (IOI 2)'],x['Date Opened']), axis = 1)
+        
         
         df['Open Month'] = df['Eligibility_Date'].apply(lambda x: str(x)[:2])
         df['Open Day'] = df['Eligibility_Date'].apply(lambda x: str(x)[3:5])
@@ -210,7 +213,7 @@ def upload_IOIempQuarterly():
         
         
         #REPORTING VERSION Put everything in the right order
-        df = df[['Unique_ID','Last_Initial','First_Initial','Year_of_Birth','Gender','Country of Origin','Borough','Zip Code','Language','Household_Size','Number_of_Children','Annual_Income','Income_Eligible','Waiver_Type','Waiver_Approval_Date','Eligibility_Date','Referral_Source','Service_Type_Code','Proceeding_Type_Code','Outcome','Outcome_Date','Seized_at_Border','Group','Prior_Enrollment_FY','Pro_Bono','Hyperlinked Case #','Office','Primary Advocate','Client Name','Level of Service','Legal Problem Code','Special Legal Problem Code','HRA_Case_Coding','Exclude due to Income?','Needs DHCI?','Needs Substantial Activity?','Units of Service','Reportable?']]
+        df = df[['Unique_ID','Last_Initial','First_Initial','Year_of_Birth','Gender','Country of Origin','Borough','Zip Code','Language','Household_Size','Number_of_Children','Annual_Income','Income_Eligible','Waiver_Type','Waiver_Approval_Date','Eligibility_Date','Referral_Source','Service_Type_Code','Proceeding_Type_Code','Outcome','Outcome_Date','Seized_at_Border','Group','Prior_Enrollment_FY','Pro_Bono','Hyperlinked Case #','Office','Primary Advocate','Client Name','Level of Service','Legal Problem Code','Special Legal Problem Code','HRA_Case_Coding','Exclude due to Income?','Needs DHCI?','Needs Substantial Activity?','HRA IOI Employment Law HRA Date Substantial Activity Performed 2021','Units of Service','Reportable?']]
         
 
         output_filename = f.filename     

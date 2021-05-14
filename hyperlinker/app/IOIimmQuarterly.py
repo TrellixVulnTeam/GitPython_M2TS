@@ -93,19 +93,19 @@ def upload_IOIimmQuarterly():
         
         #Eligibility_Date & Rollovers 
         
-        def Eligibility_Date(Effective_Date,Date_Opened):
-            if Effective_Date != '':
+        def Eligibility_Date(Substantial_Activity_Date,Effective_Date,Date_Opened):
+            if Substantial_Activity_Date != '':
+                return Substantial_Activity_Date
+            elif Effective_Date != '':
                 return Effective_Date
             else:
                 return Date_Opened
-        df['Eligibility_Date'] = df.apply(lambda x : Eligibility_Date(x['IOI HRA Effective Date (optional) (IOI 2)'],x['Date Opened']), axis = 1)
+        df['Eligibility_Date'] = df.apply(lambda x : Eligibility_Date(x['IOI Date FY21 Substantial Activity Performed'],x['IOI HRA Effective Date (optional) (IOI 2)'],x['Date Opened']), axis = 1)
         
         #Manipulable Dates               
         
-        df['Open Month'] = df['Eligibility_Date'].apply(lambda x: str(x)[:2])
-        df['Open Day'] = df['Eligibility_Date'].apply(lambda x: str(x)[3:5])
-        df['Open Year'] = df['Eligibility_Date'].apply(lambda x: str(x)[6:])
-        df['Open Construct'] = df['Open Year'] + df['Open Month'] + df['Open Day']
+        
+        df['Open Construct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['Eligibility_Date']),axis = 1)
         
         df['Subs Month'] = df['IOI Date FY21 Substantial Activity Performed'].apply(lambda x: str(x)[5:7])
         df['Subs Day'] = df['IOI Date FY21 Substantial Activity Performed'].apply(lambda x: str(x)[8:])
@@ -141,6 +141,7 @@ def upload_IOIimmQuarterly():
                 return ''
         
         df['Needs DHCI?'] = df.apply(lambda x: DHCI_Needed(x['Has Declaration of Household Composition and Income (DHCI) Form?'],x['Open Construct'],x['Level of Service']), axis=1)
+        
         
         
         #Needs Substantial Activity to Rollover into FY'20
@@ -267,7 +268,9 @@ def upload_IOIimmQuarterly():
                 return ModifiedTally
         df['Modified Deliverable Tally'] = df.apply(lambda x: fillBlanks(x['Modified Deliverable Tally'],x['Deliverable Tally']),axis=1)
 
-       
+        #Reportable?
+        
+        df['Reportable?'] = df.apply(lambda x: ImmigrationToolBox.ReportableTester(x['Exclude due to Income?'],x['Needs DHCI?'],x['Needs Substantial Activity?'],x['Deliverable Tally']),axis=1)
         
         #***add code to make it so that it deletes any extra 'brief' cases for clients that have mutliple cases
         
@@ -360,7 +363,7 @@ def upload_IOIimmQuarterly():
           
                 
         #REPORTING VERSION Put everything in the right order
-        df = df[['Unique_ID','Last_Initial','First_Initial','Year_of_Birth','Gender','Country of Origin','Borough','Zip Code','Language','Household_Size','Number_of_Children','Annual_Income','Income_Eligible','Waiver_Type','Waiver_Approval_Date','Eligibility_Date','Referral_Source','Service_Type_Code','Proceeding_Type_Code','Outcome','Outcome_Date','Seized_at_Border','Group','Prior_Enrollment_FY','Pro_Bono','Special Legal Problem Code','HRA Level of Service','HRA Case Coding','Hyperlinked Case #','Office','Primary Advocate','Client Name','Special Legal Problem Code','Level of Service','Needs DHCI?','Exclude due to Income?','Needs Substantial Activity?','Country of Origin','Outcome To Report','HRA Case Coding','IOI Was client apprehended at border? (IOI 2&3)','Deliverable Tally','Modified Deliverable Tally']]
+        df = df[['Unique_ID','Last_Initial','First_Initial','Year_of_Birth','Gender','Country of Origin','Borough','Zip Code','Language','Household_Size','Number_of_Children','Annual_Income','Income_Eligible','Waiver_Type','Waiver_Approval_Date','Eligibility_Date','Referral_Source','Service_Type_Code','Proceeding_Type_Code','Outcome','Outcome_Date','Seized_at_Border','Group','Prior_Enrollment_FY','Pro_Bono','Special Legal Problem Code','HRA Level of Service','HRA Case Coding','Hyperlinked Case #','Office','Primary Advocate','Client Name','Special Legal Problem Code','Level of Service','Needs DHCI?','Exclude due to Income?','Needs Substantial Activity?','IOI Date FY21 Substantial Activity Performed','Country of Origin','Outcome To Report','HRA Case Coding','IOI Was client apprehended at border? (IOI 2&3)','Deliverable Tally','Modified Deliverable Tally','Reportable?']]
             
         
                 

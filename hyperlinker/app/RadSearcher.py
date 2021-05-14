@@ -1816,16 +1816,13 @@ def RadSearcher():
                 return "Possibly"
             else:
                 return "Unlikely"
-        
-                
+                       
         df['Potential RAD Case?'] = df.apply(lambda x : RADSearcher(x['Street Address']),axis=1)
         
         #Putting everything in the right order
         
         
-        df = df[['Hyperlinked CaseID#','Primary Advocate','Street Address','Apt#/Suite#','City','Zip Code','Potential RAD Case?','Combined Notes']]
-        
-        
+        df = df[['Hyperlinked CaseID#','Assigned Branch/CC','Primary Advocate','Street Address','Apt#/Suite#','City','Zip Code','Potential RAD Case?','Legal Problem Code','Special Legal Problem Code','Gender','Race','Language','HUD Ethnicity','Do you identify as LGBT?','Immigration Status','HUD Veteran Status','Income Types','Is Domestic Violence a factor in this case?','Date of Birth','Date Opened','Date Closed','Close Reason','Case Disposition','Case Status','Outcome','Case Disposition','Housing Type Of Case','Housing Form Of Regulation','Housing Level of Service','Case Involves Covid-19','Combined Notes']]
         
         
         #Preparing Excel Document
@@ -1846,7 +1843,7 @@ def RadSearcher():
                 
 
                 worksheet.set_column('A:A',15,link_format)
-                worksheet.set_column('B:P',20)
+                worksheet.set_column('B:AF',20)
                 
                     
                 worksheet.conditional_format('D2:BO100000',{'type': 'text',

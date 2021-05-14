@@ -22,9 +22,14 @@ def DateMaker (Date):
             
             if isinstance(Date,datetime.datetime) == True:
                 Date = Date.strftime("%m/%d/%Y")
-            DateMonth = Date[:2]
-            DateDay = Date[3:5]
-            DateYear = Date[6:]
+            if Date.startswith('20') == True:
+                DateYear = Date[:4]
+                DateMonth = Date[5:7]
+                DateDay = Date[8:]
+            else:
+                DateMonth = Date[:2]
+                DateDay = Date[3:5]
+                DateYear = Date[6:]
             
             
             if Date == "":

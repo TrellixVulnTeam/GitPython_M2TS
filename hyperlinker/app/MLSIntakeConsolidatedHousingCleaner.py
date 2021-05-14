@@ -121,16 +121,19 @@ def MLSIntakeConsolidatedHousingCleaner():
         #assign casehandlers to Intake Paralegals:
         
         Evelyn_Casehandlers = ['Delgadillo, Omar','Heller, Steven E','Latterner, Matt J','Robles-Castillo, Camila J','Tilyayeva, Rakhil','Almanzar, Yocari']
-        Dianas_Casehandlers = ['Allen, Sharette','Abbas, Sayeda','Basu, Shantonu J','Evers, Erin C.','Hao, Lindsay','He, Ricky','Shah, Ami Mahendra','Sharma, Sagar','Spencer, Eleanor G','Wilkes, Nicole','Allen, Sharette','Duffy-Greaves, Kevin','Freeman, Daniel A','Frierson, Jerome C','Gokhale, Aparna S','Gonzalez, Matias','Gonzalez, Matias G','Ortiz, Matthew B','Sun, Dao','Labossiere, Samantha J.','Risener, Jennifer A','Orsini, Mary K']
-        Keiannis_Casehandlers = ['Almanzar, Milagros','Briggs, John M','Dittakavi, Archana','Gonzalez-Munoz, Rossana G','Honan, Thomas J','James, Lelia','Kelly, Kitanya','Mottley, Darlene','Vega, Rita','Yamasaki, Emily Woo J','McCune, Mary']
-        Dennis_Casehandlers = ['Braudy, Erica','Kulig, Jessica M','Mercedes, Jannelys J']
+        Diana_V_Casehandlers = ['Abbas, Sayeda','Evers, Erin C.','Hao, Lindsay','He, Ricky','Sharma, Sagar','Spencer, Eleanor G','Wilkes, Nicole','Allen, Sharette','Ortiz, Matthew B','Sun, Dao','Risener, Jennifer A','Evers, Erin C.','Surface, Ben L']
+        Diana_G_Casehandlers = ['Frierson, Jerome C','Saxton, Jonathan G','Orsini, Mary K','Allen, Sharette','Duffy-Greaves, Kevin','Freeman, Daniel A','Gokhale, Aparna S','Gonzalez, Matias','Gonzalez, Matias G','Labossiere, Samantha J.','Shah, Ami Mahendra']
+        Keiannis_Casehandlers = ['Almanzar, Milagros','Briggs, John M','Dittakavi, Archana','Gonzalez-Munoz, Rossana G','Honan, Thomas J','James, Lelia','Kelly, Kitanya','Mottley, Darlene','Vega, Rita','Yamasaki, Emily Woo J','McCune, Mary','Vogltanz, Amy K']
+        Dennis_Casehandlers = ['Braudy, Erica','Kulig, Jessica M','Mercedes, Jannelys J','Harshberger, Sae','Black, Rosalind','Basu, Shantonu J']
         Rosa_Casehandlers = ['Acron, Denise D','Anunkor, Ifeoma O','Reyes, Nicole V']
 
         def IntakeAssign(Casehandler):
             if Casehandler in Evelyn_Casehandlers:
                 return "Evelyn V."
-            elif Casehandler in Dianas_Casehandlers:
-                return "Diana V. & Diana G."
+            elif Casehandler in Diana_V_Casehandlers:
+                return "Diana V."
+            elif Casehandler in Diana_G_Casehandlers:
+                return "Diana G."
             elif Casehandler in Keiannis_Casehandlers:
                 return "Keiannis G."
             elif Casehandler in Dennis_Casehandlers:
