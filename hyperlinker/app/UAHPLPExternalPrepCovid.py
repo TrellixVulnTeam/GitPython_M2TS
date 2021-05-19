@@ -291,7 +291,8 @@ def UAHPLPExternalPrepCovid():
         'Pre-3/1/20 Elig Date?',
         '2020NewProgramAssignment',
         'Legal Problem Code',
-        'BoroughByZip'
+        'BoroughByZip',
+        'Assigned Branch/CC'
         ]]
         
         
