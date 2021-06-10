@@ -149,18 +149,35 @@ def IOLADollarCleaner():
                 return ''
         data_xls ["DAP Large Award Tester"] = data_xls.apply(lambda x : DAPBigAwardTester(x['DAP Retro To Client'],x['DAP Monthly XVI -- SSI'],x['DAP Monthly SSD -- Title II']),axis = 1)
         
+        #Flag situations where a dollar amount has been added but there's no category chosen
+        
+        def BenefitCategoryTester(SavingsType, DirectDollarType, MonthlyBenefit, RetroAward, MonthlyAvoid, LumpSumAvoid):
+        
+            if MonthlyBenefit != "$0.00" or RetroAward != "$0.00":
+                if DirectDollarType == "":
+                    return "Needs Direct Dollar Benefits Type"
+                else:
+                    return ""
+            elif MonthlyAvoid != "$0.00" or LumpSumAvoid != "$0.00":
+                if SavingsType =="":
+                    return "Needs Savings Type"
+        
+        data_xls["Benefit Category Tester"] = data_xls.apply(lambda x : BenefitCategoryTester(x['IOLA Dollar Savings to Clients'],x['IOLA Direct Dollar Benefits to Clients'],x['Custom Recovered Monthly (Monthly Benefit)'],x['Custom Retro Recovery (Retroactive Award/Settlement)'],x['Custom Avoid Monthly (Monthly Payment Avoided)'],x['Custom Avoid (Lump Sum Avoid)']),axis =1)
+        
+   
+        
         #TesterTester 
         
-        def TesterTester (DAPMonthlyTester,MonthlyHigherThanRetroTester,ClosingAwardTester,EducationAwardTester,MonthlyTester,AvoidedTester,LargeAwardTester,DAPLargeAwardTester):
-            if DAPMonthlyTester == '' and MonthlyHigherThanRetroTester == ''and ClosingAwardTester == '' and EducationAwardTester == '' and MonthlyTester == '' and AvoidedTester == '' and LargeAwardTester == '' and DAPLargeAwardTester == '':
+        def TesterTester (DAPMonthlyTester,MonthlyHigherThanRetroTester,ClosingAwardTester,EducationAwardTester,MonthlyTester,AvoidedTester,LargeAwardTester,DAPLargeAwardTester,BenefitCategoryTester):
+            if DAPMonthlyTester == '' and MonthlyHigherThanRetroTester == ''and ClosingAwardTester == '' and EducationAwardTester == '' and MonthlyTester == '' and AvoidedTester == '' and LargeAwardTester == '' and DAPLargeAwardTester == '' and BenefitCategoryTester == '':
                 return ''
             else:
                 return 'Case Needs Attention'
-        data_xls ['Tester Tester'] = data_xls.apply (lambda x : TesterTester(x['DAP Monthly $ Tester'],x['Monthly Higher than Retro Tester'],x['Closing Award Tester'],x['Education Award Tester'],x['Monthly Tester'],x['Avoided Tester'],x['Large Award Tester'],x['DAP Large Award Tester']), axis = 1)        
+        data_xls ['Tester Tester'] = data_xls.apply (lambda x : TesterTester(x['DAP Monthly $ Tester'],x['Monthly Higher than Retro Tester'],x['Closing Award Tester'],x['Education Award Tester'],x['Monthly Tester'],x['Avoided Tester'],x['Large Award Tester'],x['DAP Large Award Tester'],x['Benefit Category Tester']), axis = 1)        
 
         
         #Putting columns in the right order
-        data_xls = data_xls[['Hyperlinked Case #','Assigned Branch/CC','Primary Advocate','Client First Name','Client Last Name','Date Closed','Tester Tester','DAP Monthly $ Tester','DAP Monthly XVI -- SSI','DAP Monthly SSD -- Title II','Custom Recovered Monthly (Monthly Benefit)','Monthly Higher than Retro Tester','Custom Retro Recovery (Retroactive Award/Settlement)','Closing Award Tester','DAP Retro To Client','DAP Interim Assistance Recovery','Education Award Tester','Legal Problem Code','Monthly Tester','IOLA Direct Dollar Benefits to Clients','IOLA Dollar Savings to Clients','Avoided Tester','Custom Avoid (Lump Sum Avoid)','Large Award Tester','Custom Retro Recovery (Retroactive Award/Settlement)','DAP Large Award Tester','Outcome','Result Achieved']] 
+        data_xls = data_xls[['Hyperlinked Case #','Assigned Branch/CC','Primary Advocate','Client First Name','Client Last Name','Date Closed','Tester Tester','DAP Monthly $ Tester','DAP Monthly XVI -- SSI','DAP Monthly SSD -- Title II','Custom Recovered Monthly (Monthly Benefit)','Monthly Higher than Retro Tester','Custom Retro Recovery (Retroactive Award/Settlement)','Closing Award Tester','DAP Retro To Client','DAP Interim Assistance Recovery','Education Award Tester','Legal Problem Code','Monthly Tester','IOLA Direct Dollar Benefits to Clients','IOLA Dollar Savings to Clients','Avoided Tester','Custom Avoid (Lump Sum Avoid)','Large Award Tester','Custom Retro Recovery (Retroactive Award/Settlement)','DAP Large Award Tester','Outcome','Result Achieved','IOLA Dollar Savings to Clients','IOLA Direct Dollar Benefits to Clients','Benefit Category Tester','Custom Retro Recovery (Retroactive Award/Settlement)','Custom Recovered Monthly (Monthly Benefit)','Custom Avoid (Lump Sum Avoid)','Custom Avoid Monthly (Monthly Payment Avoided)',]] 
         
         
         #bounce worksheets back to excel
@@ -170,7 +187,7 @@ def IOLADollarCleaner():
         workbook = writer.book
         worksheet = writer.sheets['Sheet1']
         worksheet.freeze_panes(1,1)
-        worksheet.autofilter('A1:Z1')
+        worksheet.autofilter('A1:AI1')
         
         #create format that will make case #s look like links
         link_format = workbook.add_format({'font_color':'blue', 'bold':True, 'underline':True})
@@ -178,7 +195,7 @@ def IOLADollarCleaner():
         
         #assign new format to column A
         worksheet.set_column('A:A',20,link_format)
-        worksheet.set_column('B:Z',40)
+        worksheet.set_column('B:AI',40)
         worksheet.conditional_format('C1:BO1',{'type': 'text',
                                              'criteria': 'containing',
                                              'value': 'Tester',
@@ -202,7 +219,6 @@ def IOLADollarCleaner():
     <h3>Instructions:</h3>
     <ul type="disc">
     <li>This tool is meant to be used in conjunction with the LegalServer report called <a href="https://lsnyc.legalserver.org/report/dynamic?load=1725" target="_blank">"Pascale Big Base Report"</a>.</li>
-    <li>Browse your computer using the field above to find the LegalServer excel document that you want to add case hyperlinks to.</li> 
     <li>Once you have identified this file, click ‘Clean!’ and you should shortly be given a prompt to either open the file directly or save the file to your computer.</li> 
     <li>When you first open the file, all case numbers will display as ‘0’ until you click “Enable Editing” in excel, this will populate the fields.</li> 
     </ul>
