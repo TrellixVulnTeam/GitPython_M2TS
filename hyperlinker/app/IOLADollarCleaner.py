@@ -20,30 +20,30 @@ def IOLADollarCleaner():
         test = pd.read_excel(f)
         test.fillna('',inplace=True)
         if test.iloc[0][0] == '':
-            data_xls = pd.read_excel(f,skiprows=2)
+            df = pd.read_excel(f,skiprows=2)
         else:
-            data_xls = pd.read_excel(f)
-        if 'Matter/Case ID#' not in data_xls.columns:
-            data_xls['Matter/Case ID#'] = data_xls['id']
+            df = pd.read_excel(f)
+        if 'Matter/Case ID#' not in df.columns:
+            df['Matter/Case ID#'] = df['id']
         
-        data_xls.fillna('',inplace=True)
+        df.fillna('',inplace=True)
         #MAKE THIS WORK!!
         def NoIDDelete(CaseID):
             if CaseID == '' or CaseID == 'nan':
                 return 'No Case ID'
             else:
                 return str(CaseID)
-        data_xls['Matter/Case ID#'] = data_xls.apply(lambda x: NoIDDelete(x['Matter/Case ID#']), axis=1)
-        data_xls = data_xls[data_xls['Matter/Case ID#'] != 'No Case ID']
+        df['Matter/Case ID#'] = df.apply(lambda x: NoIDDelete(x['Matter/Case ID#']), axis=1)
+        df = df[df['Matter/Case ID#'] != 'No Case ID']
         
         
         
-        last7 = data_xls['Matter/Case ID#'].apply(lambda x: x[-7:])
-        data_xls['Hyperlinked Case #']='=HYPERLINK("https://lsnyc.legalserver.org/matter/dynamic-profile/view/'+last7+'",'+ '"' + data_xls['Matter/Case ID#'] +'"' +')'
-        move = data_xls['Hyperlinked Case #']
-        del data_xls['Hyperlinked Case #']
-        data_xls.insert(0,'Hyperlinked Case #',move)           
-        del data_xls['Matter/Case ID#']
+        last7 = df['Matter/Case ID#'].apply(lambda x: x[-7:])
+        df['Hyperlinked Case #']='=HYPERLINK("https://lsnyc.legalserver.org/matter/dynamic-profile/view/'+last7+'",'+ '"' + df['Matter/Case ID#'] +'"' +')'
+        move = df['Hyperlinked Case #']
+        del df['Hyperlinked Case #']
+        df.insert(0,'Hyperlinked Case #',move)           
+        del df['Matter/Case ID#']
         
         #Test if monthly amount is in Closing Screen
         
@@ -56,7 +56,7 @@ def IOLADollarCleaner():
                 return "Monthly Award in Closing Screen Should be as Large as in DAP Screen"
             else:
                 return ''
-        data_xls['DAP Monthly $ Tester'] = data_xls.apply(lambda x : DAPMonthlyTester(x['DAP Monthly XVI -- SSI'],x['DAP Monthly SSD -- Title II'],x['Custom Recovered Monthly (Monthly Benefit)']),axis = 1)
+        df['DAP Monthly $ Tester'] = df.apply(lambda x : DAPMonthlyTester(x['DAP Monthly XVI -- SSI'],x['DAP Monthly SSD -- Title II'],x['Custom Recovered Monthly (Monthly Benefit)']),axis = 1)
         
                 
         #Test if monthly award is higher than retro
@@ -71,7 +71,7 @@ def IOLADollarCleaner():
                 return 'Retro Awards Should Generally Be Higher than Monthly - Confirm Amounts'
             else:
                 return ''
-        data_xls['Monthly Higher than Retro Tester'] = data_xls.apply(lambda x : MonthlyHigherThanRetroTester(x['Custom Recovered Monthly (Monthly Benefit)'],x['Custom Retro Recovery (Retroactive Award/Settlement)']),axis = 1)
+        df['Monthly Higher than Retro Tester'] = df.apply(lambda x : MonthlyHigherThanRetroTester(x['Custom Recovered Monthly (Monthly Benefit)'],x['Custom Retro Recovery (Retroactive Award/Settlement)']),axis = 1)
         
         #Test if DAP Retro + Interim Assistance is Larger than custom Retro
         
@@ -85,7 +85,7 @@ def IOLADollarCleaner():
             else:
                 return ''
                 
-        data_xls ['Closing Award Tester'] = data_xls.apply(lambda x : DAPPlusInterimClosingTester(x['Custom Retro Recovery (Retroactive Award/Settlement)'],x['DAP Retro To Client'],x['DAP Interim Assistance Recovery']),axis = 1)
+        df ['Closing Award Tester'] = df.apply(lambda x : DAPPlusInterimClosingTester(x['Custom Retro Recovery (Retroactive Award/Settlement)'],x['DAP Retro To Client'],x['DAP Interim Assistance Recovery']),axis = 1)
         
         #Education Cases should generally be $ avoided rather than awarded
         
@@ -94,7 +94,7 @@ def IOLADollarCleaner():
                 return "Education Cases Should have $ Avoided Rather than Awarded"
             else:
                 return ""
-        data_xls['Education Award Tester'] = data_xls.apply(lambda x : EdTester(x['Legal Problem Code'],x['Custom Retro Recovery (Retroactive Award/Settlement)']),axis = 1)
+        df['Education Award Tester'] = df.apply(lambda x : EdTester(x['Legal Problem Code'],x['Custom Retro Recovery (Retroactive Award/Settlement)']),axis = 1)
         
         #EITC tax refunds or other tax benefits, medicaid and medicare shouldn't have monthly benefits going forward
         def MonthlyTester (IOLADirectDollars,ClosingMonthly,IOLADollarSavings):
@@ -108,7 +108,7 @@ def IOLADollarCleaner():
             else:
                 return ""
                 
-        data_xls ["Monthly Tester"] = data_xls.apply(lambda x : MonthlyTester(x['IOLA Direct Dollar Benefits to Clients'],x['Custom Recovered Monthly (Monthly Benefit)'],x['IOLA Dollar Savings to Clients']),axis = 1)
+        df ["Monthly Tester"] = df.apply(lambda x : MonthlyTester(x['IOLA Direct Dollar Benefits to Clients'],x['Custom Recovered Monthly (Monthly Benefit)'],x['IOLA Dollar Savings to Clients']),axis = 1)
         
         
         #Food stamps and public assistance benefits don't make sense as 'avoided'
@@ -121,7 +121,7 @@ def IOLADollarCleaner():
             else:
                 return ''
         
-        data_xls ["Avoided Tester"] = data_xls.apply(lambda x : AvoidedTester(x['IOLA Dollar Savings to Clients'],x['Custom Avoid (Lump Sum Avoid)']),axis = 1)
+        df ["Avoided Tester"] = df.apply(lambda x : AvoidedTester(x['IOLA Dollar Savings to Clients'],x['Custom Avoid (Lump Sum Avoid)']),axis = 1)
         
         #flag any retro awards that are greater than $750k
         #flag any monthly awards greater than $3k
@@ -134,7 +134,7 @@ def IOLADollarCleaner():
                 return 'This is an unusually large award, please confirm accuracy'
             else:
                 return ''
-        data_xls ["Large Award Tester"] = data_xls.apply(lambda x : BigAwardTester(x['Custom Retro Recovery (Retroactive Award/Settlement)'],x['Custom Recovered Monthly (Monthly Benefit)']),axis = 1)
+        df ["Large Award Tester"] = df.apply(lambda x : BigAwardTester(x['Custom Retro Recovery (Retroactive Award/Settlement)'],x['Custom Recovered Monthly (Monthly Benefit)']),axis = 1)
         
         #flag any dap retro awards that are greater than $100k
         #flag any monthly awards greater than $3k
@@ -147,43 +147,51 @@ def IOLADollarCleaner():
                 return 'This is an unusually large DAP award, please confirm accuracy'
             else:
                 return ''
-        data_xls ["DAP Large Award Tester"] = data_xls.apply(lambda x : DAPBigAwardTester(x['DAP Retro To Client'],x['DAP Monthly XVI -- SSI'],x['DAP Monthly SSD -- Title II']),axis = 1)
+        df ["DAP Large Award Tester"] = df.apply(lambda x : DAPBigAwardTester(x['DAP Retro To Client'],x['DAP Monthly XVI -- SSI'],x['DAP Monthly SSD -- Title II']),axis = 1)
         
         #Flag situations where a dollar amount has been added but there's no category chosen
         
-        def BenefitCategoryTester(SavingsType, DirectDollarType, MonthlyBenefit, RetroAward, MonthlyAvoid, LumpSumAvoid):
+        def BenefitCategoryTester(DirectDollarType, MonthlyBenefit, RetroAward):
         
             if MonthlyBenefit != "$0.00" or RetroAward != "$0.00":
                 if DirectDollarType == "":
                     return "Needs Direct Dollar Benefits Type"
                 else:
                     return ""
-            elif MonthlyAvoid != "$0.00" or LumpSumAvoid != "$0.00":
+            else:
+                return ""
+            
+        
+        df["Benefit Category Tester"] = df.apply(lambda x : BenefitCategoryTester(x['IOLA Direct Dollar Benefits to Clients'],x['Custom Recovered Monthly (Monthly Benefit)'],x['Custom Retro Recovery (Retroactive Award/Settlement)']),axis =1)
+        
+        def SavingsCategoryTester(SavingsType, MonthlyAvoid, LumpSumAvoid):
+            if MonthlyAvoid != "$0.00" or LumpSumAvoid != "$0.00":
                 if SavingsType =="":
                     return "Needs Savings Type"
-        
-        data_xls["Benefit Category Tester"] = data_xls.apply(lambda x : BenefitCategoryTester(x['IOLA Dollar Savings to Clients'],x['IOLA Direct Dollar Benefits to Clients'],x['Custom Recovered Monthly (Monthly Benefit)'],x['Custom Retro Recovery (Retroactive Award/Settlement)'],x['Custom Avoid Monthly (Monthly Payment Avoided)'],x['Custom Avoid (Lump Sum Avoid)']),axis =1)
-        
-   
-        
+                else:
+                    return ""
+            else:
+                return ""
+        df["Savings Category Tester"] = df.apply(lambda x : SavingsCategoryTester(x['IOLA Dollar Savings to Clients'],x['Custom Avoid Monthly (Monthly Payment Avoided)'],x['Custom Avoid (Lump Sum Avoid)']),axis =1)
         #TesterTester 
         
-        def TesterTester (DAPMonthlyTester,MonthlyHigherThanRetroTester,ClosingAwardTester,EducationAwardTester,MonthlyTester,AvoidedTester,LargeAwardTester,DAPLargeAwardTester,BenefitCategoryTester):
-            if DAPMonthlyTester == '' and MonthlyHigherThanRetroTester == ''and ClosingAwardTester == '' and EducationAwardTester == '' and MonthlyTester == '' and AvoidedTester == '' and LargeAwardTester == '' and DAPLargeAwardTester == '' and BenefitCategoryTester == '':
+        def TesterTester (DAPMonthlyTester,MonthlyHigherThanRetroTester,ClosingAwardTester,EducationAwardTester,MonthlyTester,AvoidedTester,LargeAwardTester,DAPLargeAwardTester,BenefitCategoryTester,SavingsCategoryTester):
+            if DAPMonthlyTester == '' and MonthlyHigherThanRetroTester == ''and ClosingAwardTester == '' and EducationAwardTester == '' and MonthlyTester == '' and AvoidedTester == '' and LargeAwardTester == '' and DAPLargeAwardTester == '' and BenefitCategoryTester == '' and SavingsCategoryTester == '':
                 return ''
             else:
                 return 'Case Needs Attention'
-        data_xls ['Tester Tester'] = data_xls.apply (lambda x : TesterTester(x['DAP Monthly $ Tester'],x['Monthly Higher than Retro Tester'],x['Closing Award Tester'],x['Education Award Tester'],x['Monthly Tester'],x['Avoided Tester'],x['Large Award Tester'],x['DAP Large Award Tester'],x['Benefit Category Tester']), axis = 1)        
+        df ['Tester Tester'] = df.apply (lambda x : TesterTester(x['DAP Monthly $ Tester'],x['Monthly Higher than Retro Tester'],x['Closing Award Tester'],x['Education Award Tester'],x['Monthly Tester'],x['Avoided Tester'],x['Large Award Tester'],x['DAP Large Award Tester'],x['Benefit Category Tester'],x['Savings Category Tester']), axis = 1)        
 
+        df = df[df['Tester Tester'] == "Case Needs Attention"]
         
         #Putting columns in the right order
-        data_xls = data_xls[['Hyperlinked Case #','Assigned Branch/CC','Primary Advocate','Client First Name','Client Last Name','Date Closed','Tester Tester','DAP Monthly $ Tester','DAP Monthly XVI -- SSI','DAP Monthly SSD -- Title II','Custom Recovered Monthly (Monthly Benefit)','Monthly Higher than Retro Tester','Custom Retro Recovery (Retroactive Award/Settlement)','Closing Award Tester','DAP Retro To Client','DAP Interim Assistance Recovery','Education Award Tester','Legal Problem Code','Monthly Tester','IOLA Direct Dollar Benefits to Clients','IOLA Dollar Savings to Clients','Avoided Tester','Custom Avoid (Lump Sum Avoid)','Large Award Tester','Custom Retro Recovery (Retroactive Award/Settlement)','DAP Large Award Tester','Outcome','Result Achieved','IOLA Dollar Savings to Clients','IOLA Direct Dollar Benefits to Clients','Benefit Category Tester','Custom Retro Recovery (Retroactive Award/Settlement)','Custom Recovered Monthly (Monthly Benefit)','Custom Avoid (Lump Sum Avoid)','Custom Avoid Monthly (Monthly Payment Avoided)',]] 
+        df = df[['Hyperlinked Case #','Assigned Branch/CC','Primary Advocate','Client First Name','Client Last Name','Date Closed','DAP Monthly $ Tester','DAP Monthly XVI -- SSI','DAP Monthly SSD -- Title II','Custom Recovered Monthly (Monthly Benefit)','Monthly Higher than Retro Tester','Custom Retro Recovery (Retroactive Award/Settlement)','Closing Award Tester','DAP Retro To Client','DAP Interim Assistance Recovery','Education Award Tester','Legal Problem Code','Monthly Tester','IOLA Direct Dollar Benefits to Clients','Benefit Category Tester','IOLA Dollar Savings to Clients','Savings Category Tester','Avoided Tester','Custom Avoid (Lump Sum Avoid)','Custom Avoid Monthly (Monthly Payment Avoided)','Large Award Tester','Custom Retro Recovery (Retroactive Award/Settlement)','DAP Large Award Tester','Outcome','Result Achieved']] 
         
         
         #bounce worksheets back to excel
         output_filename = f.filename     
         writer = pd.ExcelWriter("app\\sheets\\"+output_filename, engine = 'xlsxwriter')
-        data_xls.to_excel(writer, sheet_name='Sheet1',index=False)
+        df.to_excel(writer, sheet_name='Sheet1',index=False, header = False, startrow = 1)
         workbook = writer.book
         worksheet = writer.sheets['Sheet1']
         worksheet.freeze_panes(1,1)
@@ -191,16 +199,44 @@ def IOLADollarCleaner():
         
         #create format that will make case #s look like links
         link_format = workbook.add_format({'font_color':'blue', 'bold':True, 'underline':True})
-        problem_format = workbook.add_format({'bg_color':'yellow'})
+        problem_format = workbook.add_format({
+                'bg_color':'yellow',
+                'text_wrap': True,
+                'font_size' : 9
+                })
+        default_format = workbook.add_format({
+                'text_wrap': True,
+                'font_size' : 9
+                })
+        header_format = workbook.add_format({
+                'text_wrap':True,
+                'bold':True,
+                'valign': 'middle',
+                'align': 'center',
+                'font_size' : 9
+                })
         
         #assign new format to column A
-        worksheet.set_column('A:A',20,link_format)
-        worksheet.set_column('B:AI',40)
-        worksheet.conditional_format('C1:BO1',{'type': 'text',
+        for col_num, value in enumerate(df.columns.values):
+                    worksheet.write(0, col_num, value, header_format)
+        worksheet.set_column('A:A',15,link_format)
+        worksheet.set_column('B:AI',15,default_format)
+        worksheet.conditional_format('C1:BO10000',{'type': 'text',
+                                             'criteria': 'containing',
+                                             'value': 'Needs',
+                                             'format': problem_format})        
+        worksheet.conditional_format('C1:BO10000',{'type': 'text',
                                              'criteria': 'containing',
                                              'value': 'Tester',
-                                             'format': problem_format})        
-        
+                                             'format': problem_format})
+        worksheet.conditional_format('C1:BO10000',{'type': 'text',
+                                             'criteria': 'containing',
+                                             'value': 'Should',
+                                             'format': problem_format})
+        worksheet.conditional_format('C1:BO10000',{'type': 'text',
+                                             'criteria': 'containing',
+                                             'value': 'please',
+                                             'format': problem_format})
         writer.save()
         
         #send file back to user

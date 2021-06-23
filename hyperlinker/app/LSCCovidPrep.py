@@ -135,7 +135,7 @@ def LSCCovidPrep():
             if Date == "":
                 return ""
             
-            elif Date >= 20210101 and Date <= 20210331:
+            elif Date >= 20210401 and Date <= 20210630:
                 return "Yes"
             else:
                 return "No"

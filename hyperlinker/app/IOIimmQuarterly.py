@@ -245,7 +245,7 @@ def upload_IOIimmQuarterly():
         #make all cases for any client that has a minor removal tally, into also being minor removal cases
         
         
-        
+        df['Modified Deliverable Tally'] = ''
         
         dfs = df.groupby('Unique Client ID#',sort = False)
 

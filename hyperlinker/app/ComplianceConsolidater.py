@@ -319,8 +319,9 @@ def ComplianceConsolidater():
                 header_format = workbook.add_format({
                 'text_wrap':True,
                 'bold':True,
-                'valign': 'middle',
-                'align': 'center'
+                'valign': 'top',
+                'align': 'center',
+                'bg_color' : '#eeece1'
                 })
                 
                 
@@ -331,7 +332,8 @@ def ComplianceConsolidater():
                     worksheet.write(0, col_num, value, header_format)
                 worksheet.autofilter('A1:R1')
                 worksheet.set_column('A:A',15,link_format)
-                worksheet.set_column('C:R',20)
+                worksheet.set_column('C:C',20)
+                worksheet.set_column('D:R',13)
                 worksheet.set_column('B:B',0)
                 worksheet.set_column('S:ZZ',0)
                 worksheet.set_row(0,60)

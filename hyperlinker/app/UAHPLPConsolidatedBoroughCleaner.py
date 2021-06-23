@@ -101,11 +101,13 @@ def UAHPLPConsolidatedBoroughCleaner():
         
         
     
-        #Is everything okay with a case? 
+        #Is everything okay with a case? Also remove if Eligdate is from prior year
 
-        def TesterTester (HRARelease,HousingLevel,HousingType,EligDate,PANum,Outcome,OutcomeDate):
+        def TesterTester (EligConstruct,HRARelease,HousingLevel,HousingType,EligDate,PANum,Outcome,OutcomeDate):
            
-            if HRARelease == "" or HRARelease == "No" or HRARelease == " ":
+            if EligConstruct != '' and EligConstruct < 20200701 :
+                return 'Eligibility date from prior contract year'
+            elif HRARelease == "" or HRARelease == "No" or HRARelease == " ":
                 return 'Case Needs Attention'
             elif HousingLevel == "" or HousingLevel == "Hold For Review":
                 return 'Case Needs Attention'
@@ -120,7 +122,7 @@ def UAHPLPConsolidatedBoroughCleaner():
             else:
                 return 'No Cleanup Necessary'
             
-        df['Tester Tester'] = df.apply(lambda x: TesterTester(x['HRA Release?'],x['Housing Level of Service'],x['Housing Type Of Case'],x['HAL Eligibility Date'],x['Gen Pub Assist Case Number'],x['Housing Outcome'],x['Housing Outcome Date']),axis=1)
+        df['Tester Tester'] = df.apply(lambda x: TesterTester(x['EligDateConstruct'],x['HRA Release?'],x['Housing Level of Service'],x['Housing Type Of Case'],x['HAL Eligibility Date'],x['Gen Pub Assist Case Number'],x['Housing Outcome'],x['Housing Outcome Date']),axis=1)
         
         
         #Delete if everything's okay **
@@ -138,6 +140,7 @@ def UAHPLPConsolidatedBoroughCleaner():
         df = df[['Hyperlinked CaseID#',
         'Primary Advocate',
         'Date Opened',
+        'Date Closed',
         "Client First Name",
         "Client Last Name",
         
@@ -180,17 +183,17 @@ def UAHPLPConsolidatedBoroughCleaner():
                 ws.autofilter('B1:ZZ1')
                 ws.freeze_panes(1, 2)
 
-                ws.conditional_format('F2:J100000',{'type': 'blanks',
+                ws.conditional_format('G2:K100000',{'type': 'blanks',
                                                  'format': problem_format})
-                ws.conditional_format('G2:G100000',{'type': 'text',
+                ws.conditional_format('H2:H100000',{'type': 'text',
                                                  'criteria': 'containing',
                                                  'value': 'Hold For Review',
                                                  'format': problem_format})
-                ws.conditional_format('F2:F100000',{'type': 'text',
+                ws.conditional_format('G2:G100000',{'type': 'text',
                                                  'criteria': 'containing',
                                                  'value': 'No',
                                                  'format': problem_format})
-                ws.conditional_format('L2:M100000',{'type': 'text',
+                ws.conditional_format('M2:N100000',{'type': 'text',
                                                  'criteria': 'containing',
                                                  'value': 'Needs',
                                                  'format': problem_format})
