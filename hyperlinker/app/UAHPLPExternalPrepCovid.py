@@ -297,7 +297,7 @@ def UAHPLPExternalPrepCovid():
         
         
         
-        borough_dictionary = dict(tuple(df.groupby('BoroughByZip')))
+        borough_dictionary = dict(tuple(df.groupby('Assigned Branch/CC')))
 
         def save_xls(dict_df, path):
             writer = pd.ExcelWriter(path, engine = 'xlsxwriter')

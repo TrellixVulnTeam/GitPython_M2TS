@@ -111,7 +111,7 @@ def CNYCNCleaner():
             if Outcome == "Obtained credit/budget counseling" or Outcome == "Referred to legal services":
                 return "Referral"
             elif Outcome == "Resolved non-mortgage lien issue":
-                return "Resolved Non-mortgage Lien"
+                return "Resolved Non-mortgage Lien Issue"
             elif Outcome == "Mortgage Refinanced-In House":
                 return "Mortgage Modified - In House"
             else:

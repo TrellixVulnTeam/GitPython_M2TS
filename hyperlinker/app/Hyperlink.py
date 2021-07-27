@@ -9,7 +9,6 @@ import pandas as pd
 import os
 
 
-
 @app.route("/Hyperlinker", methods=['GET', 'POST'])
 def upload_hyperlink():
     #upload file from computer

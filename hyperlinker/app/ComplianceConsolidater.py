@@ -196,18 +196,25 @@ def ComplianceConsolidater():
                  
         df['Active Advocate Tester'] = df.apply(lambda x : ActiveAdvocateTester(x['Login Active']),axis=1)
         
-        #Case needs a retainer if it's closed with higher level of service than A or B
+        #Case needs a retainer if it's closed with higher level of service than A or B, or has level of service entered, or is more than 30 days old (PAI cases don't need it)
         
-        def RetainerTester(Retainer,CloseReason,LevelOfService,PAICase):
+        df['Today'] = datetime.now()
+        df['TodayConstruct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['Today']), axis=1)
+        df['OpenConstruct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['Date Opened']), axis = 1)
+        df['ConstructAge'] = df['TodayConstruct'] - df['OpenConstruct']
+        
+        def RetainerTester(Retainer,CloseReason,LevelOfService,PAICase,ConstructAge):
             if Retainer == 'Yes' or PAICase == 'Yes':
                 return ''
             elif CloseReason.startswith('F') == True or CloseReason.startswith('G') == True or CloseReason.startswith('H') == True or CloseReason.startswith('IA') == True or CloseReason.startswith('IB') == True or CloseReason.startswith('IC') == True or CloseReason.startswith('L') == True:
                 return 'Needs Retainer'
             elif LevelOfService.startswith('Representation')== True:
                 return 'Needs Retainer'
+            elif LevelOfService == '' and ConstructAge > 200:
+                return 'Needs Retainer'
             else:
                 return ''
-        df['Retainer Tester'] = df.apply(lambda x : RetainerTester(x['Retainer on File'],x['Close Reason'],x['Level of Service'],x['PAI Case?']),axis=1)
+        df['Retainer Tester'] = df.apply(lambda x : RetainerTester(x['Retainer on File'],x['Close Reason'],x['Level of Service'],x['PAI Case?'],x['ConstructAge']),axis=1)
         
         #Can't be closed before opened
         
@@ -266,7 +273,7 @@ def ComplianceConsolidater():
         
         #Putting everything in the right order
         
-        df = df[['Hyperlinked CaseID#','Assigned Branch/CC','Primary Advocate Name','Client First Name','Client Last Name','No Legal Assistance Documented Tester','No Time Entered for 90 Days Tester','200% of Poverty Tester','125-200% of Poverty Tester','Funding Code 4000 Tester','No Age for Client Tester','Untimely Closed Tester','Untimely Closed Overridden Tester','Citizenship & Immigration Tester','Active Advocate Tester','Retainer Tester','Closed Before Opened Tester','CSR Agreement Tester','Caseworker Name','Compliance Check Untimely Closed','Compliance Check Untimely Closed Overwritten','Compliance Check 125 to 200 Poverty Income Ineligible','Compliance Check 200 Poverty Income Eligible','Compliance Check Citizenship and Immigration','Citizenship Status','Attestation on File?','Staff Verified Non-Citizenship Documentation','Did any Staff Meet Client in Person?','Close Reason','Date Closed','Date Opened','CSR: Is Legal Assistance Documented?','Age in Days','Percentage of Poverty','LSC Eligible?','CSR Eligible','Income Eligible','Primary Funding Codes','Secondary Funding Codes','DOB Information','Group','CSR: Timely Closing?','Was Timely Closed overridden?','Case Status','PAI Case?','Level of Service','Retainer on File','Python CSR Tester']]
+        df = df[['Hyperlinked CaseID#','Assigned Branch/CC','Primary Advocate Name','Client First Name','Client Last Name','No Legal Assistance Documented Tester','No Time Entered for 90 Days Tester','200% of Poverty Tester','125-200% of Poverty Tester','Funding Code 4000 Tester','No Age for Client Tester','Untimely Closed Tester','Untimely Closed Overridden Tester','Citizenship & Immigration Tester','Active Advocate Tester','Retainer Tester','Closed Before Opened Tester','CSR Agreement Tester','Caseworker Name','Compliance Check Untimely Closed','Compliance Check Untimely Closed Overwritten','Compliance Check 125 to 200 Poverty Income Ineligible','Compliance Check 200 Poverty Income Eligible','Compliance Check Citizenship and Immigration','Citizenship Status','Attestation on File?','Staff Verified Non-Citizenship Documentation','Did any Staff Meet Client in Person?','Close Reason','Date Closed','Date Opened','CSR: Is Legal Assistance Documented?','Age in Days','Percentage of Poverty','LSC Eligible?','CSR Eligible','Income Eligible','Primary Funding Codes','Secondary Funding Codes','DOB Information','Group','CSR: Timely Closing?','Was Timely Closed overridden?','Case Status','PAI Case?','Level of Service','Retainer on File','Python CSR Tester','TodayConstruct','ConstructAge']]
         
         
         
@@ -368,7 +375,7 @@ def ComplianceConsolidater():
                     'Active Advocate Tester: These are cases for which the Primary Advocate does not have an active user profile in LegalServer. All Cases must be assigned to a currently-active case handler',
                     {'height':70,'width':500})
                 worksheet.write_comment('P1',
-                    'Retainer Tester: Cases that have a Close Reason showing more than Advice/Brief Service, or a Level of Service indicating representation has been provided must have retainers.',
+                    'Retainer Tester: Cases that have a Close Reason showing more than Advice/Brief Service, or a Level of Service indicating representation has been provided must have retainers. Open cases with a blank Level of Service will ask for retainers after they have been open for 2 months.',
                     {'height':70,'width':500})
                 worksheet.write_comment('Q1',
                     'Closed Before Opened Tester: The date that a case was closed must be equal to or later than the date on which it was opened.',
