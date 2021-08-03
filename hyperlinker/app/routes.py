@@ -31,6 +31,7 @@ def index():
     <li><a href="/LSCCovidPrep">LSC Covid Report Prep</a></li>
     <li><a href="/CSRDeterminer">Determine CSR Eligibility</a></li>
     <li><a href="/RadSearcher">Identify Clients in RAD Buildings</a></li>
+    <li><a href="/AccessLineSplitter">Identify Access Line Cases</a></li>
     </ul>
     
     <b>Housing Tools:</b>

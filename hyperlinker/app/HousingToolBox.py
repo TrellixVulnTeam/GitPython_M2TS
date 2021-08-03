@@ -470,10 +470,12 @@ def PostureOnEligibility(Posture):
     return "; ".join(recombinedposturelist)
  
 #TRC Level of Service becomes Service type - lots of level of service in LS, mapped to Advice Only, Pre-Lit Strategies (brief service, out of court advocacy, hold for review), and Full Rep (mapping to be confirmed)
-def TRCServiceType(LevelOfService,LegalProblemCode):
+def TRCServiceType(LevelOfService,LegalProblemCode,FundingCode, Referral, HRARelease):
     if LevelOfService == "Advice":
         return "Advice Only"
-    elif LegalProblemCode.startswith("3") == True or LegalProblemCode.startswith("5") == True or LegalProblemCode.startswith("7") == True:
+    #elif LegalProblemCode.startswith("3") == True or LegalProblemCode.startswith("5") == True or LegalProblemCode.startswith("7") == True:
+    #    return "Advice Only"
+    elif FundingCode.startswith('3011') == True and HRARelease != 'Yes': 
         return "Advice Only"
     elif LevelOfService == "Brief Service" or LevelOfService == "Out-of-Court Advocacy" or LevelOfService == "Hold For Review":
         return "Pre-Litigation Strategies"

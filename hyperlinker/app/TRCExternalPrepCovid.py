@@ -93,7 +93,7 @@ def TRCExternalPrepCovid():
         
         
         #Level of Service becomes Service type 
-        df['service_type'] = df.apply(lambda x: HousingToolBox.TRCServiceType(x['Housing Level of Service'],x['Legal Problem Code']), axis=1)
+        df['service_type'] = df.apply(lambda x: HousingToolBox.TRCServiceType(x['Housing Level of Service'],x['Legal Problem Code'],x['Legal Problem Code'],x['Referral Source'],x['HRA Release?']), axis=1)
         
         #if below 201, = 'Yes' otherwise 'No'
         df['below_200_FPL'] = df['Percentage of Poverty'].apply(lambda x: "Yes" if x < 200 else "No")
@@ -123,15 +123,18 @@ def TRCExternalPrepCovid():
         
         
         #Differentiate pre- and post- 3/1/20 eligibility date cases
-           
-       
-        
+
         df['Pre-3/1/20 Elig Date?'] = df.apply(lambda x: HousingToolBox.PreThreeOne(x['DateConstruct']), axis=1)
         
         #Flag cases that don't have housing-based legal problem codes for Kim's review, after 9/30
         
+        def NonHousing (LegalProblemCode):
+            if LegalProblemCode.startswith('6') == True:
+                return 'Housing'
+            else:
+                return 'Needs Review'
     
-        df['Non-Housing Case Tester'] = df.apply(lambda x: HousingToolBox.NonHousingTester(x['Legal Problem Code'],x['DateConstruct']), axis=1)
+        df['Non-Housing Case Tester'] = df.apply(lambda x: NonHousing(x['Legal Problem Code']), axis=1)
         
       
         
@@ -163,10 +166,9 @@ def TRCExternalPrepCovid():
         
         #DHCI Blank
         def RedactAnything(ServiceType, PreThreeOne, ToRedact, PrimaryFunding, ProblemCode, Consent):
-            
-            if ProblemCode.startswith('6') == False and ServiceType == 'Advice Only' and PrimaryFunding != "3011 TRC FJC Initiative":
+            if ServiceType == 'Advice Only':
                 return ""
-            elif ServiceType == "Advice Only" and PreThreeOne == "No" and PrimaryFunding != "3011 TRC FJC Initiative":
+            elif ServiceType == "Advice Only" and PreThreeOne == "No":
                 return ""
             else:
                 return ToRedact

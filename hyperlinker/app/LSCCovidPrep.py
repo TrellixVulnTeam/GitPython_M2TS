@@ -133,9 +133,8 @@ def LSCCovidPrep():
         #Closed or Opened in Prior Quarter ** NEED To UpDate this every quarter? BAD!***
         def DateInQuarter(Date):
             if Date == "":
-                return ""
-            
-            elif Date >= 20210401 and Date <= 20210630:
+                return ""           
+            elif Date >= 20210701 and Date <= 20210930:
                 return "Yes"
             else:
                 return "No"
