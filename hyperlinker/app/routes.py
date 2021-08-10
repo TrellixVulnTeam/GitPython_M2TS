@@ -86,6 +86,7 @@ def index():
     <ul type="disc">
     <li><a href="/BoxTester">Checkbox Tester</a></li>
     <li><a href="/PTOEstimator">PTO Estimator</a></li>
+    <li><a href="/Sandbox1">Sandbox1</a></li>
     </ul>
     <br>
     <p>If you have any questions or concerns about these tools (or ideas for new ones!) please reach out to <a href="mailto:jackley@lsnyc.org?cc=rstump@lsnyc.org&Subject=Hi Jay! (Idea for Python tool!)" target="_top">Jay Ackley</a></p>
