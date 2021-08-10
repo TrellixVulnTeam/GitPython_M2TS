@@ -4,6 +4,7 @@ from app.models import User, Post
 from app.forms import PostForm
 from werkzeug.urls import url_parse
 from datetime import datetime
+from random import randrange
 import pandas as pd
 
 
@@ -119,26 +120,40 @@ def BkLSIntakeConsolidatedHousingCleaner():
         df = df[df['Tester Tester'] == "Case Needs Attention"]
 
         def IntakeAssign(Casehandler):
-            if Casehandler in Evelyn_Casehandlers:
-                return "Evelyn V."
-            elif Casehandler in Diana_V_Casehandlers:
-                return "Diana V."
-            elif Casehandler in Diana_G_Casehandlers:
-                return "Diana G."
-            elif Casehandler in Keiannis_Casehandlers:
-                return "Keiannis G."
-            elif Casehandler in Dennis_Casehandlers:
-                return "Dennis S."
-            elif Casehandler in Rosa_Casehandlers:
-                return "Rosa A."
+            if Casehandler == 'Wong, Angela':
+                return 'Angela Wong'
+            elif Casehandler == 'Lane, Diane':
+                return 'Diane Lane'
+            elif Casehandler == 'Oquendo, Joann':
+                return 'Joann Oquendo'
+            elif Casehandler == 'Mullen, Evan M':
+                return 'Evan Mullen'
+            elif Casehandler == 'Spivey, Joseph':
+                return 'Joseph Spivey'
+            elif Casehandler == 'Moss, Julieta':
+                return 'Julieta Moss'
             else:
-                return "ZZ No Intake Para Assigned"
+                Roulette = randrange(6)
+                if Roulette == 0:
+                    return 'Angela Wong'
+                elif Roulette == 1:
+                    return 'Diane Lane'
+                elif Roulette == 2:
+                    return 'Joann Oquendo'
+                elif Roulette == 3:
+                    return 'Evan Mullen'
+                elif Roulette == 4:
+                    return 'Joseph Spivey'
+                elif Roulette == 5:
+                    return 'Julieta Moss'
+                
+                
 
         df['Intake Paralegal'] = df.apply(lambda x: IntakeAssign(x['Caseworker Name']),axis = 1)
 
         #sort by case handler
         
-        df = df.sort_values(by=['Primary Advocate'])
+        df = df.sort_values(by=['Intake Paralegal'])
         
         
         

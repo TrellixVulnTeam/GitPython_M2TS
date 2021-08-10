@@ -51,8 +51,8 @@ def UAHPLPConsolidatedBoroughCleaner():
         
         df['OpenedDateConstruct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['Date Opened']), axis=1)
        
-        #don't need consent form if it's post-covid advice/brief
-        def ReleaseTester(HRARelease,LevelOfService,EligDate,IndexNum):
+        #don't need consent form if it's post-covid advice/brief (still need release if we do have the index number)
+        def ReleaseTester(HRARelease,LevelOfService,IndexNum):
             LevelOfService = str(LevelOfService)
             IndexNum = str(IndexNum)
             if LevelOfService.startswith("Advice") or LevelOfService.startswith("Brief"):
@@ -64,7 +64,7 @@ def UAHPLPConsolidatedBoroughCleaner():
             else:
                 return HRARelease
        
-        df['HRA Release?'] = df.apply(lambda x: ReleaseTester(x['HRA Release?'],x["Housing Level of Service"],x['EligDateConstruct'],x['Gen Case Index Number']),axis = 1)
+        df['HRA Release?'] = df.apply(lambda x: ReleaseTester(x['HRA Release?'],x["Housing Level of Service"],x['Gen Case Index Number']),axis = 1)
        
         #PA Tester if theres no dhci, not needed for post-covid advice/brief cases
         def PATester (PANum,DHCI,PreThreeOne,LevelOfService,EligDate,OpenDate):
@@ -89,21 +89,30 @@ def UAHPLPConsolidatedBoroughCleaner():
             else:
                 return Outcome
                 
+        df['Housing Outcome'] = df.apply(lambda x: OutcomeTester(x['Housing Outcome'],x['Housing Outcome Date']),axis = 1)
+                
         def OutcomeDateTester(Outcome,OutcomeDate):
             if Outcome != "" and OutcomeDate == "":
                 return "Needs Outcome Date"
             else:
                 return OutcomeDate      
-       
-        df['Housing Outcome'] = df.apply(lambda x: OutcomeTester(x['Housing Outcome'],x['Housing Outcome Date']),axis = 1)
+
         df['Housing Outcome Date'] = df.apply(lambda x: OutcomeDateTester(x['Housing Outcome'],x['Housing Outcome Date']),axis = 1)
         
         
-        
+        #Test if a case is actually a housing case
+        def NonHousingCase (LegalProblemCode):
+            if LegalProblemCode.startswith('6') == True:
+                return ''
+            else:
+                return 'Non-Housing Case, Please Review'
+                
+        df['Housing Case?'] = df.apply(lambda x: NonHousingCase(x['Legal Problem Code']),axis = 1)
+            
     
         #Is everything okay with a case? Also remove if Eligdate is from prior year
 
-        def TesterTester (EligConstruct,HRARelease,HousingLevel,HousingType,EligDate,PANum,Outcome,OutcomeDate):
+        def TesterTester (EligConstruct,HRARelease,HousingLevel,HousingType,EligDate,PANum,Outcome,OutcomeDate,HousingCase):
            
             if EligConstruct != '' and EligConstruct < 20200701 :
                 return 'Eligibility date from prior contract year'
@@ -119,10 +128,12 @@ def UAHPLPConsolidatedBoroughCleaner():
                 return 'Case Needs Attention'
             elif Outcome == 'Needs Outcome' or OutcomeDate == 'Needs Outcome Date':
                 return 'Case Needs Attention'
+            elif HousingCase == 'Non-Housing Case, Please Review':
+                return 'Case Needs Attention'
             else:
                 return 'No Cleanup Necessary'
             
-        df['Tester Tester'] = df.apply(lambda x: TesterTester(x['EligDateConstruct'],x['HRA Release?'],x['Housing Level of Service'],x['Housing Type Of Case'],x['HAL Eligibility Date'],x['Gen Pub Assist Case Number'],x['Housing Outcome'],x['Housing Outcome Date']),axis=1)
+        df['Tester Tester'] = df.apply(lambda x: TesterTester(x['EligDateConstruct'],x['HRA Release?'],x['Housing Level of Service'],x['Housing Type Of Case'],x['HAL Eligibility Date'],x['Gen Pub Assist Case Number'],x['Housing Outcome'],x['Housing Outcome Date'],x['Housing Case?']),axis=1)
         
         
         #Delete if everything's okay **
@@ -158,6 +169,7 @@ def UAHPLPConsolidatedBoroughCleaner():
         
         "Housing Outcome",
         "Housing Outcome Date",
+        "Housing Case?",
         "Gen Case Index Number", 
         "Tester Tester",
         "Assigned Branch/CC"
@@ -196,6 +208,10 @@ def UAHPLPConsolidatedBoroughCleaner():
                 ws.conditional_format('M2:N100000',{'type': 'text',
                                                  'criteria': 'containing',
                                                  'value': 'Needs',
+                                                 'format': problem_format})
+                ws.conditional_format('O2:O100000',{'type': 'text',
+                                                 'criteria': 'containing',
+                                                 'value': 'Review',
                                                  'format': problem_format})
             writer.save()
         
