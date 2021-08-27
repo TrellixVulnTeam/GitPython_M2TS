@@ -3,13 +3,12 @@ from app import app, db, EmploymentToolBox, DataWizardTools
 from app.models import User, Post
 from app.forms import PostForm
 from werkzeug.urls import url_parse
-from datetime import datetime
+from datetime import date
 import pandas as pd
 
 
-
-@app.route("/IOIempMonthly", methods=['GET', 'POST'])
-def upload_IOIempMonthly():
+@app.route("/IOIempTally", methods=['GET', 'POST'])
+def upload_IOIempTally():
     if request.method == 'POST':
         print(request.files['file'])
         f = request.files['file']
@@ -18,7 +17,17 @@ def upload_IOIempMonthly():
         
         test.fillna('',inplace=True)
         
+        #date definition?
+        today = date.today()
+        print(today.month)
         
+        if today.month >= 8:
+            howmanymonths = today.month - 7
+        else:
+            howmanymonths = today.month + 12 - 7
+        
+        print(howmanymonths)
+       
         #Cleaning
         if test.iloc[0][0] == '':
             df = pd.read_excel(f,skiprows=2)
@@ -34,14 +43,14 @@ def upload_IOIempMonthly():
         
         df.fillna('',inplace=True)
         
-
+        
         #shorten branch names
         df['Assigned Branch/CC'] = df.apply(lambda x: DataWizardTools.OfficeAbbreviator(x['Assigned Branch/CC']),axis = 1)
         
-        #Putting Employment Work in HRA Baskets
-
-        df['HRA_Case_Coding'] = df.apply(lambda x: EmploymentToolBox.HRA_Case_Coding(x['Level of Service'],x['Legal Problem Code'],x['Special Legal Problem Code'],x['HRA IOI Employment Law Retainer?'],x['Matter/Case ID#']), axis = 1)
         
+        #Putting Employment Work in HRA Baskets
+        
+        df['HRA_Case_Coding'] = df.apply(lambda x: EmploymentToolBox.HRA_Case_Coding(x['Level of Service'],x['Legal Problem Code'],x['Special Legal Problem Code'],x['HRA IOI Employment Law Retainer?'],x['Matter/Case ID#']), axis = 1)        
 
         #Does case need special legal problem code?
                 
@@ -52,37 +61,40 @@ def upload_IOIempMonthly():
 
         df['Exclude due to Income?'] = df.apply(lambda x: EmploymentToolBox.Income_Exclude(x['Percentage of Poverty'],x['HRA IOI Employment Law If Client is Over 200% of FPL, Did you seek a waiver from HRA?']), axis=1)
         
+        
         #DateMaker for Date Opened
         
         df['Open Construct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['Date Opened']),axis = 1)
+
         
         #DHCI form needed?
+        
         
         df['Needs DHCI?'] = df.apply(lambda x: EmploymentToolBox.DHCI_Needed(x['HRA IOI Employment Law DHCI Form?'],x['Level of Service'],x['Open Construct']), axis=1)
         
          
-        #Manipulable Dates               
+        #Manipulable Dates (this seems like a mess, i would like to fix it later - Jay)            
         
-        def Eligibility_Date(Effective_Date,Date_Opened):
-            if Effective_Date != '':
+        def Eligibility_Date(Substantial_Activity_Date,Effective_Date,Date_Opened):
+            if Substantial_Activity_Date != '':
+                return Substantial_Activity_Date
+            elif Effective_Date != '':
                 return Effective_Date
             else:
                 return Date_Opened
-        df['Eligibility_Date'] = df.apply(lambda x : Eligibility_Date(x['IOI HRA Effective Date (optional) (IOI 2)'],x['Date Opened']), axis = 1)
+        df['Eligibility_Date'] = df.apply(lambda x : Eligibility_Date(x['HRA IOI Employment Law HRA Date Substantial Activity Performed 2022'],x['IOI HRA Effective Date (optional) (IOI 2)'],x['Date Opened']), axis = 1)
         
-        df['Open Month'] = df['Eligibility_Date'].apply(lambda x: str(x)[:2])
-        df['Open Day'] = df['Eligibility_Date'].apply(lambda x: str(x)[3:5])
-        df['Open Year'] = df['Eligibility_Date'].apply(lambda x: str(x)[6:])
-        df['Open Construct'] = df['Open Year'] + df['Open Month'] + df['Open Day']
         
-        #DateMaker Substantial Activity FY21
-        df['Subs Construct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['HRA IOI Employment Law HRA Date Substantial Activity Performed 2021']),axis = 1)
         
-        #Substantial Activity for Rollover FY21?
+        df['Open Construct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['Date Opened']),axis = 1)
+        
+        #DateMaker Substantial Activity FY22
+        df['Subs Construct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['HRA IOI Employment Law HRA Date Substantial Activity Performed 2022']),axis = 1)
                 
-        df['Needs Substantial Activity?'] = df.apply(lambda x: EmploymentToolBox.Needs_Rollover(x['Open Construct'],x['HRA IOI Employment Law HRA Substantial Activity 2021'],x['Subs Construct'],x['Matter/Case ID#']), axis=1)
-        
-              
+        #Substantial Activity for Rollover FY22?
+
+        df['Needs Substantial Activity?'] = df.apply(lambda x: EmploymentToolBox.Needs_Rollover(x['Open Construct'],x['HRA IOI Employment Law HRA Substantial Activity 2022'],x['Subs Construct'],x['Matter/Case ID#']), axis=1)
+                     
         #Reportable?
         
         df['Reportable?'] = df.apply(lambda x: EmploymentToolBox.ReportableTester(x['Exclude due to Income?'],x['Needs DHCI?'],x['Needs Substantial Activity?'],x['HRA_Case_Coding']),axis=1)
@@ -114,38 +126,165 @@ def upload_IOIempMonthly():
 
         #Better names & HRA Names
 
+        df['Employment Tier Category'] = df['HRA IOI Employment Law IOI Employment Tier Category:']
+        
         df['Client Name'] = df['Full Person/Group Name (Last First)']
         
         df['Office'] = df['Assigned Branch/CC']
         
+        df['Unique_ID'] = 'LSNYC'+df['Matter/Case ID#']
+        
+        df['Last_Initial'] = df['Client Last Name'].str[1]
+        df['First_Initial'] = df['Client First Name'].str[1]
+        
+        df['Year_of_Birth'] = df['Date of Birth'].str[-4:]
+        
+        #gender
+        def HRAGender (gender):
+            if gender == 'Male' or gender == 'Female':
+                return gender
+            else:
+                return 'Other'
+        df['Gender'] = df.apply(lambda x: HRAGender(x['Gender']), axis=1)
+        
+        df['Country of Origin'] = ''
+        
+        #county=borough
+        df['Borough'] = df['County of Residence']
+        
+        #household size etc.
+        df['Household_Size'] = df['Number of People under 18'].astype(int) + df['Number of People 18 and Over'].astype(int)
+        df['Number_of_Children'] = df['Number of People under 18']
+        
+        #Income Eligible?
+        df['Annual_Income'] = df['Total Annual Income ']
+        def HRAIncElig (PercentOfPoverty):
+            if PercentOfPoverty > 200:
+                return 'NO'
+            else:
+                return 'YES'
+        df['Income_Eligible'] = df.apply(lambda x: HRAIncElig(x['Percentage of Poverty']), axis=1)
+        
+        def IncWaiver (eligible,waiverdate):
+            if eligible == 'NO' and waiverdate != '':
+                return 'Income'
+            else:
+                return ''
+        df['Waiver_Type'] = df.apply(lambda x: IncWaiver(x['Income_Eligible'],x['HRA IOI Employment Law If Client is Over 200% of FPL, Did you seek a waiver from HRA?']), axis=1)
+        
+        def IncWaiverDate (waivertype,date):
+            if waivertype != '':
+                return date
+            else:  
+                return ''
+                
+        df['Waiver_Approval_Date'] = df.apply(lambda x: IncWaiverDate(x['Waiver_Type'],x['HRA IOI Employment Law Income Waiver Date']), axis = 1)
+        
 
+        #Other Cleanup
+        
+                        
+                 
+        def PriorEnrollment (casenumber):
+            if casenumber in EmploymentToolBox.ReportedFY20:
+                return 'FY 20'
+            elif casenumber in EmploymentToolBox.ReportedFY19:
+                return 'FY 19'
+                
+        df['Prior_Enrollment_FY'] = df.apply(lambda x:PriorEnrollment(x['Matter/Case ID#']), axis = 1)
+                
+              
+        df['Service_Type_Code'] = df['HRA_Case_Coding'].apply(lambda x: x[:2] if x != 'Hold For Review' else '')
+
+        df['Proceeding_Type_Code'] = df['HRA_Case_Coding'].apply(lambda x: x[3:] if x != 'Hold For Review' else '')
         
         df['Outcome'] = df['HRA IOI Employment Law HRA Outcome:']
         df['Outcome_Date'] = df['HRA IOI Employment Law HRA Outcome Date:']
         
+                             
         
-        #Cleaning Output
-        
-        df = df[['Hyperlinked Case #','Office','Primary Advocate','Client Name','Level of Service','Special Legal Problem Code','Exclude due to Income?','Needs DHCI?','Needs Substantial Activity?','Language','HRA Outcome','HRA_Case_Coding','Units of Service','Reportable?']]
         
         #sorting by borough and advocate
         df = df.sort_values(by=['Office','Primary Advocate'])
         
+        
+        #Construct Summary Tables
+        city_pivot = pd.pivot_table(df,index=['Office'],values=['Units of Service'],aggfunc=sum,fill_value=0)
+        
+        city_pivot.reset_index(inplace=True)
+        
+        #remove LSU cases
+        city_pivot = city_pivot[city_pivot['Office'] != "LSU"]
+        
+        #Add Goals to Summary Tables:
+                
+        def BoroughGoal(Office):
+            if Office == "BxLS":
+                return 19.06
+            elif Office == "BkLS":
+                return 38.38
+            elif Office == "MLS":
+                return 88.26
+            elif Office == "QLS":
+                return 19.06
+            elif Office == "SILS":
+                return 6.26
+            elif Office == "LSU":
+                return 1
+            elif Office == "":
+                return ""
+            else:
+                return "hmmmm!"
+                              
+        city_pivot.reset_index(inplace=True)
+        
+        #Add goals to City Picot
+               
+        city_pivot['Annual Goal'] = city_pivot.apply(lambda x: BoroughGoal(x['Office']), axis=1)
+        
+        city_pivot['Proportional Goal'] = round((city_pivot['Annual Goal']/12 * howmanymonths),2)
+                
+                                         
+        #adds the goals for each column
+        city_pivot.loc['Total','Units of Service':'Proportional Goal'] = city_pivot.sum(axis=0) 
+                       
+        print (city_pivot) 
+
+        #Add percentage calculator:
+        city_pivot['Annual Percentage']=city_pivot['Units of Service']/city_pivot['Annual Goal']
+        city_pivot['Proportional Percentage']=city_pivot['Units of Service']/city_pivot['Proportional Goal']        
+        
+        #REPORTING VERSION Put everything in the right order
+        df = df[['Hyperlinked Case #','Office','Primary Advocate','Client Name','Level of Service','Legal Problem Code','Special Legal Problem Code','HRA_Case_Coding','Exclude due to Income?','Needs DHCI?','Needs Substantial Activity?','HRA IOI Employment Law HRA Date Substantial Activity Performed 2022','HRA IOI Employment Law HRA Substantial Activity 2022','Units of Service','Reportable?']]
+        city_pivot = city_pivot[['Office','Units of Service','Annual Goal','Annual Percentage','Proportional Goal','Proportional Percentage']]
+        
+        #Bounce to Excel
         borough_dictionary = dict(tuple(df.groupby('Office')))
            
         def save_xls(dict_df, path):
             writer = pd.ExcelWriter(path, engine = 'xlsxwriter')
             for i in dict_df:
+                city_pivot.to_excel(writer, sheet_name='City Pivot',index=False)
                 dict_df[i].to_excel(writer, i, index = False)
                 workbook = writer.book
+                percent_format = workbook.add_format({'bold':True})
+                percent_format.set_num_format('0.00%')
                 link_format = workbook.add_format({'font_color':'blue','bold':True,'underline':True})
                 problem_format = workbook.add_format({'bg_color':'yellow'})
+                totals_format = workbook.add_format({'bold':True})
+                CityPivot = writer.sheets['City Pivot']
                 worksheet = writer.sheets[i]
                 worksheet.set_column('A:A',20,link_format)
                 worksheet.set_column('B:B',19)
                 worksheet.set_column('C:BL',30)
                 worksheet.freeze_panes(1,1)
                 
+                CityPivot.set_column('A:F',20)
+                #CityPivot.set_row(6,20,totals_format)
+                CityPivot.set_column('D:D',20,percent_format)
+                CityPivot.set_column('F:F',20,percent_format)
+                
+                CityPivot.write('A7', 'Totals', totals_format)
                 
                 worksheet.conditional_format('E1:E100000',{'type': 'cell',
                                                  'criteria': '==',
@@ -191,12 +330,12 @@ def upload_IOIempMonthly():
            
 
         return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = "Cleanup " + f.filename)
-
+        
     return '''
     <!doctype html>
-    <title>IOI Employment Monthly</title>
+    <title>IOI Employment Tally</title>
     <link rel="stylesheet" href="/static/css/main.css">
-    <h1>Monthly Cleanup for IOI Employment Cases:</h1>
+    <h1>Tally your IOI Employment Cases and Case Cleanup:</h1>
     <form action="" method=post enctype=multipart/form-data>
     <p><input type=file name=file><input type=submit value=IOI-ify!>
     </form>

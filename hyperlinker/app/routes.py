@@ -65,6 +65,7 @@ def index():
     <br>
     <li><a href="/IOIempMonthly">Monthly IOI Employment</a></li>
     <li><a href="/IOIempQuarterly">Quarterly IOI Employment</a></li>
+    <li><a href="/IOIempTally">IOI Employment Tally</a></li>
     </ul>
     
     <b>DAP Tools:</b>

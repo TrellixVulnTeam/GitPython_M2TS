@@ -75,10 +75,10 @@ def Sandbox1():
 #what the user-facing site looks like
     return '''
     <!doctype html>
-    <title>Hyperlinks</title>
+    <title>Sandboxing</title>
     <link rel="stylesheet" href="/static/css/main.css">  
     <link rel="stylesheet" href="/static/css/main.css"> 
-    <h1>Add Hyperlinks to Report:</h1>
+    <h1>Welcome to Sandbox1:</h1>
     <form action="" method=post enctype=multipart/form-data>
     <p><input type=file name=file><input type=submit value=Hyperlink!>
     </form>
