@@ -61,16 +61,16 @@ def UAHPLPExternalPrepCovid():
         
         #cases in certain zip codes (RTC zips) that are eviction are UA - everything else is non-UA **Bounce this to housing tools**
         
-        def UAorNonUA (TypeOfCase,Zip):
+        def UAorNonUA (TypeOfCase):
             if TypeOfCase== "CON" or TypeOfCase== "FAM" or TypeOfCase== "HEA" or TypeOfCase== "BEN":
                 return "UA"
             
-            elif TypeOfCase in HousingToolBox.evictionproceedings and str(Zip) in HousingToolBox.UACZipCodes:
+            elif TypeOfCase in HousingToolBox.evictionproceedings:
                 return "UA"
             else:
                 return "Non-UA"
 
-        df['program_name'] = df.apply(lambda x: UAorNonUA(x['proceeding'],x['Zip Code']), axis=1)
+        df['program_name'] = df.apply(lambda x: UAorNonUA(x['proceeding']), axis=1)
         
         
         

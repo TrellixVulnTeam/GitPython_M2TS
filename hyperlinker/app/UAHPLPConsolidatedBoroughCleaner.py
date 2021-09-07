@@ -17,6 +17,10 @@ def UAHPLPConsolidatedBoroughCleaner():
         
         test.fillna('',inplace=True)
         
+        #Preparing Excel Document
+        
+        
+        
         #Cleaning
         if test.iloc[0][0] == '':
             df = pd.read_excel(f,skiprows=2)
@@ -33,7 +37,12 @@ def UAHPLPConsolidatedBoroughCleaner():
         
         df['Assigned Branch/CC'] = df.apply(lambda x : DataWizardTools.OfficeAbbreviator(x['Assigned Branch/CC']),axis=1)   
 
-
+        if request.form.get('MLS'):
+            print('MLS Version')
+            df = df[df['Assigned Branch/CC'] == "MLS"]
+        if request.form.get('BkLS'):
+            print('BkLS Version')
+            df = df[df['Assigned Branch/CC'] == "BkLS"]
         
         
         #Has to have a Housing Type of Case
@@ -145,7 +154,119 @@ def UAHPLPConsolidatedBoroughCleaner():
         df = df.sort_values(by=['Primary Advocate'])
         
         
+        #Create borough-specific tabs for MLS and BkLS as needed
+        if request.form.get('MLS'):
+            
+            Evelyn_Casehandlers = ['Delgadillo, Omar','Heller, Steven E','Latterner, Matt J','Tilyayeva, Rakhil','Almanzar, Yocari']
+            Diana_V_Casehandlers = ['Abbas, Sayeda','Evers, Erin C.','Hao, Lindsay','He, Ricky','Sharma, Sagar','Spencer, Eleanor G','Wilkes, Nicole','Allen, Sharette','Ortiz, Matthew B','Sun, Dao','Risener, Jennifer A','Evers, Erin C.','Surface, Ben L','Velasquez, Diana']
+            Diana_G_Casehandlers = ['Frierson, Jerome C','Saxton, Jonathan G','Orsini, Mary K','Duffy-Greaves, Kevin','Freeman, Daniel A','Gokhale, Aparna S','Gonzalez, Matias','Gonzalez, Matias G','Labossiere, Samantha J.','Shah, Ami Mahendra']
+            Keiannis_Casehandlers = ['Almanzar, Milagros','Briggs, John M','Dittakavi, Archana','Gonzalez-Munoz, Rossana G','Honan, Thomas J','James, Lelia','Kelly, Kitanya','Yamasaki, Emily Woo J','McCune, Mary','Vogltanz, Amy K','Whedan, Rebecca','McDonald, John']
+            Dennis_Casehandlers = ['Braudy, Erica','Kulig, Jessica M','Mercedes, Jannelys J','Harshberger, Sae','Black, Rosalind','Basu, Shantonu J','Gelly-Rahim, Jibril']
+            Rosa_Casehandlers = ['Acron, Denise D','Anunkor, Ifeoma O','Reyes, Nicole V','Vega, Rita']
+            
+
+            Access_Line = ["Pierre, Haenley","Ortega, Luis","Djourab, Atteib","Suriel, Sal","Villanueva, Anthony","Ruiz-Caceres, Gaby A","Yeh, Victoria","Paz, Alex","Khanam, Aysha"]
+            
+            def IntakeAssign(Casehandler, Advocate):
+                if Casehandler == 'Vergeli, Evelyn':
+                    return "Evelyn V."
+                elif Casehandler == 'Velasquez, Diana':
+                    return "Diana V."
+                elif Casehandler == 'Garcia, Diana':
+                    return "Diana G."
+                elif Casehandler == 'De Jesus, Christine' or Casehandler == 'Garcia, Keiannis':
+                    return "Christine D."
+                elif Casehandler == 'Sanchez, Dennis':
+                    return "Dennis S."
+                elif Casehandler == 'Acosta, Rosa F':
+                    return "Rosa A."
+                elif Casehandler == 'Benitez, Vicenta':
+                    return "Vincenta B."
+                elif Casehandler == 'Garcia, Delci T.':
+                    return "Delci G"
+                elif Casehandler == 'Garcia, Alexandra A.':
+                    return "Alexandra G."
+                elif Advocate in Evelyn_Casehandlers:
+                    return "Evelyn V."
+                elif Advocate in Diana_V_Casehandlers:
+                    return "Diana V."
+                elif Advocate in Diana_G_Casehandlers:
+                    return "Diana G."
+                elif Advocate in Keiannis_Casehandlers:
+                    return "Christine D."
+                elif Advocate in Dennis_Casehandlers:
+                    return "Dennis S."
+                elif Advocate in Rosa_Casehandlers:
+                    return "Rosa A."
+                elif Casehandler in Access_Line:
+                    global whoseturn
+                    try: 
+                        whoseturn += 1
+                    except:
+                        whoseturn = 1
+                    if whoseturn == 6:
+                        whoseturn = 1
+                        
+                    if whoseturn == 1:
+                        return 'Evelyn V.'
+                    elif whoseturn == 2:
+                        return 'Diana V.'
+                    elif whoseturn == 3:
+                        return 'Diana G.'
+                    elif whoseturn == 4:
+                        return 'Christine D.'
+                    elif whoseturn == 5:
+                        return 'Dennis S.'
+                else:
+                    return "zzMiscellaneous"
+
+            df['Assigned Paralegal'] = df.apply(lambda x: IntakeAssign(x['Caseworker Name'], x['Primary Advocate']),axis = 1)
         
+        
+        elif request.form.get('BkLS'):
+            def IntakeAssign(Casehandler):
+                if Casehandler == 'Wong, Angela':
+                    return 'Angela Wong'
+                elif Casehandler == 'Lane, Diane':
+                    return 'Diane Lane'
+                elif Casehandler == 'Oquendo, Joann':
+                    return 'Joann Oquendo'
+                elif Casehandler == 'Mullen, Evan M':
+                    return 'Evan Mullen'
+                elif Casehandler == 'Spivey, Joseph':
+                    return 'Joseph Spivey'
+                elif Casehandler == 'Moss, Julieta':
+                    return 'Julieta Moss'
+                else:
+                    global whoseturn
+                    try: 
+                        whoseturn += 1
+                    except:
+                        whoseturn = 1
+                    if whoseturn == 7:
+                        whoseturn = 1
+                        
+                    if whoseturn == 1:
+                        return 'Angela Wong'
+                    elif whoseturn == 2:
+                        return 'Diane Lane'
+                    elif whoseturn == 3:
+                        return 'Joann Oquendo'
+                    elif whoseturn == 4:
+                        return 'Evan Mullen'
+                    elif whoseturn == 5:
+                        return 'Joseph Spivey'
+                    elif whoseturn == 6:
+                        return 'Julieta Moss'
+                
+                
+
+            df['Assigned Paralegal'] = df.apply(lambda x: IntakeAssign(x['Caseworker Name']),axis = 1)
+        
+        else:
+            df['Assigned Paralegal'] = 'No Assignment Made'
+
+        df['Intake User'] = df['Caseworker Name']
         #Put everything in the right order
         
         df = df[['Hyperlinked CaseID#',
@@ -172,14 +293,22 @@ def UAHPLPConsolidatedBoroughCleaner():
         "Housing Case?",
         "Gen Case Index Number", 
         "Tester Tester",
-        "Assigned Branch/CC"
-        
+        "Assigned Branch/CC",
+        "Assigned Paralegal",
+        "Intake User"
         ]]      
         
-        #Preparing Excel Document
+        
+        
         
         #Split into different tabs
-        allgood_dictionary = dict(tuple(df.groupby('Assigned Branch/CC')))
+        
+        if request.form.get('MLS'):
+            allgood_dictionary = dict(tuple(df.groupby('Assigned Paralegal')))
+        elif request.form.get('BkLS'):
+            allgood_dictionary = dict(tuple(df.groupby('Assigned Paralegal')))
+        else:
+            allgood_dictionary = dict(tuple(df.groupby('Assigned Branch/CC')))
         
         def save_xls(dict_df, path):
             writer = pd.ExcelWriter(path, engine = 'xlsxwriter')
@@ -219,7 +348,13 @@ def UAHPLPConsolidatedBoroughCleaner():
         
         save_xls(dict_df = allgood_dictionary, path = "app\\sheets\\" + output_filename)
        
-        return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = "Cleaned " + f.filename)
+        if request.form.get('MLS'):
+            return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = "MLS " + f.filename)
+        elif request.form.get('BkLS'):
+            return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = "BkLS " + f.filename)
+        else:
+            return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = "Cleaned " + f.filename)
+        
 
     return '''
     <!doctype html>
@@ -228,6 +363,14 @@ def UAHPLPConsolidatedBoroughCleaner():
     <h1>UAHPLP Consolidated Borough Cleaner:</h1>
     <form action="" method=post enctype=multipart/form-data>
     <p><input type=file name=file><input type=submit value=Clean!>
+    
+    </br>
+    </br>
+    <input type="checkbox" id="MLS" name="MLS" value="MLS">
+    <label for="MLS"> MLS Compliance</label><br>
+    <input type="checkbox" id="BkLS" name="BkLS" value="BkLS">
+    <label for="BkLS"> BkLS Compliance</label><br>
+    
     </form>
     <h3>Instructions:</h3>
     <ul type="disc">
