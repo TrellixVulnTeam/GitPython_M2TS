@@ -24,53 +24,47 @@ def index():
     <ul type="disc">
     <li><a href="/Hyperlinker">Hyperlinker</a></li>
     <li><a href="/BoroughSplitter">Borough Splitter</a></li>
-    <li><a href="/ComplianceConsolidater">Compliance Consolidater</a></li>
-    <li><a href="/ComplianceConsolidaterYearEnd">Year End Compliance Consolidater</a></li>
+
     <li><a href="/SuperSplitter">MLS Supervisor Splitter</a></li>
-    <li><a href="/AdvocateSplitter">Advocate Splitter</a></li>
-    <li><a href="/LSCCovidPrep">LSC Covid Report Prep</a></li>
-    <li><a href="/CSRDeterminer">Determine CSR Eligibility</a></li>
+    
+    
     <li><a href="/RadSearcher">Identify Clients in RAD Buildings</a></li>
-    <li><a href="/AccessLineSplitter">Identify Access Line Cases</a></li>
+    
     </ul>
     
     <b>Housing Tools:</b>
     <ul type="disc">
     
     <li><a href="/AllHousing">All Housing Report</a></li>
+    <li><a href="/DHCIPrep">DHCI Document Extractor Prep</a></li>
     </br>
     <li><a href="/UAHPLPCovidClean">[Revised for Covid] UAHPLP Cleaner</a></li>     
     <li><a href="/UAHPLPExternalPrepCovid">[Revised for Covid] Prepare UA/HPLP Reports for Submission to HRA</a></li>
+    <li><a href="/UAHPLPConsolidatedBoroughCleaner">UAHPLP Consolidated Borough Cleaner</a></li>
     </br>
     <li><a href="/TRCCovidClean">[Revised for Covid] TRC Cleaner</a></li>
     <li><a href="/TRCExternalPrepCovid">[Revised for Covid] Prepare TRC Reports for Submission to HRA</a></li>
     <li><a href="/TRCtallyCovid">[Revised for Covid] TRC Tally</a></li>
-    <li><a href="/TRCtally">TRC Tally</a></li>
     <li><a href="/TRCDuplicateIdentifier">TRC Identify Duplicates</a></li>
-    </br>
-    <li><a href="/DHCIPrep">DHCI Document Extractor Prep</a></li>
-    <li><a href="/UAHPLPConsolidatedBoroughCleaner">UAHPLP Consolidated Borough Cleaner</a></li>
-    <li><a href="/MLSIntakeConsolidatedHousingCleaner">[MLS] Consolidated Housing Cleaner</a></li>
-    <li><a href="/BkLSIntakeConsolidatedHousingCleaner">[BkLS] Consolidated Housing Cleaner</a></li>
-    
-    
+
     
     </ul>
 
     
     <b>IOI:</b>
     <ul type="disc">
-    <li><a href="/IOIimmMonthly">Monthly IOI Immigration</a></li>
+    
     <li><a href="/IOIimmQuarterly">Quarterly IOI Immigration</a></li>
     <br>
-    <li><a href="/IOIempMonthly">Monthly IOI Employment</a></li>
+    
     <li><a href="/IOIempQuarterly">Quarterly IOI Employment</a></li>
     <li><a href="/IOIempTally">IOI Employment Tally</a></li>
     </ul>
     
-    <b>DAP Tools:</b>
+    <b>Pascale Tools:</b>
     <ul type="disc">
     <li><a href="/DAPException">DAP Exception & Report Prep Tool</a></li>
+    <li><a href="/LSCCovidPrep">LSC Covid Report Prep</a></li>
     </ul>
     
     <b>IOLA Tools:</b>
@@ -80,6 +74,15 @@ def index():
     <b>Foreclosure Tools:</b>
     <ul type="disc">
     <li><a href="/CNYCNCleaner">CNYCN Cleaner</a></li>
+    </ul>
+    
+    <b>Compliance Tools:</b>
+    <ul type="disc">
+    <li><a href="/ComplianceConsolidater">Compliance Consolidater</a></li>
+    <li><a href="/ComplianceConsolidaterYearEnd">Year End Compliance Consolidater</a></li>
+    <li><a href="/CSRDeterminer">Determine CSR Eligibility</a></li>
+    
+    
     </ul>
     
     <br>
@@ -96,3 +99,10 @@ def index():
     #<li><a href="/TRCtally">TRC Tally</a></li>
     #<li><a href="/BrownsvilleTRCclean">Brownsville TRC Cleaner</a></li>
     #<li><a href="/TRCExternalPrep">Prepare TRC Reports for Submission to HRA</a></li>
+    #<li><a href="/AdvocateSplitter">Advocate Splitter</a></li>
+    #<li><a href="/IOIempMonthly">Monthly IOI Employment</a></li>
+    #<li><a href="/IOIimmMonthly">Monthly IOI Immigration</a></li>
+    #<li><a href="/MLSIntakeConsolidatedHousingCleaner">[MLS] Consolidated Housing Cleaner</a></li>
+    #<li><a href="/BkLSIntakeConsolidatedHousingCleaner">[BkLS] Consolidated Housing Cleaner</a></li>
+    #<li><a href="/TRCtally">TRC Tally</a></li>
+    #<li><a href="/AccessLineSplitter">Identify Access Line Cases</a></li>

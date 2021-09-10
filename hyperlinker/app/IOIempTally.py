@@ -1,5 +1,6 @@
 from flask import render_template, flash, redirect, url_for, request, Flask, jsonify, send_from_directory
 from app import app, db, EmploymentToolBox, DataWizardTools
+
 from app.models import User, Post
 from app.forms import PostForm
 from werkzeug.urls import url_parse
@@ -258,6 +259,9 @@ def upload_IOIempTally():
         df = df[['Hyperlinked Case #','Office','Primary Advocate','Client Name','Level of Service','Legal Problem Code','Special Legal Problem Code','HRA_Case_Coding','Exclude due to Income?','Needs DHCI?','Needs Substantial Activity?','HRA IOI Employment Law HRA Date Substantial Activity Performed 2022','HRA IOI Employment Law HRA Substantial Activity 2022','Units of Service','Reportable?']]
         city_pivot = city_pivot[['Office','Units of Service','Annual Goal','Annual Percentage','Proportional Goal','Proportional Percentage']]
         
+        
+        
+        
         #Bounce to Excel
         borough_dictionary = dict(tuple(df.groupby('Office')))
            
@@ -282,9 +286,13 @@ def upload_IOIempTally():
                 CityPivot.set_column('A:F',20)
                 #CityPivot.set_row(6,20,totals_format)
                 CityPivot.set_column('D:D',20,percent_format)
-                CityPivot.set_column('F:F',20,percent_format)
+                CityPivot.set_column('F:F',30,percent_format)
                 
                 CityPivot.write('A7', 'Totals', totals_format)
+                
+                DataWizardTools.draw_frame_border(workbook, CityPivot, 1,1,5,5,2)
+                
+                
                 
                 worksheet.conditional_format('E1:E100000',{'type': 'cell',
                                                  'criteria': '==',

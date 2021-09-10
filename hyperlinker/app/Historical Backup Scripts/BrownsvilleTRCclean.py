@@ -43,6 +43,19 @@ def upload_BrownsvilleTRCclean():
         #only brownsville advocates
         
         brownsville_advocates = [
+                    "McCowen, Tamella L.",
+                    "Henriquez, Luis A",
+                    "Katnani, Samar A",
+                    "Landry-Reyes, Jane M.",
+                    "Costa, Stephanie A",
+                    "Crisona, Kathryn M",
+                    "McCormick, James H",
+                    "Patel, Mona R",
+                    "Roman, Melissa M.",
+                    "Rubin, Jenn S",
+                    "Wong, Humbert T.",
+                    "Chew, Thomas F",
+                    "DeLong, Sarah L",
                     "McCowen, Tamella",
                     "Farrell, Emily",
                     "Goncharov-Cruickshnk, Natalie",
@@ -89,9 +102,9 @@ def upload_BrownsvilleTRCclean():
         
         def HRARelease (HRARelease,EligibilityDate):
             if HRARelease == 'No' and EligibilityDate != '':
-                return '**REMOVE ELIGIBILITY DATE**'
+                return 'No Release - Remove Elig Date'
             elif HRARelease == '' and EligibilityDate != '':
-                return '**REMOVE ELIGIBILITY DATE**'
+                return 'No Release - Remove Elig Date'
             elif HRARelease == 'Yes':
                 return ''
             else:
@@ -154,10 +167,10 @@ def upload_BrownsvilleTRCclean():
         def Units (Units):
             
             Units = str(Units)
-            if Units == 0:
+            if Units == '0':
                 return 'Needs Units'
             elif any(c.isalpha() for c in Units) == True:
-                return 'Must be a number'
+                return 'Needs To Be Number'
             else:
                 return ''
         data_xls['Unit Tester'] = data_xls.apply(lambda x: Units(x['Housing Number Of Units In Building']), axis=1)
@@ -186,7 +199,7 @@ def upload_BrownsvilleTRCclean():
             if Years == 0:
                 return 'Needs Years In Apartment'
             elif Years < -1:
-                return 'Invalid Number'
+                return 'Needs Valid Number'
             else:
                 return ''
         data_xls['Years in Apartment Tester'] = data_xls.apply(lambda x: Years(x['Housing Years Living In Apartment']), axis=1)
@@ -200,7 +213,6 @@ def upload_BrownsvilleTRCclean():
                 return ''
         data_xls['Language Tester'] = data_xls.apply(lambda x: Language(x['Language']), axis=1)
         
-        #haven't added below to tester tester
         
         #Housing Posture of Case can't be blank if there is an eligibility date
         
@@ -211,18 +223,24 @@ def upload_BrownsvilleTRCclean():
                 return ''
         data_xls['Posture Tester'] = data_xls.apply(lambda x: Posture(x['Housing Posture of Case on Eligibility Date'],x['HAL Eligibility Date']), axis=1)
         
-        #Housing Income Verification can't be blank or none
-        def IncomeVerification (IncomeVerification):
-            if IncomeVerification == '':
+        #Housing Income Verification can't be blank or none and other stuff with kids and poverty level and you just give up if it's closed
+        def IncomeVerification (IncomeVerification, Children, PovertyPercent, Disposition):
+            if Children > 0 and PovertyPercent <= 200.99 and IncomeVerification == '':
+                return 'Must Have DHCI or PA#'
+            elif Children > 0 and PovertyPercent <= 200.99 and IncomeVerification == 'None':
+                return 'Must Have DHCI or PA#'
+            elif Disposition == 'Closed' and IncomeVerification =='None':
+                return ''
+            elif IncomeVerification == '':
                 return 'Needs Income Verification'
-            if IncomeVerification == 'None':
+            elif IncomeVerification == 'None':
                 return 'Needs Income Verification'
             else:
                 return ''
-        data_xls['Income Verification Tester'] = data_xls.apply(lambda x: IncomeVerification(x['Housing Income Verification']), axis=1)
+        data_xls['Income Verification Tester'] = data_xls.apply(lambda x: IncomeVerification(x['Housing Income Verification'], x['Number of People under 18'], x['Percentage of Poverty'],x['Case Disposition']), axis=1)
        
         #PA Tester (need to be correct format as well)
-        def PATester (IncomeVerification,PANumber):
+        def PATester (PANumber):
                         
             PANumber = str(PANumber)
             LastCharacter = PANumber[-1:]
@@ -242,23 +260,24 @@ def upload_BrownsvilleTRCclean():
                 return ''
             elif len(PANumber) == 9 and str.isalpha(LastCharacter) == False and PenultimateCharater != '-' and PenultimateCharater != ' ':
                 return ''
-            elif SecondCharacter == 'o':
-                return 'Needs PA Number'
             else:
-                return 'PA Number Format Wrong'
+                return 'Needs Correct PA # Format'
                 
-        data_xls['PA Tester'] = data_xls.apply(lambda x: PATester(x['Housing Income Verification'],x['Gen Pub Assist Case Number']), axis=1)
+        data_xls['PA # Tester'] = data_xls.apply(lambda x: PATester(x['Gen Pub Assist Case Number']), axis=1)
         
-        #Test if case number is correct format
-        def CaseNum (CaseNum):
+        #Test if case number is correct format (don't need one if it's brief, advice, or out-of-court)
+        def CaseNum (CaseNum,Level):
             CaseNum = str(CaseNum)
             First3 = CaseNum[0:3]
             ThirdFromEnd = CaseNum[-3:-2]
             SecondFromEnd = CaseNum[-2:-1]
             First6 = CaseNum[0:6]
             First2 = CaseNum[0:2]
+            
+            if Level == 'Advice' or Level == 'Brief Service' or Level == 'Out-of-Court Advocacy' or Level == 'Hold For Review':
+                return ''            
             #City LT Case format LT-123456-19/XX
-            if len(CaseNum) == 15 and First3 == 'LT-' and ThirdFromEnd == '/':
+            elif len(CaseNum) == 15 and First3 == 'LT-' and ThirdFromEnd == '/':
                 return ''
             elif len(CaseNum) == 15 and First3 == 'CV-' and ThirdFromEnd == '/':
                 return ''
@@ -271,9 +290,37 @@ def upload_BrownsvilleTRCclean():
             elif len(CaseNum) == 11 and str.isdigit(First6) == True:
                 return ''
             else:
-                return "Case Number Format Wrong"
+                return "Needs Correct Case # Format"
                 
-        data_xls['Case Number Tester'] = data_xls.apply(lambda x: CaseNum(x['Gen Case Index Number']), axis=1)
+        data_xls['Case Number Tester'] = data_xls.apply(lambda x: CaseNum(x['Gen Case Index Number'],x['Housing Level of Service']), axis=1)
+        
+        #Test if social security number is correct format
+        def SSNum (CaseNum, PANumber):
+            CaseNum = str(CaseNum)
+            First3 = CaseNum[0:3]
+            Middle2 = CaseNum[4:6]
+            Last4 = CaseNum[7:11]
+            FirstDash = CaseNum[3:4]
+            SecondDash = CaseNum[6:7]
+            PANumber = str(PANumber)
+            LastCharacter = PANumber[-1:]
+            PenultimateCharater = PANumber[-2:-1]
+            SecondCharacter = PANumber [1:2]
+            
+            if First3 == '000' and Middle2 == '00':
+                return 'Needs  Full SS#'
+            elif str.isnumeric(First3) == True and str.isnumeric(Middle2) == True and str.isnumeric(Last4) == True and FirstDash == '-' and SecondDash == '-': 
+                return ''
+            elif len(PANumber) == 10 and str.isalpha(LastCharacter) == True and str.isalpha(PenultimateCharater) == False and PenultimateCharater != '-' and PenultimateCharater != ' ':
+                return ''
+            elif len(PANumber) == 12 and str.isalpha(LastCharacter) == True and str.isalpha(PenultimateCharater) == False and PenultimateCharater != '-' and PenultimateCharater != ' ':
+                return ''
+            elif len(PANumber) == 9 and str.isalpha(LastCharacter) == False and PenultimateCharater != '-' and PenultimateCharater != ' ':
+                return '' 
+            else:
+                return "Needs Correct SS # Format"
+                
+        data_xls['SS # Tester'] = data_xls.apply(lambda x: SSNum(x['Social Security #'],x['Gen Pub Assist Case Number']), axis=1)
         
         #Test Housing Activity Indicator - can't be blank for closed cases that are full rep state or full rep federal(housing level of service) and eviction cases(housing type of case: non-payment holdover illegal lockout nycha housing termination)
         
@@ -312,22 +359,19 @@ def upload_BrownsvilleTRCclean():
                 return 'Needs Outcome Date'
             else:
                 return ''
+            
         data_xls['Outcome Tester'] = data_xls.apply(lambda x: OutcomeTester(x['Case Disposition'],x['Housing Outcome'],x['Housing Outcome Date'],x['Housing Level of Service'],x['Housing Type Of Case'],evictiontypes,leveltypes), axis = 1)
         
-        #Is everything okay with a case? (delete if so?)
+        #Is everything okay with a case? 
 
-        def TesterTester (ReleaseTester,TypeTester,LevelTester,BuildingTester,ReferralTester,RentTester,UnitTester,RegulationTester,SubsidyTester,YearsTester,LanguageTester,PostureTester,IncomeVerification,PATester,CaseNumberTester,ActivityTester,ServicesTester,OutcomeTester):
-            if ReleaseTester == '' and TypeTester == '' and LevelTester == '' and BuildingTester == '' and ReferralTester == '' and RentTester == '' and UnitTester == '' and RegulationTester == '' and SubsidyTester == '' and YearsTester == '' and LanguageTester == '' and PostureTester == '' and IncomeVerification == '' and PATester == '' and CaseNumberTester == '' and ActivityTester == '' and ServicesTester == '' and OutcomeTester == '':
-                return 'All Good!'
+        def TesterTester (ReleaseTester,TypeTester,LevelTester,BuildingTester,ReferralTester,RentTester,UnitTester,RegulationTester,SubsidyTester,YearsTester,LanguageTester,PostureTester,IncomeVerification,PATester,CaseNumberTester,SSTester,ActivityTester,ServicesTester,OutcomeTester):
+            if ReleaseTester == '' and TypeTester == '' and LevelTester == '' and BuildingTester == '' and ReferralTester == '' and RentTester == '' and UnitTester == '' and RegulationTester == '' and SubsidyTester == '' and YearsTester == '' and LanguageTester == '' and PostureTester == '' and IncomeVerification == '' and PATester == '' and CaseNumberTester == '' and SSTester == '' and ActivityTester == '' and ServicesTester == '' and OutcomeTester == '':
+                return 'No Cleanup Necessary'
             else:
                 return 'Case Needs Attention'
             
-        data_xls['Tester Tester'] = data_xls.apply(lambda x: TesterTester(x['HRA Release Tester'],x['Housing Type Tester'],x['Housing Level Tester'],x['Building Case Tester'],x['Referral Tester'],x['Rent Tester'],x['Unit Tester'],x[ 'Regulation Tester'],x['Subsidy Tester'],x['Years in Apartment Tester'],x['Language Tester'],x['Posture Tester'],x['Income Verification Tester'],x['PA Tester'],x['Case Number Tester'],x['Housing Activity Tester'],x['Housing Services Tester'],x['Outcome Tester']),axis=1)
+        data_xls['Tester Tester'] = data_xls.apply(lambda x: TesterTester(x['HRA Release Tester'],x['Housing Type Tester'],x['Housing Level Tester'],x['Building Case Tester'],x['Referral Tester'],x['Rent Tester'],x['Unit Tester'],x[ 'Regulation Tester'],x['Subsidy Tester'],x['Years in Apartment Tester'],x['Language Tester'],x['Posture Tester'],x['Income Verification Tester'],x['PA # Tester'],x['Case Number Tester'],x['SS # Tester'],x['Housing Activity Tester'],x['Housing Services Tester'],x['Outcome Tester']),axis=1)
         
-
-        #(delete if so?)
-        
-        data_xls = data_xls[data_xls['Tester Tester'] != 'All Good!']
 
         #sort by case handler
         
@@ -336,43 +380,101 @@ def upload_BrownsvilleTRCclean():
         
         #Put everything in the right order
         
-        data_xls = data_xls[['Hyperlinked Case #','Primary Advocate','HRA Release Tester','Housing Type Tester','Housing Level Tester','Building Case Tester','Referral Tester','Rent Tester','Unit Tester', 'Regulation Tester','Subsidy Tester','Years in Apartment Tester','Language Tester','Posture Tester','Income Verification Tester','PA Tester','Case Number Tester','Housing Activity Tester','Housing Services Tester','Outcome Tester']]      
+        data_xls = data_xls[['Hyperlinked Case #','Primary Advocate',
+        "Date Opened",
+        "Date Closed",
+        "Client First Name",
+        "Client Last Name",
+        "Street Address",
+        "City",
+        "Zip Code",
+        "HRA Release?",'HRA Release Tester',
+        "Housing Income Verification",'Income Verification Tester',
+        "Gen Case Index Number",'Case Number Tester',        
+        "Housing Type Of Case",'Housing Type Tester',
+        "Housing Level of Service",'Housing Level Tester',"Close Reason",
+        "Housing Building Case?",'Building Case Tester',
+        "HAL Eligibility Date","Housing Posture of Case on Eligibility Date",'Posture Tester',
+        "Primary Funding Code",
+        "Housing Total Monthly Rent",'Rent Tester',
+        "Housing Number Of Units In Building",'Unit Tester',
+        "Housing Form Of Regulation",'Regulation Tester',
+        "Housing Subsidy Type",'Subsidy Tester',
+        "Housing Years Living In Apartment",'Years in Apartment Tester',
+        "Language",'Language Tester',
+        "Gen Pub Assist Case Number",'PA # Tester',
+        "Social Security #","SS # Tester",
+        "Referral Source",'Referral Tester',
+        "Housing Activity Indicators",'Housing Activity Tester',
+        "Housing Services Rendered to Client",'Housing Services Tester',
+        "Housing Outcome",'Outcome Tester',"Housing Outcome Date",
+        "Number of People under 18",
+        "Number of People 18 and Over",
+        "Percentage of Poverty",
+        "Total Annual Income ",
+        "Housing Funding Note",
+        "Housing Date Of Waiver Approval",
+        "Housing TRC HRA Waiver Categories",
+        "Date of Birth",
+        "Apt#/Suite#","Legal Problem Code","Case Disposition",
+        "Assigned Branch/CC",
+        "Tester Tester"
+        ]]      
         
         #Preparing Excel Document
         
-        output_filename = f.filename     
-        writer = pd.ExcelWriter("app\\sheets\\"+output_filename, engine = 'xlsxwriter')
-        data_xls.to_excel(writer, sheet_name='Sheet1',index=False)
-
-        workbook = writer.book
-        worksheet = writer.sheets['Sheet1']
-
-        link_format = workbook.add_format({'font_color':'blue', 'bold':True, 'underline':True})
-        regular_format = workbook.add_format({'font_color':'black'})
-        problem_format = workbook.add_format({'bg_color':'yellow'})
+        #Split into different tabs
+        allgood_dictionary = dict(tuple(data_xls.groupby('Tester Tester')))
         
-        
-        worksheet.set_column('A:A',20,link_format)
-        worksheet.set_column('B:BL',25)
-        
-        worksheet.conditional_format('C2:T100000',{'type': 'cell',
-                                                 'criteria': '!=',
-                                                 'value': '""',
+        def save_xls(dict_df, path):
+            writer = pd.ExcelWriter(path, engine = 'xlsxwriter')
+            for i in dict_df:
+                dict_df[i].to_excel(writer, i, index = False)
+                workbook = writer.book
+                ws = writer.sheets[i]
+                link_format = workbook.add_format({'font_color':'blue','bold':True,'underline':True})
+                regular_format = workbook.add_format({'font_color':'black'})
+                problem_format = workbook.add_format({'bg_color':'yellow'})
+                bad_problem_format = workbook.add_format({'bg_color':'red'})
+                medium_problem_format = workbook.add_format({'bg_color':'orange'})
+                ws.set_column('A:A',20,link_format)
+                ws.set_column('B:ZZ',25)
+                ws.freeze_panes(1, 2)
+                ws.conditional_format('C2:BO100000',{'type': 'text',
+                                                 'criteria': 'containing',
+                                                 'value': 'No Release - Remove Elig Date',
+                                                 'format': bad_problem_format})
+                ws.conditional_format('C2:BO100000',{'type': 'text',
+                                                 'criteria': 'containing',
+                                                 'value': 'Needs',
                                                  'format': problem_format})
-        writer.save()
+                ws.conditional_format('C1:BO1',{'type': 'text',
+                                                 'criteria': 'containing',
+                                                 'value': 'Tester',
+                                                 'format': problem_format})
+                ws.conditional_format('C2:BO100000',{'type': 'text',
+                                                 'criteria': 'containing',
+                                                 'value': 'Must Have DHCI or PA#',
+                                                 'format': medium_problem_format})            
+            writer.save()
         
+        output_filename = f.filename
+        
+        save_xls(dict_df = allgood_dictionary, path = "app\\sheets\\" + output_filename)
+       
         return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = "Cleaned " + f.filename)
 
     return '''
     <!doctype html>
-    <title>BrownsvilleTRCTester</title>
-    <h1>Prepare a Brownsville TRC Cleanup Report:</h1>
+    <title>BrownsvilleTRCCleaner</title>
+    <link rel="stylesheet" href="/static/css/main.css">  
+    <h1>Brownsville TRC Cleanup Report:</h1>
     <form action="" method=post enctype=multipart/form-data>
     <p><input type=file name=file><input type=submit value=Clean!>
     </form>
     <h3>Instructions:</h3>
     <ul type="disc">
-    <li>This tool is meant to be used in conjunction with the LegalServer report called "TRC Raw Case Data Report".</li>
+    <li>This tool is meant to be used in conjunction with the LegalServer report called <a href="https://lsnyc.legalserver.org/report/dynamic?load=1507" target="_blank">TRC Raw Case Data Report</a>.</li>
     <li>It will only return cases for Brownsville advocates.</li>
     <li>Browse your computer using the field above to find the LegalServer excel document that you want to process for TRC cleanup.</li> 
     <li>Once you have identified this file, click ‘Clean!’ and you should shortly be given a prompt to either open the file directly or save the file to your computer.</li> 

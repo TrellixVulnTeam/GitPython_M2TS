@@ -6,7 +6,7 @@ from werkzeug.urls import url_parse
 from datetime import datetime
 import pandas as pd
 
-#Jay version
+
 @app.route("/IOIimmMonthly", methods=['GET', 'POST'])
 def upload_IOIimmMonthly():
     if request.method == 'POST':
@@ -20,22 +20,26 @@ def upload_IOIimmMonthly():
         
         #Cleaning
         if test.iloc[0][0] == '':
-         df = pd.read_excel(f,skiprows=2)
+            df = pd.read_excel(f,skiprows=2)
         else:
-         df = pd.read_excel(f)
-            
+            df = pd.read_excel(f)
+        
         df.fillna('',inplace=True)
-            
-        #Create Hyperlinks
+        
+    #Create Hyperlinks
         df['Hyperlinked Case #'] = df.apply(lambda x : DataWizardTools.Hyperlinker(x['Matter/Case ID#']),axis=1)
-            
-            
+        
+        
         df['Assigned Branch/CC'] = df['Assigned Branch/CC'].str.replace('Bronx Legal Services','BxLS')
         df['Assigned Branch/CC'] = df['Assigned Branch/CC'].str.replace('Brooklyn Legal Services','BkLS')
         df['Assigned Branch/CC'] = df['Assigned Branch/CC'].str.replace('Queens Legal Services','QLS')
         df['Assigned Branch/CC'] = df['Assigned Branch/CC'].str.replace('Manhattan Legal Services','MLS')
         df['Assigned Branch/CC'] = df['Assigned Branch/CC'].str.replace('Staten Island Legal Services','SILS')
         df['Assigned Branch/CC'] = df['Assigned Branch/CC'].str.replace('Legal Support Unit','LSU')
+        
+        
+        
+    #Determining 'level of service' from 3 fields       
             
         df['HRA Level of Service'] = df.apply(lambda x: ImmigrationToolBox.HRA_Level_Service(x['Close Reason'],x['Level of Service']), axis=1)
 
@@ -104,11 +108,8 @@ def upload_IOIimmMonthly():
         df['Open Year'] = df['Eligibility_Date'].apply(lambda x: str(x)[6:])
         df['Open Construct'] = df['Open Year'] + df['Open Month'] + df['Open Day']
 
-        df['Subs Month'] = df['Date of Substantial Activity'].apply(lambda x: str(x)[:2])
-        df['Subs Day'] = df['Date of Substantial Activity'].apply(lambda x: str(x)[3:5])
-        df['Subs Year'] = df['Date of Substantial Activity'].apply(lambda x: str(x)[6:])
-        df['Subs Construct'] = df['Subs Year'] + df['Subs Month'] + df['Subs Day']
-        df['Subs Construct'] = df.apply(lambda x : x['Subs Construct'] if x['Subs Construct'] != '' else 0, axis = 1)
+
+        df['Subs Construct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['IOI Date Substantial Activity Performed 2022']) , axis = 1)
 
         df['Outcome1 Month'] = df['IOI Outcome 2 Date (IOI 2)'].apply(lambda x: str(x)[:2])
         df['Outcome1 Day'] = df['IOI Outcome 2 Date (IOI 2)'].apply(lambda x: str(x)[3:5])
@@ -140,20 +141,22 @@ def upload_IOIimmMonthly():
         df['Needs DHCI?'] = df.apply(lambda x: DHCI_Needed(x['Has Declaration of Household Composition and Income (DHCI) Form?'],x['Open Construct'],x['Level of Service']), axis=1)
 
 
+       
         #Needs Substantial Activity to Rollover into FY'20
 
-        def Needs_Rollover(Open_Construct,Substantial_Activity,Substantial_Activity_Date,CaseID,ReportedFY19):
-            if int(Open_Construct) >= 20190701:
+        
+        #Needs Substantial Activity to Rollover into FY'22
+        
+        def Needs_Rollover(Open_Construct,Substantial_Activity, Substantial_Activity_Date,CaseID) :
+            if int(Open_Construct) >= 20210701:
                 return ''
-            elif Substantial_Activity != '' and int(Substantial_Activity_Date) >= 20190701 and int(Substantial_Activity_Date) <= 20200630:
+            elif Substantial_Activity != '' and int(Substantial_Activity_Date) >20210701 and int(Substantial_Activity_Date) <=20220630:
                 return ''
-            elif CaseID in ReportedFY19:
-                return 'Needs Substantial Activity in FY20'
-            else:
-                return ''
-                
-        df['Needs Substantial Activity?'] = df.apply(lambda x: Needs_Rollover(x['Open Construct'],x['Substantial Activity'],x['Subs Construct'],x['Matter/Case ID#'], ImmigrationToolBox.ReportedFY19), axis=1)
-
+            elif CaseID in ImmigrationToolBox.ReportedFY20 or CaseID in ImmigrationToolBox.ReportedFY19 or CaseID in ImmigrationToolBox.ReportedFY21:
+                return 'Needs Substantial Activity in FY22'
+            else: return ''
+        df['Needs Substantial Activity?'] = df.apply(lambda x: Needs_Rollover(x['Open Construct'],x['IOI FY22 Immigration Substantial Activity 2022'],x['Subs Construct'],x['Matter/Case ID#']), axis=1)  
+        
 
         #Outcomes
 
@@ -218,107 +221,48 @@ def upload_IOIimmMonthly():
         df['Deliverable Tally'] = df.apply(lambda x: Deliverable_Category(x['HRA Case Coding'],x['Exclude due to Income?'],x['Age at Intake']), axis=1)
 
 
-        #add LSNYC to start of case numbers 
-
-        df['Unique_ID'] = 'LSNYC'+df['Matter/Case ID#']
-
-        #take second letters of first and last names
-
-        df['Last_Initial'] = df['Client Last Name'].str[1]
-        df['First_Initial'] = df['Client First Name'].str[1]
-
-        #Year of birth
-        df['Year_of_Birth'] = df['Date of Birth'].str[-4:]
-
-        #gender
-        def HRAGender (gender):
-            if gender == 'Male' or gender == 'Female':
-                return gender
-            else:
-                return 'Other'
-        df['Gender'] = df.apply(lambda x: HRAGender(x['Gender']), axis=1)
-
-        #county=borough
-        df['Borough'] = df['County of Residence']
-
-        #household size etc.
-        df['Household_Size'] = df['Number of People under 18'].astype(int) + df['Number of People 18 and Over'].astype(int)
-        df['Number_of_Children'] = df['Number of People under 18']
-
-        #Income Eligible?
-        df['Annual_Income'] = df['Total Annual Income ']
-        def HRAIncElig (PercentOfPoverty):
-            if PercentOfPoverty > 200:
-                return 'NO'
-            else:
-                return 'YES'
-        df['Income_Eligible'] = df.apply(lambda x: HRAIncElig(x['Percentage of Poverty']), axis=1)
-
-        def IncWaiver (eligible,waiverdate):
-            if eligible == 'NO' and waiverdate != '':
-                return 'Income'
-            else:
-                return ''
-        df['Waiver_Type'] = df.apply(lambda x: IncWaiver(x['Income_Eligible'],x['IOI HRA WAIVER APPROVAL DATE if over 200% of FPL (IOI 2)']), axis=1)
-
-        def IncWaiverDate (waivertype,date):
-            if waivertype != '':
-                return date
-            else:  
-                return ''
-                
-        df['Waiver_Approval_Date'] = df.apply(lambda x: IncWaiverDate(x['Waiver_Type'],x['IOI HRA WAIVER APPROVAL DATE if over 200% of FPL (IOI 2)']), axis = 1)
-
-        #Referrals
-        def Referral (referral):
-            if referral == "Action NY":
-                return "ActionNYC"
-            elif referral == "HRA":
-                return "HRA-DSS"
-            elif referral == "Other":
-                return "Other"
-            elif referral == "":
-                return "None"
-            else:
-                return ""
-                
-        df['Referral_Source'] = df.apply(lambda x: Referral(x['IOI Referral Source (IOI 2)']), axis = 1)
-
-        #Pro Bono Involvement
-        def ProBonoCase (branch, pai):
-            if branch == "LSU" or pai == "Yes":
-                return "YES"
-            else:
-                return "NO"
-                
-        df['Pro_Bono'] = df.apply(lambda x:ProBonoCase(x['Assigned Branch/CC'], x['PAI Case?']), axis = 1)
-
-                 
-
-        #Other Cleanup
-        df['Service_Type_Code'] = df['HRA Service Type']
-        df['Proceeding_Type_Code'] = df['HRA Proceeding Type']
-        df['Outcome'] = df['Outcome To Report']
-        df['Outcome_Date'] = df['Outcome Date To Report']
-        df['Seized_at_Border'] = df['IOI Was client apprehended at border? (IOI 2&3)']
-        df['Group'] = ''
-        df['Prior_Enrollment_FY'] = 'Jay does this manually later'
+        #Unit of Service Calculator
+        df['Units of Service'] = df.apply(lambda x: ImmigrationToolBox.UoSCalculator(x['HRA Case Coding']),axis=1)
+        
+        #Reportable?
+        
+        df['Reportable?'] = df.apply(lambda x: ImmigrationToolBox.ReportableTester(x['Exclude due to Income?'],x['Needs DHCI?'],x['Needs Substantial Activity?'],x['Deliverable Tally']),axis=1)
+        
+ 
         df = df.sort_values(by=['Primary Advocate'])
           
         #CLEANUP VERSION Put everything in the right order
-        df = df[['Hyperlinked Case #','Office','Primary Advocate','Client Name','Special Legal Problem Code','Level of Service','Needs DHCI?','Exclude due to Income?','Needs Substantial Activity?','Country of Origin','Language','Outcome To Report','IOI Was client apprehended at border? (IOI 2&3)','Deliverable Tally']]
+        df = df[['Hyperlinked Case #','Office','Primary Advocate','Client Name','Special Legal Problem Code','Level of Service','Needs DHCI?','Exclude due to Income?','Needs Substantial Activity?','Country of Origin','Language','Outcome To Report','IOI Was client apprehended at border? (IOI 2&3)','Deliverable Tally','Units of Service','Reportable?']]
 
         #Preparing Excel Document
 
         borough_dictionary = dict(tuple(df.groupby('Office')))
+        """        
+        # initialize list of lists
+        data = [['tom', 10], ['nick', 15], ['juli', 14]]
+ 
+        # Create the pandas DataFrame
+        dummy_df = pd.DataFrame(data, columns = ['Name', 'Age'])
+ 
+        # print dataframe.
+        print(dummy_df)
+        """       
 
         def save_xls(dict_df, path):
             writer = pd.ExcelWriter(path, engine = 'xlsxwriter')
             for i in dict_df:
-                dict_df[i].to_excel(writer, i, index = False)
+                dict_df[i].to_excel(writer, sheet_name = i, index = False)
+                
+                #dummy_df.to_excel(writer, sheet_name='Summary',index=False)
+                
                 workbook = writer.book
                 link_format = workbook.add_format({'font_color':'blue','bold':True,'underline':True})
                 problem_format = workbook.add_format({'bg_color':'yellow'})
+                
+                #dummyworksheet = writer.sheets['Summary']
+                
+                #dummyworksheet.set_column('A:A',50)
+                
                 worksheet = writer.sheets[i]
                 worksheet.set_column('A:A',20,link_format)
                 worksheet.set_column('B:B',19)
@@ -343,7 +287,7 @@ def upload_IOIimmMonthly():
                                                  'format': problem_format})
                 worksheet.conditional_format('I1:I100000',{'type': 'cell',
                                                  'criteria': '==',
-                                                 'value': '"Needs Substantial Activity in FY20"',
+                                                 'value': '"Needs Substantial Activity in FY22"',
                                                  'format': problem_format})
                 worksheet.conditional_format('J1:K100000',{'type': 'cell',
                                                  'criteria': '==',
@@ -363,7 +307,7 @@ def upload_IOIimmMonthly():
 
         save_xls(dict_df = borough_dictionary, path = "app\\sheets\\" + output_filename)
 
-        return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = "Cleaned " + f.filename)
+        return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = "Cleanup " + f.filename)
     return '''
     <!doctype html>
     <title>IOI Immigration Monthly</title>
