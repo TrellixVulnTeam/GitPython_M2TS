@@ -28,18 +28,30 @@ def upload_TRCCovidClean():
         df['Matter/Case ID#'] = df.apply(lambda x : DataWizardTools.RemoveNoCaseID(x['Matter/Case ID#']),axis=1)        
         df = df[df['Matter/Case ID#'] != 'No Case ID']
         
-        if request.form.get('Evelyn'):
+        if request.form.get('EastHarlem'):
         
             Evelyn_Casehandlers = ['Delgadillo, Omar','Heller, Steven E','Latterner, Matt J','Tilyayeva, Rakhil','Almanzar, Yocari']
             
-            def EvelynCase(PrimaryAdvocate):
+            def EastHarlemCase(PrimaryAdvocate):
                 if PrimaryAdvocate in Evelyn_Casehandlers:
-                    return "Evelyn Case"
+                    return "East Harlem Case"
                 else:
                     return ""
-            df['Evelyn Case'] = df.apply(lambda x : EvelynCase(x['Primary Advocate']),axis=1)          
+            df['East Harlem Case'] = df.apply(lambda x : EastHarlemCase(x['Primary Advocate']),axis=1)
+            df = df[df['East Harlem Case'] == 'East Harlem Case']
+        
+        if request.form.get('Inwood'):
+        
+            Keiannis_Casehandlers = ['Almanzar, Milagros','Briggs, John M','Dittakavi, Archana','Gonzalez-Munoz, Rossana G','Honan, Thomas J','James, Lelia','Kelly, Kitanya','Yamasaki, Emily Woo J','McCune, Mary','Vogltanz, Amy K','Whedan, Rebecca','McDonald, John']
             
-            df = df[df['Evelyn Case'] == 'Evelyn Case']
+            def InwoodCase(PrimaryAdvocate):
+                if PrimaryAdvocate in Keiannis_Casehandlers:
+                    return "Inwood Case"
+                else:
+                    return ""
+            df['Inwood Case'] = df.apply(lambda x : InwoodCase(x['Primary Advocate']),axis=1)
+            df = df[df['Inwood Case'] == 'Inwood Case']
+        
         
         #Create Hyperlinks
         df['Hyperlinked CaseID#'] = df.apply(lambda x : DataWizardTools.Hyperlinker(x['Matter/Case ID#']),axis=1)          
@@ -397,8 +409,12 @@ def upload_TRCCovidClean():
     <p><input type=file name=file><input type=submit value=Clean!>
     </br>
     </br>
-    <input type="checkbox" id="Evelyn" name="Evelyn" value="Evelyn">
-    <label for="Evelyn"> for Evelyn</label><br>
+    <input type="checkbox" id="EastHarlem" name="EastHarlem" value="EastHarlem">
+    <label for="EastHarlem"> East Harlem</label><br>
+    
+
+    <input type="checkbox" id="Inwood" name="Inwood" value="Inwood">
+    <label for="Inwood"> Inwood</label><br>
     
     </form>
     <h3>Instructions:</h3>
