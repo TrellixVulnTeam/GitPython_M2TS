@@ -28,6 +28,19 @@ def upload_TRCCovidClean():
         df['Matter/Case ID#'] = df.apply(lambda x : DataWizardTools.RemoveNoCaseID(x['Matter/Case ID#']),axis=1)        
         df = df[df['Matter/Case ID#'] != 'No Case ID']
         
+        if request.form.get('Evelyn'):
+        
+            Evelyn_Casehandlers = ['Delgadillo, Omar','Heller, Steven E','Latterner, Matt J','Tilyayeva, Rakhil','Almanzar, Yocari']
+            
+            def EvelynCase(PrimaryAdvocate):
+                if PrimaryAdvocate in Evelyn_Casehandlers:
+                    return "Evelyn Case"
+                else:
+                    return ""
+            df['Evelyn Case'] = df.apply(lambda x : EvelynCase(x['Primary Advocate']),axis=1)          
+            
+            df = df[df['Evelyn Case'] == 'Evelyn Case']
+        
         #Create Hyperlinks
         df['Hyperlinked CaseID#'] = df.apply(lambda x : DataWizardTools.Hyperlinker(x['Matter/Case ID#']),axis=1)          
         
@@ -222,74 +235,38 @@ def upload_TRCCovidClean():
         df['Non-Housing Case?'] = df.apply(lambda x: NonHousing(x['Legal Problem Code']), axis=1)
 
         #CovidException testers to erase clean-up requests
-
-        """
-        #df['PA # Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['PA # Tester'],x['Primary Funding Code']), axis=1)
         
-        df['SS # Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['SS # Tester'],x['Primary Funding Code']), axis=1)
+        df['PA # Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['Housing Level of Service'],  x['PA # Tester'],x['Primary Funding Code'], x['HRA Release?']), axis=1)
         
-        df['Case Number Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Case Number Tester'],x['Primary Funding Code']), axis=1)
+        df['SS # Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['Housing Level of Service'],  x['SS # Tester'],x['Primary Funding Code'], x['HRA Release?']), axis=1)
         
-        df['Rent Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Rent Tester'],x['Primary Funding Code']), axis=1)
+        df['Case Number Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['Housing Level of Service'], x['Case Number Tester'],x['Primary Funding Code'], x['HRA Release?']), axis=1)
         
-        df['Years in Apartment Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Years in Apartment Tester'],x['Primary Funding Code']), axis=1)
+        df['Rent Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['Housing Level of Service'], x['Rent Tester'],x['Primary Funding Code'], x['HRA Release?']), axis=1)
         
-        df['Referral Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Referral Tester'],x['Primary Funding Code']), axis=1)
+        df['Years in Apartment Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['Housing Level of Service'], x['Years in Apartment Tester'],x['Primary Funding Code'], x['HRA Release?']), axis=1)
         
-        df['Income Verification Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Income Verification Tester'],x['Primary Funding Code']), axis=1)
+        df['Referral Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['Housing Level of Service'], x['Referral Tester'],x['Primary Funding Code'], x['HRA Release?']), axis=1)
         
-        df['Posture Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Posture Tester'],x['Primary Funding Code']), axis=1)
+        df['Income Verification Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['Housing Level of Service'], x['Income Verification Tester'],x['Primary Funding Code'], x['HRA Release?']), axis=1)
         
-        df['Unit Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Unit Tester'],x['Primary Funding Code']), axis=1)
+        df['Posture Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['Housing Level of Service'], x['Posture Tester'],x['Primary Funding Code'], x['HRA Release?']), axis=1)
         
-        df['Regulation Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Regulation Tester'],x['Primary Funding Code']), axis=1)
+        df['Unit Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['Housing Level of Service'], x['Unit Tester'],x['Primary Funding Code'], x['HRA Release?']), axis=1)
         
-        df['Subsidy Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Subsidy Tester'],x['Primary Funding Code']), axis=1)
+        df['Regulation Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['Housing Level of Service'], x['Regulation Tester'],x['Primary Funding Code'], x['HRA Release?']), axis=1)
         
-        df['Outcome Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Outcome Tester'],x['Primary Funding Code']), axis=1)
+        df['Subsidy Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['Housing Level of Service'], x['Subsidy Tester'],x['Primary Funding Code'], x['HRA Release?']), axis=1)
         
-        df['Housing Services Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Housing Services Tester'],x['Primary Funding Code']), axis=1)
+        df['Outcome Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['Housing Level of Service'], x['Outcome Tester'],x['Primary Funding Code'], x['HRA Release?']), axis=1)
         
-        df['Housing Activity Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Housing Activity Tester'],x['Primary Funding Code']), axis=1)
+        df['Housing Services Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['Housing Level of Service'], x['Housing Services Tester'],x['Primary Funding Code'], x['HRA Release?']), axis=1)
         
-        df['HRA Release Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['HRA Release Tester'],x['Primary Funding Code']), axis=1)
+        df['Housing Activity Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['Housing Level of Service'], x['Housing Activity Tester'],x['Primary Funding Code'], x['HRA Release?']), axis=1)
         
-        #df['Housing Type Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['Housing Level of Service'], x['Pre-3/1/20 Elig Date?'], x['Housing Type Tester'],x['Primary Funding Code']), axis=1)
-        """
+        df['HRA Release Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['Housing Level of Service'], x['HRA Release Tester'],x['Primary Funding Code'], x['HRA Release?']), axis=1)
         
-        """
-        #DuplicateTester
-        #add client name and birth year and eligiblity date into one ID string
-        #identify duplicates based on ID string
-        #make new column identifying repeat values
-        
-        df['DupEligID'] = df["Client Last Name"]+df["Date of Birth"] +df["HAL Eligibility Date"]
-        df['DuplicatedClient&EligDate?Bool'] = df.duplicated(['DupEligID'])
-        
-        def DuplicateHasEligDate (DupBool,EligDate):
-            if EligDate == '':
-                return False
-            else:
-                return DupBool
-        df['DuplicatedClient&EligDate?Bool'] = df.apply(lambda x: DuplicateHasEligDate(x['DuplicatedClient&EligDate?Bool'], x['HAL Eligibility Date']), axis=1)
-        
-        #df['DuplicatedClient&EligDate?Bool'] = df['DuplicatedClient&EligDate?Bool'].apply(lambda x: x if x == True else '')
-
-        dfs = df.groupby('DupEligID',sort = False)
-
-        tdf = pd.DataFrame()
-        for x, y in dfs:
-            for z in y['DuplicatedClient&EligDate?Bool']:
-                if z == True:
-                    y['Duplicate Tester'] = 'Duplicate Found'
-                else:
-                    y['Duplicate Tester'] = ''
-                    
-            tdf = tdf.append(y)
-        df = tdf
-        """
-       
-        #***make it so that duplicates only show up if there's an eligibility date
+        df['Building Case Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['Housing Level of Service'], x['Building Case Tester'],x['Primary Funding Code'], x['HRA Release?']), axis=1)
     
         #Is everything okay with a case? 
 
@@ -418,6 +395,11 @@ def upload_TRCCovidClean():
     <h1>TRC Cleanup Report: [Covid]</h1>
     <form action="" method=post enctype=multipart/form-data>
     <p><input type=file name=file><input type=submit value=Clean!>
+    </br>
+    </br>
+    <input type="checkbox" id="Evelyn" name="Evelyn" value="Evelyn">
+    <label for="Evelyn"> for Evelyn</label><br>
+    
     </form>
     <h3>Instructions:</h3>
     <ul type="disc">
