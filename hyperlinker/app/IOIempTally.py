@@ -292,11 +292,15 @@ def upload_IOIempTally():
                 CityPivot.write('A7', 'Totals', totals_format)
                 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
                 DataWizardTools.draw_frame_border(workbook, CityPivot, 1,1,5,5,2)
                 
                 
                 
                 worksheet.conditional_format('E1:E100000',{'type': 'cell',
+=======
+                worksheet.conditional_format('E1:E2000',{'type': 'cell',
+>>>>>>> Stashed changes
 =======
                 worksheet.conditional_format('E1:E2000',{'type': 'cell',
 >>>>>>> Stashed changes
