@@ -55,6 +55,7 @@ def index():
     <ul type="disc">
     
     <li><a href="/IOIimmQuarterly">Quarterly IOI Immigration</a></li>
+    <li><a href="/IOIimmTally"> IOI Immigration Tally</a></li>
     <br>
     
     <li><a href="/IOIempQuarterly">Quarterly IOI Employment</a></li>

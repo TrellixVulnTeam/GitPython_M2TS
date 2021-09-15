@@ -239,7 +239,7 @@ def upload_IOIempTally():
                               
         city_pivot.reset_index(inplace=True)
         
-        #Add goals to City Picot
+        #Add goals to City Pivot
                
         city_pivot['Annual Goal'] = city_pivot.apply(lambda x: BoroughGoal(x['Office']), axis=1)
         
@@ -278,6 +278,7 @@ def upload_IOIempTally():
                 totals_format = workbook.add_format({'bold':True})
                 CityPivot = writer.sheets['City Pivot']
                 worksheet = writer.sheets[i]
+                worksheet.autofilter('A1:O1')
                 worksheet.set_column('A:A',20,link_format)
                 worksheet.set_column('B:B',19)
                 worksheet.set_column('C:BL',30)
@@ -290,11 +291,15 @@ def upload_IOIempTally():
                 
                 CityPivot.write('A7', 'Totals', totals_format)
                 
+<<<<<<< Updated upstream
                 DataWizardTools.draw_frame_border(workbook, CityPivot, 1,1,5,5,2)
                 
                 
                 
                 worksheet.conditional_format('E1:E100000',{'type': 'cell',
+=======
+                worksheet.conditional_format('E1:E2000',{'type': 'cell',
+>>>>>>> Stashed changes
                                                  'criteria': '==',
                                                  'value': '""',
                                                  'format': problem_format})
@@ -308,27 +313,19 @@ def upload_IOIempTally():
                                                  'format': problem_format})
                 worksheet.conditional_format('H1:H100000',{'type': 'cell',
                                                  'criteria': '==',
-                                                 'value': '"Needs DHCI"',
+                                                 'value': '"***Needs Cleanup***"',
                                                  'format': problem_format})
                 worksheet.conditional_format('I1:I100000',{'type': 'cell',
                                                  'criteria': '==',
-                                                 'value': '"Needs Substantial Activity in FY21"',
-                                                 'format': problem_format})
-                worksheet.conditional_format('I1:I100000',{'type': 'cell',
-                                                 'criteria': '==',
-                                                 'value': '"Needs Substantial Activity Date"',
+                                                 'value': '"Needs Income Waiver"',
                                                  'format': problem_format})
                 worksheet.conditional_format('J1:J100000',{'type': 'cell',
                                                  'criteria': '==',
-                                                 'value': '""',
+                                                 'value': '"Needs DHCI"',
                                                  'format': problem_format})
                 worksheet.conditional_format('K1:K100000',{'type': 'cell',
                                                  'criteria': '==',
-                                                 'value': '"**Needs Outcome**"',
-                                                 'format': problem_format})
-                worksheet.conditional_format('K1:K100000',{'type': 'cell',
-                                                 'criteria': '==',
-                                                 'value': '"**Needs Outcome Date**"',
+                                                 'value': '"Needs Substantial Activity in FY22"',
                                                  'format': problem_format})
             writer.save()
         
