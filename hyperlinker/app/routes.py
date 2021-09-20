@@ -25,7 +25,7 @@ def index():
     <li><a href="/Hyperlinker">Hyperlinker</a></li>
     <li><a href="/BoroughSplitter">Borough Splitter</a></li>
 
-    <li><a href="/SuperSplitter">MLS Supervisor Splitter</a></li>
+    <li><a href="/AccessLineSplitter">Access Line Splitter</a></li>
     
     
     <li><a href="/RadSearcher">Identify Clients in RAD Buildings</a></li>
