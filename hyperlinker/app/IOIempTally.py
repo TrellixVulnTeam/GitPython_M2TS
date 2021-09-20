@@ -246,7 +246,7 @@ def upload_IOIempTally():
         city_pivot['Proportional Goal'] = round((city_pivot['Annual Goal']/12 * howmanymonths),2)
                 
                                          
-        #adds the goals for each column
+        #sums the goals for each column
         city_pivot.loc['Total','Units of Service':'Proportional Goal'] = city_pivot.sum(axis=0) 
                        
         print (city_pivot) 
