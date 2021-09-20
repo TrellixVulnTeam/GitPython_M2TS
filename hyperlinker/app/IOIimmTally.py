@@ -390,6 +390,19 @@ def upload_IOIimmTally():
         #inter['total'] = inter.sum(axis=0, numeric_only= True)
         #cells.hideColumn(1,4)
         #city_pivot.style.hide_columns([1,4])
+        
+        #Add totals to all columns
+        #city_pivot.loc['I2':'X8'] = city_pivot.sum(axis=0) 
+        #city_pivot.sum(axis=1, skipna=None, level=0, numeric_only=None, min_count=0)
+        #df.groupby(level=1).sum().
+        #city_pivot.groupby('Brief').sum()
+        #print(city_pivot.loc['I2':'X8'] = city_pivot.sum(axis=0) )
+        #city_pivot.loc['Total'] = city_pivot.groupby(level=0).sum(-3)
+        #print(city_pivot)
+        #totalBrief=city_pivot.groupby(level=[0][0]['J']).sum()
+        #print(totalBrief)
+        city_pivot.loc['Total'] = city_pivot.sum(axis=0)
+        print(city_pivot)
 
         #Add Goals to Summary Tables:
                         
@@ -406,10 +419,8 @@ def upload_IOIimmTally():
                 return 20
             elif Office == "LSU":
                 return 140
-            elif Office == "":
-                return ""
             else:
-                return "hmmmm!"
+                return 240
         
         def Tier1Goal(Office):
             if Office == "BxLS":
@@ -424,10 +435,8 @@ def upload_IOIimmTally():
                 return 15
             elif Office == "LSU":
                 return 100
-            elif Office == "":
-                return ""
             else:
-                return "hmmmm!"
+                return 264
                 
         def T2MRGoal(Office):
             if Office == "BxLS":
@@ -442,10 +451,8 @@ def upload_IOIimmTally():
                 return 63
             elif Office == "LSU":
                 return 62
-            elif Office == "":
-                return ""
             else:
-                return "hmmmm!"
+                return 374
         def T2OTHRGoal(Office):
             if Office == "BxLS":
                 return 7
@@ -459,10 +466,8 @@ def upload_IOIimmTally():
                 return 25
             elif Office == "LSU":
                 return 92
-            elif Office == "":
-                return ""
             else:
-                return "hmmmm!"
+                return 144
         def T2RmvlGoal(Office):
             if Office == "BxLS":
                 return 24
@@ -476,79 +481,75 @@ def upload_IOIimmTally():
                 return 24
             elif Office == "LSU":
                 return 0
-            elif Office == "":
-                return ""
             else:
-                return "hmmmm!"
+                return 120
                                       
-        city_pivot.reset_index(inplace=True)  
+        city_pivot.reset_index(inplace=True)
 
-        '''#Add goals to City Pivot and percentage calculators, alternating w Proportional Goals
-               
-        city_pivot['Unique_ID','Brief '] = city_pivot['Unique_ID','Brief']
-        city_pivot['Unique_ID','Ann Brf Goal'] = city_pivot.apply(lambda x: BriefGoal(x['Office','']), axis=1)
-        city_pivot['Unique_ID','Ann Brf %']=city_pivot['Unique_ID','Brief']/city_pivot['Unique_ID','Ann Brf Goal']
-        city_pivot['Unique_ID','Prop Brf Goal'] = round((city_pivot['Unique_ID','Ann Brf Goal']/12 * howmanymonths),2)
-        city_pivot['Unique_ID','Prop Brf %']=city_pivot['Unique_ID','Brief ']/city_pivot['Unique_ID','Prop Brf Goal']
-        city_pivot['Unique_ID','Tier 1 '] = city_pivot['Unique_ID','Tier 1']
-        city_pivot['Unique_ID','Ann T1 Goal'] = city_pivot.apply(lambda x: Tier1Goal(x['Office','']), axis=1)
-        city_pivot['Unique_ID','Ann T1 %']=city_pivot['Unique_ID','Tier 1']/city_pivot['Unique_ID','Ann T1 Goal']
-        city_pivot['Unique_ID','Prop T1 Goal'] = round((city_pivot['Unique_ID','Ann T1 Goal']/12 * howmanymonths),2)
-        city_pivot['Unique_ID','Prop T1 %']=city_pivot['Unique_ID','Tier 1 ']/city_pivot['Unique_ID','Prop T1 Goal']
-        city_pivot['Unique_ID','T2 MR'] = city_pivot['Unique_ID','Tier 2 (minor removal)']
-        city_pivot['Unique_ID','Ann T2 MR Goal'] = city_pivot.apply(lambda x: T2MRGoal(x['Office','']), axis=1)
-        city_pivot['Unique_ID','Ann T2 MR %']=city_pivot['Unique_ID','T2 MR']/city_pivot['Unique_ID','Ann T2 MR Goal']
-        city_pivot['Unique_ID','Prop T2MR Goal'] = round((city_pivot['Unique_ID','Ann T2 MR Goal']/12 * howmanymonths),2)
-        city_pivot['Unique_ID','Prop T2MR %']=city_pivot['Unique_ID','T2 MR']/city_pivot['Unique_ID','Prop T2MR Goal']
-        city_pivot['Unique_ID','T2 Other'] = city_pivot['Unique_ID','Tier 2 (other)']
-        city_pivot['Unique_ID','Ann T2O Goal'] = city_pivot.apply(lambda x: T2OTHRGoal(x['Office','']), axis=1)
-        city_pivot['Unique_ID','Ann T2O %']=city_pivot['Unique_ID','T2 Other']/city_pivot['Unique_ID','Ann T2O Goal']
-        city_pivot['Unique_ID','Prop T2O Goal'] = round((city_pivot['Unique_ID','Ann T2O Goal']/12 * howmanymonths),2)
-        city_pivot['Unique_ID','Prop T2O %']=city_pivot['Unique_ID','T2 Other']/city_pivot['Unique_ID','Prop T2O Goal']
-        city_pivot['Unique_ID','T2 Rmvl'] = city_pivot['Unique_ID','Tier 2 (removal)']
-        city_pivot['Unique_ID','Ann T2 Rmvl Goal'] = city_pivot.apply(lambda x: T2RmvlGoal(x['Office','']), axis=1)
-        city_pivot['Unique_ID','Ann T2 Rmvl %']=city_pivot['Unique_ID','T2 Rmvl']/city_pivot['Unique_ID','Ann T2 Rmvl Goal']
-        city_pivot['Unique_ID','Prop T2R Goal'] = round((city_pivot['Unique_ID','Ann T2 Rmvl Goal']/12 * howmanymonths),2)
-        city_pivot['Unique_ID','Prop T2R %']=city_pivot['Unique_ID','T2 Rmvl']/city_pivot['Unique_ID','Prop T2R Goal']  '''
+        if request.form.get('Proportional'):   
+            print('Hello proportional!')
         
-        #Add goals to City Pivot and percentage calculators, alternating - No Proportional Goals
-        city_pivot['Unique_ID','Brief '] = city_pivot['Unique_ID','Brief']
-        city_pivot['Unique_ID','Ann Brf Goal'] = city_pivot.apply(lambda x: BriefGoal(x['Office','']), axis=1)
-        city_pivot['Unique_ID','Ann Brf %']=city_pivot['Unique_ID','Brief']/city_pivot['Unique_ID','Ann Brf Goal']
-        #city_pivot['Unique_ID','Prop Brf Goal'] = round((city_pivot['Unique_ID','Ann Brf Goal']/12 * howmanymonths),2)
-        #city_pivot['Unique_ID','Prop Brf %']=city_pivot['Unique_ID','Brief ']/city_pivot['Unique_ID','Prop Brf Goal']
-        city_pivot['Unique_ID','Tier 1 '] = city_pivot['Unique_ID','Tier 1']
-        city_pivot['Unique_ID','Ann T1 Goal'] = city_pivot.apply(lambda x: Tier1Goal(x['Office','']), axis=1)
-        city_pivot['Unique_ID','Ann T1 %']=city_pivot['Unique_ID','Tier 1']/city_pivot['Unique_ID','Ann T1 Goal']
-        #city_pivot['Unique_ID','Prop T1 Goal'] = round((city_pivot['Unique_ID','Ann T1 Goal']/12 * howmanymonths),2)
-        #city_pivot['Unique_ID','Prop T1 %']=city_pivot['Unique_ID','Tier 1 ']/city_pivot['Unique_ID','Prop T1 Goal']
-        city_pivot['Unique_ID','T2 MR'] = city_pivot['Unique_ID','Tier 2 (minor removal)']
-        city_pivot['Unique_ID','Ann T2 MR Goal'] = city_pivot.apply(lambda x: T2MRGoal(x['Office','']), axis=1)
-        city_pivot['Unique_ID','Ann T2 MR %']=city_pivot['Unique_ID','T2 MR']/city_pivot['Unique_ID','Ann T2 MR Goal']
-        #city_pivot['Unique_ID','Prop T2MR Goal'] = round((city_pivot['Unique_ID','Ann T2 MR Goal']/12 * howmanymonths),2)
-        #city_pivot['Unique_ID','Prop T2MR %']=city_pivot['Unique_ID','T2 MR']/city_pivot['Unique_ID','Prop T2MR Goal']
-        city_pivot['Unique_ID','T2 Other'] = city_pivot['Unique_ID','Tier 2 (other)']
-        city_pivot['Unique_ID','Ann T2O Goal'] = city_pivot.apply(lambda x: T2OTHRGoal(x['Office','']), axis=1)
-        city_pivot['Unique_ID','Ann T2O %']=city_pivot['Unique_ID','T2 Other']/city_pivot['Unique_ID','Ann T2O Goal']
-        #city_pivot['Unique_ID','Prop T2O Goal'] = round((city_pivot['Unique_ID','Ann T2O Goal']/12 * howmanymonths),2)
-        #city_pivot['Unique_ID','Prop T2O %']=city_pivot['Unique_ID','T2 Other']/city_pivot['Unique_ID','Prop T2O Goal']
-        city_pivot['Unique_ID','T2 Rmvl'] = city_pivot['Unique_ID','Tier 2 (removal)']
-        city_pivot['Unique_ID','Ann T2 Rmvl Goal'] = city_pivot.apply(lambda x: T2RmvlGoal(x['Office','']), axis=1)
-        city_pivot['Unique_ID','Ann T2 Rmvl %']=city_pivot['Unique_ID','T2 Rmvl']/city_pivot['Unique_ID','Ann T2 Rmvl Goal']
-        #city_pivot['Unique_ID','Prop T2R Goal'] = round((city_pivot['Unique_ID','Ann T2 Rmvl Goal']/12 * howmanymonths),2)
-        #city_pivot['Unique_ID','Prop T2R %']=city_pivot['Unique_ID','T2 Rmvl']/city_pivot['Unique_ID','Prop T2R Goal']  
+        #Add goals to City Pivot and percentage calculators, alternating w Proportional Goals   
+            city_pivot['Unique_ID','Brief '] = city_pivot['Unique_ID','Brief']
+            city_pivot['Unique_ID','Ann Brf Goal'] = city_pivot.apply(lambda x: BriefGoal(x['Office','']), axis=1)
+            city_pivot['Unique_ID','Ann Brf %']=city_pivot['Unique_ID','Brief']/city_pivot['Unique_ID','Ann Brf Goal']
+            city_pivot['Unique_ID','Prop Brf Goal'] = round((city_pivot['Unique_ID','Ann Brf Goal']/12 * howmanymonths),2)
+            city_pivot['Unique_ID','Prop Brf %']=city_pivot['Unique_ID','Brief ']/city_pivot['Unique_ID','Prop Brf Goal']
+            city_pivot['Unique_ID','Tier 1 '] = city_pivot['Unique_ID','Tier 1']
+            city_pivot['Unique_ID','Ann T1 Goal'] = city_pivot.apply(lambda x: Tier1Goal(x['Office','']), axis=1)
+            city_pivot['Unique_ID','Ann T1 %']=city_pivot['Unique_ID','Tier 1']/city_pivot['Unique_ID','Ann T1 Goal']
+            city_pivot['Unique_ID','Prop T1 Goal'] = round((city_pivot['Unique_ID','Ann T1 Goal']/12 * howmanymonths),2)
+            city_pivot['Unique_ID','Prop T1 %']=city_pivot['Unique_ID','Tier 1 ']/city_pivot['Unique_ID','Prop T1 Goal']
+            city_pivot['Unique_ID','T2 MR'] = city_pivot['Unique_ID','Tier 2 (minor removal)']
+            city_pivot['Unique_ID','Ann T2 MR Goal'] = city_pivot.apply(lambda x: T2MRGoal(x['Office','']), axis=1)
+            city_pivot['Unique_ID','Ann T2 MR %']=city_pivot['Unique_ID','T2 MR']/city_pivot['Unique_ID','Ann T2 MR Goal']
+            city_pivot['Unique_ID','Prop T2MR Goal'] = round((city_pivot['Unique_ID','Ann T2 MR Goal']/12 * howmanymonths),2)
+            city_pivot['Unique_ID','Prop T2MR %']=city_pivot['Unique_ID','T2 MR']/city_pivot['Unique_ID','Prop T2MR Goal']
+            city_pivot['Unique_ID','T2 Other'] = city_pivot['Unique_ID','Tier 2 (other)']
+            city_pivot['Unique_ID','Ann T2O Goal'] = city_pivot.apply(lambda x: T2OTHRGoal(x['Office','']), axis=1)
+            city_pivot['Unique_ID','Ann T2O %']=city_pivot['Unique_ID','T2 Other']/city_pivot['Unique_ID','Ann T2O Goal']
+            city_pivot['Unique_ID','Prop T2O Goal'] = round((city_pivot['Unique_ID','Ann T2O Goal']/12 * howmanymonths),2)
+            city_pivot['Unique_ID','Prop T2O %']=city_pivot['Unique_ID','T2 Other']/city_pivot['Unique_ID','Prop T2O Goal']
+            city_pivot['Unique_ID','T2 Rmvl'] = city_pivot['Unique_ID','Tier 2 (removal)']
+            city_pivot['Unique_ID','Ann T2 Rmvl Goal'] = city_pivot.apply(lambda x: T2RmvlGoal(x['Office','']), axis=1)
+            city_pivot['Unique_ID','Ann T2 Rmvl %']=city_pivot['Unique_ID','T2 Rmvl']/city_pivot['Unique_ID','Ann T2 Rmvl Goal']
+            city_pivot['Unique_ID','Prop T2R Goal'] = round((city_pivot['Unique_ID','Ann T2 Rmvl Goal']/12 * howmanymonths),2)
+            city_pivot['Unique_ID','Prop T2R %']=city_pivot['Unique_ID','T2 Rmvl']/city_pivot['Unique_ID','Prop T2R Goal']  
+        
+        else:
+            print('Annual here')
+            #Add goals to City Pivot and percentage calculators, alternating - No Proportional Goals
+            city_pivot['Unique_ID','Brief '] = city_pivot['Unique_ID','Brief']
+            city_pivot['Unique_ID','Ann Brf Goal'] = city_pivot.apply(lambda x: BriefGoal(x['Office','']), axis=1)
+            city_pivot['Unique_ID','Ann Brf %']=city_pivot['Unique_ID','Brief']/city_pivot['Unique_ID','Ann Brf Goal']
+            #city_pivot['Unique_ID','Prop Brf Goal'] = round((city_pivot['Unique_ID','Ann Brf Goal']/12 * howmanymonths),2)
+            #city_pivot['Unique_ID','Prop Brf %']=city_pivot['Unique_ID','Brief ']/city_pivot['Unique_ID','Prop Brf Goal']
+            city_pivot['Unique_ID','Tier 1 '] = city_pivot['Unique_ID','Tier 1']
+            city_pivot['Unique_ID','Ann T1 Goal'] = city_pivot.apply(lambda x: Tier1Goal(x['Office','']), axis=1)
+            city_pivot['Unique_ID','Ann T1 %']=city_pivot['Unique_ID','Tier 1']/city_pivot['Unique_ID','Ann T1 Goal']
+            #city_pivot['Unique_ID','Prop T1 Goal'] = round((city_pivot['Unique_ID','Ann T1 Goal']/12 * howmanymonths),2)
+            #city_pivot['Unique_ID','Prop T1 %']=city_pivot['Unique_ID','Tier 1 ']/city_pivot['Unique_ID','Prop T1 Goal']
+            city_pivot['Unique_ID','T2 MR'] = city_pivot['Unique_ID','Tier 2 (minor removal)']
+            city_pivot['Unique_ID','Ann T2 MR Goal'] = city_pivot.apply(lambda x: T2MRGoal(x['Office','']), axis=1)
+            city_pivot['Unique_ID','Ann T2 MR %']=city_pivot['Unique_ID','T2 MR']/city_pivot['Unique_ID','Ann T2 MR Goal']
+            #city_pivot['Unique_ID','Prop T2MR Goal'] = round((city_pivot['Unique_ID','Ann T2 MR Goal']/12 * howmanymonths),2)
+            #city_pivot['Unique_ID','Prop T2MR %']=city_pivot['Unique_ID','T2 MR']/city_pivot['Unique_ID','Prop T2MR Goal']
+            city_pivot['Unique_ID','T2 Other'] = city_pivot['Unique_ID','Tier 2 (other)']
+            city_pivot['Unique_ID','Ann T2O Goal'] = city_pivot.apply(lambda x: T2OTHRGoal(x['Office','']), axis=1)
+            city_pivot['Unique_ID','Ann T2O %']=city_pivot['Unique_ID','T2 Other']/city_pivot['Unique_ID','Ann T2O Goal']
+            #city_pivot['Unique_ID','Prop T2O Goal'] = round((city_pivot['Unique_ID','Ann T2O Goal']/12 * howmanymonths),2)
+            #city_pivot['Unique_ID','Prop T2O %']=city_pivot['Unique_ID','T2 Other']/city_pivot['Unique_ID','Prop T2O Goal']
+            city_pivot['Unique_ID','T2 Rmvl'] = city_pivot['Unique_ID','Tier 2 (removal)']
+            city_pivot['Unique_ID','Ann T2 Rmvl Goal'] = city_pivot.apply(lambda x: T2RmvlGoal(x['Office','']), axis=1)
+            city_pivot['Unique_ID','Ann T2 Rmvl %']=city_pivot['Unique_ID','T2 Rmvl']/city_pivot['Unique_ID','Ann T2 Rmvl Goal']
+            #city_pivot['Unique_ID','Prop T2R Goal'] = round((city_pivot['Unique_ID','Ann T2 Rmvl Goal']/12 * howmanymonths),2)
+            #city_pivot['Unique_ID','Prop T2R %']=city_pivot['Unique_ID','T2 Rmvl']/city_pivot['Unique_ID','Prop T2R Goal']  
 		
 
         #Add zeros to blank cells:
         city_pivot.fillna(0, inplace=True)
-        
-        #Add totals to all columns
-        #city_pivot.loc['I2':'X8'] = city_pivot.sum(axis=0) 
-        #city_pivot.sum(axis=0, skipna=None, level='', numeric_only=None, min_count=0)
-        #print(city_pivot.sum)
-
-        
-        
+            
+              
         #REPORTING VERSION Put everything in the right order
         df = df[['Hyperlinked Case #','Office','Primary Advocate','Client Name','Special Legal Problem Code','Level of Service','Needs DHCI?','Exclude due to Income?','Needs Substantial Activity?','Country of Origin','Outcome To Report','Modified Deliverable Tally','Reportable?']]
                    
@@ -582,7 +583,7 @@ def upload_IOIimmTally():
                 dict_df[i].to_excel(writer, i, index = False)
                 workbook = writer.book
                 #cols = [textwrap.wrap(x, width=20) for x in cols] - First attempt at text wrapping
-                percent_format = workbook.add_format({})#removed ({'bold':True})
+                percent_format = workbook.add_format({})#({'bold':True})
                 percent_format.set_num_format('0%')
                 link_format = workbook.add_format({'font_color':'blue','bold':True,'underline':True})
                 officehead_format = workbook.add_format({'font_color':'black','bold':True})
@@ -607,75 +608,83 @@ def upload_IOIimmTally():
                 for col_num, value in enumerate(city_pivot['Unique_ID'].columns.values):
                     CityPivot.write(1, col_num +3, value, header_format)
                     
-                '''#CityPivot sheet formatting w Proportional Goals
-                CityPivot.write('C2', 'Office',officehead_format)
-                CityPivot.write('J2:AH2', 'Brief ',header_format)
-                #JOTYD
-                CityPivot.write('J2', 'Brief ',HeaderBlock_format)
-                CityPivot.write('O2', 'Tier 1 ',HeaderBlock_format)
-                CityPivot.write('T2', 'T2 MR',HeaderBlock_format)
-                CityPivot.write('Y2', 'T2 Other',HeaderBlock_format)
-                CityPivot.write('AD2', 'T2 Rmvl',HeaderBlock_format)
-                CityPivot.freeze_panes(0,3)
-                CityPivot.set_column('A:B',0)
-                CityPivot.set_column('C:C',6,officehead_format)
-                CityPivot.set_column('D:I',0)
-                CityPivot.set_column('J:V',11)
-                CityPivot.set_column('W:W',11)
-                CityPivot.set_row(0,0)
-                #CityPivot.set_row(2,0) no longer need to hide this row, it was deleted when the headers disappeared
-                CityPivot.set_row(1,31)
-                #CityPivot.set_row(1,31,header_format) removed to prevent beige bormatting to infinitum
-                #l,n,q,s,v,x,a,c,f,h
-                CityPivot.set_column('L:L',11,percent_format)
-                CityPivot.set_column('N:N',11,percent_format)
-                CityPivot.set_column('Q:Q',11,percent_format)
-                CityPivot.set_column('S:S',11,percent_format)
-                CityPivot.set_column('V:V',11,percent_format)
-                CityPivot.set_column('X:X',11,percent_format)
-                CityPivot.set_column('AA:AA',11,percent_format)
-                CityPivot.set_column('AC:AC',11,percent_format)
-                CityPivot.set_column('AF:AF',11,percent_format)
-                CityPivot.set_column('AH:AH',11,percent_format)
-                CityPivot.conditional_format( 'C2:AH9' , { 'type' : 'cell' ,'criteria': '!=','value':'""','format' : border_format} )
-                #CityPivot.set_row(6,20,totals_format)
-                #CityPivot.set_column('D:D',20,percent_format)
-                #CityPivot.set_column('F:F',20,percent_format)
+                if request.form.get('Proportional'):   
+                    print('Hello proportional!')
+                                    
+                    #CityPivot sheet formatting w Proportional Goals
+                    CityPivot.write('C2', 'Office',officehead_format)
+                    CityPivot.write('C9', 'Citywide',officehead_format)
+                    CityPivot.write('J2:AH2', 'Brief ',header_format)
+                    #JOTYD
+                    CityPivot.write('J2', 'Brief ',HeaderBlock_format)
+                    CityPivot.write('O2', 'Tier 1 ',HeaderBlock_format)
+                    CityPivot.write('T2', 'T2 MR',HeaderBlock_format)
+                    CityPivot.write('Y2', 'T2 Other',HeaderBlock_format)
+                    CityPivot.write('AD2', 'T2 Rmvl',HeaderBlock_format)
+                    CityPivot.freeze_panes(0,3)
+                    CityPivot.set_column('A:B',0)
+                    CityPivot.set_column('C:C',6,officehead_format)
+                    CityPivot.set_column('D:I',0)
+                    CityPivot.set_column('J:V',11)
+                    CityPivot.set_column('W:W',11)
+                    CityPivot.set_row(0,0)
+                    #CityPivot.set_row(2,0) no longer need to hide this row, it was deleted when the headers disappeared
+                    CityPivot.set_row(1,31)
+                    #CityPivot.set_row(1,31,header_format) removed to prevent beige bormatting to infinitum
+                    #l,n,q,s,v,x,a,c,f,h
+                    CityPivot.set_column('L:L',11,percent_format)
+                    CityPivot.set_column('N:N',11,percent_format)
+                    CityPivot.set_column('Q:Q',11,percent_format)
+                    CityPivot.set_column('S:S',11,percent_format)
+                    CityPivot.set_column('V:V',11,percent_format)
+                    CityPivot.set_column('X:X',11,percent_format)
+                    CityPivot.set_column('AA:AA',11,percent_format)
+                    CityPivot.set_column('AC:AC',11,percent_format)
+                    CityPivot.set_column('AF:AF',11,percent_format)
+                    CityPivot.set_column('AH:AH',11,percent_format)
+                    CityPivot.conditional_format( 'C2:AH9' , { 'type' : 'cell' ,'criteria': '!=','value':'""','format' : border_format} )
+                    #CityPivot.set_row(6,20,totals_format)
+                    #CityPivot.set_column('D:D',20,percent_format)
+                    #CityPivot.set_column('F:F',20,percent_format)
+                    
+                    #CityPivot.write('A7', 'Totals', totals_format)
+                    #CityPivot.set_column('L:L',10,percent_format)
                 
-                #CityPivot.write('A7', 'Totals', totals_format)
-                #CityPivot.set_column('L:L',10,percent_format)'''
+                else:
+                    print('Annual here')
                 
-                #CityPivot sheet formatting - No Proportional Goals
-                CityPivot.write('C2', 'Office',officehead_format)
-                CityPivot.write('J2:AH2', 'Brief ',header_format)
-                #JMPSV
-                CityPivot.write('J2', 'Brief ',HeaderBlock_format)
-                CityPivot.write('M2', 'Tier 1 ',HeaderBlock_format)
-                CityPivot.write('P2', 'T2 MR',HeaderBlock_format)
-                CityPivot.write('S2', 'T2 Other',HeaderBlock_format)
-                CityPivot.write('V2', 'T2 Rmvl',HeaderBlock_format)
-                CityPivot.freeze_panes(0,3)
-                CityPivot.set_column('A:B',0)
-                CityPivot.set_column('C:C',6,officehead_format)
-                CityPivot.set_column('D:I',0)
-                CityPivot.set_column('J:V',11)
-                CityPivot.set_column('W:W',14)
-                CityPivot.set_row(0,0)
-                #CityPivot.set_row(2,0) no longer need to hide this row, it was deleted when the headers disappeared
-                CityPivot.set_row(1,31)
-                #CityPivot.set_row(1,31,header_format)
-                CityPivot.set_column('L:L',11,percent_format)
-                CityPivot.set_column('O:O',11,percent_format)
-                CityPivot.set_column('R:R',11,percent_format)
-                CityPivot.set_column('U:U',11,percent_format)
-                CityPivot.set_column('X:X',13,percent_format)
-                CityPivot.conditional_format( 'C2:AH9' , { 'type' : 'cell' ,'criteria': '!=','value':'""','format' : border_format} )
-                #CityPivot.set_row(6,20,totals_format)
-                #CityPivot.set_column('D:D',20,percent_format)
-                #CityPivot.set_column('F:F',20,percent_format)
-                
-                #CityPivot.write('A7', 'Totals', totals_format)
-                #CityPivot.set_column('L:L',10,percent_format)
+                    #CityPivot sheet formatting - No Proportional Goals
+                    CityPivot.write('C2', 'Office',officehead_format)
+                    CityPivot.write('C9', 'Citywide',officehead_format)
+                    CityPivot.write('J2:AH2', 'Brief ',header_format)
+                    #JMPSV
+                    CityPivot.write('J2', 'Brief ',HeaderBlock_format)
+                    CityPivot.write('M2', 'Tier 1 ',HeaderBlock_format)
+                    CityPivot.write('P2', 'T2 MR',HeaderBlock_format)
+                    CityPivot.write('S2', 'T2 Other',HeaderBlock_format)
+                    CityPivot.write('V2', 'T2 Rmvl',HeaderBlock_format)
+                    CityPivot.freeze_panes(0,3)
+                    CityPivot.set_column('A:B',0)
+                    CityPivot.set_column('C:C',6,officehead_format)
+                    CityPivot.set_column('D:I',0)
+                    CityPivot.set_column('J:V',11)
+                    CityPivot.set_column('W:W',14)
+                    CityPivot.set_row(0,0)
+                    #CityPivot.set_row(2,0) no longer need to hide this row, it was deleted when the headers disappeared
+                    CityPivot.set_row(1,31)
+                    #CityPivot.set_row(1,31,header_format)
+                    CityPivot.set_column('L:L',11,percent_format)
+                    CityPivot.set_column('O:O',11,percent_format)
+                    CityPivot.set_column('R:R',11,percent_format)
+                    CityPivot.set_column('U:U',11,percent_format)
+                    CityPivot.set_column('X:X',13,percent_format)
+                    CityPivot.conditional_format( 'C2:AH9' , { 'type' : 'cell' ,'criteria': '!=','value':'""','format' : border_format} )
+                    #CityPivot.set_row(6,20,totals_format)
+                    #CityPivot.set_column('D:D',20,percent_format)
+                    #CityPivot.set_column('F:F',20,percent_format)
+                    
+                    #CityPivot.write('A7', 'Totals', totals_format)
+                    #CityPivot.set_column('L:L',10,percent_format)
                 
                 
                 EFRowRange='E1:F'+str(dict_df[i].shape[0]+1)
@@ -744,6 +753,12 @@ def upload_IOIimmTally():
     <h1>Tally your IOI Immigration Cases and Case Cleanup:</h1>
     <form action="" method=post enctype=multipart/form-data>
     <p><input type=file name=file><input type=submit value=IOI-ify!>
+    
+    </br>
+    </br>
+    <input type="checkbox" id="Proportional" name="Proportional" value="Proportional">
+    <label for="Proportional"> Proportional Deliverable Targets</label><br>
+    
     </form>
     <h3>Instructions:</h3>
     <ul type="disc">
