@@ -86,13 +86,12 @@ def upload_IOIempQuarterly():
         #Substantial Activity for Rollover FY21?
 
         df['Needs Substantial Activity?'] = df.apply(lambda x: EmploymentToolBox.Needs_Rollover(x['Open Construct'],x['HRA IOI Employment Law HRA Substantial Activity 2021'],x['Subs Construct'],x['Matter/Case ID#']), axis=1)
+                    
+        #Reportable?
+        df['Reportable?'] = df.apply(lambda x: EmploymentToolBox.ReportableTester(x['Exclude due to Income?'],x['Needs DHCI?'],x['Needs Substantial Activity?'],x['HRA_Case_Coding']),axis=1)
         
         #Unit of Service Calculator
-        df['Units of Service'] = df.apply(lambda x: EmploymentToolBox.UoSCalculator(x['HRA_Case_Coding']),axis=1)
-        
-        #Reportable?
-        
-        df['Reportable?'] = df.apply(lambda x: EmploymentToolBox.ReportableTester(x['Exclude due to Income?'],x['Needs DHCI?'],x['Needs Substantial Activity?'],x['HRA_Case_Coding']),axis=1)
+        df['Units of Service'] = df.apply(lambda x: EmploymentToolBox.UoSCalculator(x['HRA_Case_Coding'],x['Reportable?']),axis=1)
         
         #Assign Outcomes
         def AdviceOutcomeDate(HRAOutcome,HRAOutcomeDate,DateClosed):
