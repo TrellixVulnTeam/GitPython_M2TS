@@ -54,6 +54,8 @@ def BoxTester():
         #Create Hyperlinks
         df['Hyperlinked CaseID#'] = df.apply(lambda x : DataWizardTools.Hyperlinker(x['Matter/Case ID#']),axis=1)    
         """
+        print(request.form['name'])
+        print(request.form['date'])
         
         #bounce worksheets back to excel
         output_filename = f.filename     
@@ -92,8 +94,13 @@ def BoxTester():
     </br>
     </br>
     <input type="checkbox" id="highlights" name="highlights" value="highlights" checked>
-    <label for="highlights"> Add highlights</label><br>
+    <label for="highlights"> Add highlights</label><br><br>
     
+    <input type = "text" id="name" name="name">
+    <label for ="name"> Add some text!</label><br><br>
+    
+    <input type = "date" id="date" name="date">
+    <label for = "date"> choose a date! </label>
     
     </form>
     <h3>Instructions:</h3>
