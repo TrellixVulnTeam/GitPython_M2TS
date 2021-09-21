@@ -37,6 +37,7 @@ def index():
     
     <li><a href="/AllHousing">All Housing Report</a></li>
     <li><a href="/DHCIPrep">DHCI Document Extractor Prep</a></li>
+    <li><a href="/WaiverMaker">Prepare Waiver Request Templates</a></li>
     </br>
     <li><a href="/UAHPLPCovidClean">[Revised for Covid] UAHPLP Cleaner</a></li>     
     <li><a href="/UAHPLPExternalPrepCovid">[Revised for Covid] Prepare UA/HPLP Reports for Submission to HRA</a></li>
