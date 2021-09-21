@@ -112,13 +112,15 @@ def upload_TRCtallyCovid():
         
         city_pivot = city_pivot.reindex(city_reorder)
         
+        
+        
         area_pivot = pd.pivot_table(data_xls,index=['Service Area'],values=['Case Value'],aggfunc=sum,fill_value=0)
         
         area_reorder = ["Bronx - Morris Height/Highbridge","Bronx - Longwood/East Tremont/West Farms","Bronx - Other Zips","Brooklyn - Ridgewood/Bushwick","Brooklyn - Gowanus/Park Slope/Boerum Hill/Carroll Garden/Red Hook","Brooklyn - East New York/Brownsville/Ocean Hill","Brooklyn - Other Zips","Manhattan - East Harlem","Manhattan - Inwood","Manhattan - Washington Heights","Manhattan - Other Zips","Queens - Long Island City","Queens - Flushing/West Flushing","Queens - Far Rockaway","Queens - Other Zips","Staten Island - Stapleton/Bay Street","Staten Island - Other Zips"]
         
         area_pivot = area_pivot.reindex(area_reorder)
         
-        zip_pivot = pd.pivot_table(data_xls,index=['zip'],values=['Case Value'],aggfunc=sum,fill_value=0)
+        zip_pivot = pd.pivot_table(data_xls,index=['city','zip'],values=['Case Value'],aggfunc=sum,fill_value=0)
         
         advice_proportion = pd.pivot_table(data_xls,index=['city','Case Value'],values=['Case Value Sum'],aggfunc=sum,fill_value=0)
         
@@ -150,7 +152,8 @@ def upload_TRCtallyCovid():
         
         city_pivot['Proportional Goal'] = numpy.ceil(city_pivot['Annual Goal']/12) * howmanymonths
         
-  
+        #Sum boroughs into city-wide total
+        city_pivot.loc['Citywide','Case Value':'Proportional Goal'] = city_pivot.sum(axis=0)
         
         def AreaGoal(area):
             if area == "Bronx - Morris Height/Highbridge":
@@ -246,16 +249,23 @@ def upload_TRCtallyCovid():
         percent_format = workbook.add_format()
         percent_format.set_num_format('0.00%')
         
+        number_format = workbook.add_format()
+        number_format.set_num_format('0.00')
+        
+        CityPivot.write('A7', 'Citywide:')
+        
         CaseList.set_column('A:I',20)
         CityPivot.set_column('A:F',20)
+        CityPivot.set_column('B:B',20,number_format)
         CityPivot.set_column('D:D',23,percent_format)
         CityPivot.set_column('F:F',20,percent_format)
         AreaPivot.set_column('A:A', 65)
-        AreaPivot.set_column('B:F', 20)
+        AreaPivot.set_column('B:B', 20,number_format)
+        AreaPivot.set_column('C:F', 20)
         AreaPivot.set_column('D:D',23,percent_format)
         AreaPivot.set_column('F:F',20,percent_format)
-        ZipPivot.set_column('A:B',20)
-        ProportionTable.set_column('A:D',15)
+        ZipPivot.set_column('A:C',20,number_format)
+        ProportionTable.set_column('A:D',15,number_format)
         ProportionTable.set_column('D:D',20,percent_format)
         writer.save()
         
@@ -267,7 +277,7 @@ def upload_TRCtallyCovid():
     <link rel="stylesheet" href="/static/css/main.css">
     <h1>Tally your TRC Cases against Goals:</h1>
     <form action="" method=post enctype=multipart/form-data>
-    <p><input type=file name=file><input type=submit value=TRC-ify!>
+    <p><input type=file name=file><input type=submit value=Tally!>
     </form>
     <h3>Instructions:</h3>
     <ul type="disc">
