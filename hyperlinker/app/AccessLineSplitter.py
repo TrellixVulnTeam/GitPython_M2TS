@@ -24,35 +24,56 @@ def AccessLineSplitter():
         else:
             df = pd.read_excel(f)
         
+        
+        #Import Access Line Spreadsheet and turn it into dictionary with caseworkername:[start date, end date ]
+        ALdf = pd.read_excel("app\\referencesheets\\Hotline Para List.xlsx")
+        ALdf['End Date'] = ALdf['End Date'].fillna('2099-99-99')
+        ALdf['Start Date 2'] = ALdf['Start Date 2'].fillna('2099-99-99')
+        ALdf['End Date 2'] = ALdf['End Date 2'].fillna('2099-99-99')
+        
+        ALdf['Start Date'] = ALdf.apply(lambda x : DataWizardTools.DateMaker(x['Start Date']),axis=1) 
+        ALdf['End Date'] = ALdf.apply(lambda x : DataWizardTools.DateMaker(x['End Date']),axis=1)
+        ALdf['Start Date 2'] = ALdf.apply(lambda x : DataWizardTools.DateMaker(x['Start Date 2']),axis=1) 
+        ALdf['End Date 2'] = ALdf.apply(lambda x : DataWizardTools.DateMaker(x['End Date 2']),axis=1)         
+        
+        
+        AccessLineDictionary = ALdf.set_index('Name').T.to_dict('list')
+        print(AccessLineDictionary)
+        
+        
+        
         #Remove Rows without Case ID values
         df.fillna('',inplace = True)
         df['Matter/Case ID#'] = df.apply(lambda x : DataWizardTools.RemoveNoCaseID(x['Matter/Case ID#']),axis=1)        
         df = df[df['Matter/Case ID#'] != 'No Case ID']
-
+        
+        
+        
         #Create Hyperlinks
-        df['ClientID'] = df['Matter/Case ID#']
-        df['Case ID#'] = df.apply(lambda x : DataWizardTools.Hyperlinker(x['Matter/Case ID#']),axis=1)  
+       
+        df['Matter/Case ID#'] = df.apply(lambda x : DataWizardTools.Hyperlinker(x['Matter/Case ID#']),axis=1)  
         
-        AccessLineStaff = [
-        "Pierre, Haenley",
-        "Ortega, Luis",
-        "Djourab, Atteib",
-        "Suriel, Sal",
-        "Villanueva, Anthony",
-        "Ruiz-Caceres, Gaby A",
-        "Yeh, Victoria"]
+        #Split cases in access line:
+        df['Date Opened Construct'] = df.apply(lambda x : DataWizardTools.DateMaker(x['Date Opened']),axis=1) 
         
-        def SplittingFunction (CaseWorkerName):
-            if CaseWorkerName in AccessLineStaff:
-                return "Access Line"
+        def AccessLineSplit(CaseWorker,DateOpened):
+            if CaseWorker in AccessLineDictionary:
+                if AccessLineDictionary[CaseWorker][1] >= DateOpened >= AccessLineDictionary[CaseWorker][0]:
+                    return 'Access Line'
+                elif AccessLineDictionary[CaseWorker][3] >= DateOpened >= AccessLineDictionary[CaseWorker][2]:
+                    return 'Access Line'
+                else:
+                    return 'Borough'
             else:
-                return "Not Access Line"
+                return 'Borough'
+
+
+        df['Access Line Case?'] = df.apply(lambda x: AccessLineSplit(x['Caseworker Name'],x['Date Opened Construct']),axis=1)     
         
-        df["Access Line?"] = df.apply(lambda x : SplittingFunction(x['Caseworker Name']),axis = 1)
-
-
+        df = df.drop(['Date Opened Construct'], axis=1)
+        
         #Split into different tabs
-        output_dictionary = dict(tuple(df.groupby('Access Line?')))
+        output_dictionary = dict(tuple(df.groupby('Access Line Case?')))
         
         def save_xls(dict_df, path):
             writer = pd.ExcelWriter(path, engine = 'xlsxwriter')
@@ -66,7 +87,7 @@ def AccessLineSplitter():
                 ws.set_column('A:A',20,link_format)
                 ws.set_column('B:ZZ',25)
                 ws.autofilter('B1:ZZ1')
-                ws.freeze_panes(1, 2)
+                ws.freeze_panes(1, 1)
             writer.save()
         
         output_filename = f.filename

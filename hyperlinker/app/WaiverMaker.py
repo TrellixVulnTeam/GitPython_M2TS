@@ -9,9 +9,8 @@ import pandas as pd
 import os
 
 
-
-@app.route("/BoxTester", methods=['GET', 'POST'])
-def BoxTester():
+@app.route("/WaiverMaker", methods=['GET', 'POST'])
+def WaiverMaker():
     #upload file from computer
     if request.method == 'POST':
         print(request.files['file'])
@@ -54,8 +53,6 @@ def BoxTester():
         #Create Hyperlinks
         df['Hyperlinked CaseID#'] = df.apply(lambda x : DataWizardTools.Hyperlinker(x['Matter/Case ID#']),axis=1)    
         """
-        print(request.form['name'])
-        print(request.form['date'])
         
         #bounce worksheets back to excel
         output_filename = f.filename     
@@ -67,13 +64,8 @@ def BoxTester():
         #create format that will make case #s look like links
         link_format = workbook.add_format({'font_color':'blue', 'bold':True, 'underline':True})
         
-        highlight_link_format = workbook.add_format({'font_color':'blue', 'bold':True, 'underline':True, 'bg_color':'yellow'})
-        
         #assign new format to column A
         worksheet.set_column('A:A',20,link_format)
-        
-        if request.form.get('highlights'):
-            worksheet.set_column('A:A',20,highlight_link_format)
         
         writer.save()
         
@@ -86,30 +78,13 @@ def BoxTester():
     <title>Hyperlinks</title>
     <link rel="stylesheet" href="/static/css/main.css">  
     <link rel="stylesheet" href="/static/css/main.css"> 
-    <h1>Checkbox Changes Script Behavior:</h1>
+    <h1>Add Hyperlinks to Report:</h1>
     <form action="" method=post enctype=multipart/form-data>
-    
     <p><input type=file name=file><input type=submit value=Hyperlink!>
-    
-    </br>
-    </br>
-    <input type="checkbox" id="highlights" name="highlights" value="highlights" checked>
-    <label for="highlights"> Add highlights</label><br><br>
-    
-    <input type = "text" id="name" name="name">
-    <label for ="name"> Add some text!</label><br><br>
-    
-    <input type = "date" id="date" name="date">
-    <label for = "date"> choose a date! </label>
-    
     </form>
     <h3>Instructions:</h3>
     <ul type="disc">
-    <li>Browse your computer using the field above to find the LegalServer excel document that you want to add case hyperlinks to.</li> 
-    <li>Once you have identified this file, click ‘Hyperlink!’ and you should shortly be given a prompt to either open the file directly or save the file to your computer.</li> 
-    <li>When you first open the file, all case numbers will display as ‘0’ until you click “Enable Editing” in excel, this will populate the fields.</li> 
-    <li>Note, the column with your case ID numbers in it must be titled "Matter/Case ID#" or "id" for this to work.</li>
-    </ul>
+    <li>This tool is meant to be used in conjunction with the LegalServer report called <a href="https://lsnyc.legalserver.org/report/dynamic?load=1507" target="_blank">TRC Raw Case Data Report</a>.</li>
     </br>
     <a href="/">Home</a>
     '''
