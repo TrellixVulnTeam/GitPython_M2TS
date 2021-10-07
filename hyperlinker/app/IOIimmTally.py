@@ -375,10 +375,15 @@ def upload_IOIimmTally():
         df['Seized_at_Border'] = df['IOI Was client apprehended at border? (IOI 2&3)']
         df['Group'] = ''
           
-        #Construct Summary Tables
-        #city_pivot = pd.pivot_table(df,index=['Office'],values=['Deliverable Tally'],aggfunc='count',fill_value=0)
-        city_pivot = pd.pivot_table(df,values=['Unique_ID'], index=['Office'], columns=['Modified Deliverable Tally'], aggfunc=lambda x: len(x.unique()))
+        #Makes a dataframe of only reportable cases, so pivot table is only reportable cases
+        tdf = df[df['Reportable?'] == "Reportable"]
         
+        #Construct Summary Tables using tdf reportable only dataframe
+        #city_pivot = pd.pivot_table(df,index=['Office'],values=['Deliverable Tally'],aggfunc='count',fill_value=0)
+        city_pivot = pd.pivot_table(tdf,values=['Unique_ID'], index=['Office'], columns=['Modified Deliverable Tally'], aggfunc=lambda x: len(x.unique()))
+        
+        #Adds dummy cleanup column to maintain formatting after non-reportable cases column removed
+        city_pivot['Unique_ID','Needs Cleanup']=''
         
         city_pivot.reset_index(inplace=True)
         print(city_pivot)
