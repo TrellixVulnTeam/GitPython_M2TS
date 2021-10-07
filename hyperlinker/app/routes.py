@@ -47,7 +47,9 @@ def index():
     <li><a href="/TRCExternalPrepCovid">[Revised for Covid] Prepare TRC Reports for Submission to HRA</a></li>
     <li><a href="/TRCtallyCovid">[Revised for Covid] TRC Tally</a></li>
     <li><a href="/TRCDuplicateIdentifier">TRC Identify Duplicates</a></li>
-
+    </br>
+    <li><a href="/MLSIntakeConsolidatedHousingCleaner">MLS Consolidated Intake Cleaner</a></li>
+    
     
     </ul>
 

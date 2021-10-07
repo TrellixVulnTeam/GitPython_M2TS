@@ -34,43 +34,57 @@ def MLSIntakeConsolidatedHousingCleaner():
         df['Assigned Branch/CC'] = df.apply(lambda x : DataWizardTools.OfficeAbbreviator(x['Assigned Branch/CC']),axis=1)   
 
 
-        #Has to have a Housing Type of Case
+        #Delete cases closed before 7/1/2021
         
-
-        #Has to have a Housing Level of Service 
-
+        df['ClosedConstruct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['Date Closed']), axis=1)
+        #NOT RIGHT YET, don't delete currently open cases.
+        
+        def CaseSelector(DateClosed,EligDate):
+            if EligDate == '':
+                if DateClosed == '':
+                    return 'Keep'
+                elif DateClosed >= 20210701:
+                    return 'Keep'
+                else:
+                    'Do not keep'
+            else:
+                return 'Keep'
+        
+        df['Keep?'] = df.apply(lambda x: CaseSelector(x['ClosedConstruct'],x['HAL Eligibility Date']),axis=1)
+        
+        df = df[df['Keep?'] == 'Keep']
+        
        
         #Eligiblity date tester - blank or not?
        
         df['DateConstruct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['HAL Eligibility Date']), axis=1)
         
-        df['Pre-3/1/20 Elig Date?'] = df.apply(lambda x: HousingToolBox.PreThreeOne(x['DateConstruct']), axis=1)
        
         #don't need consent form if it's post-covid advice/brief
-        def ReleaseTester(HRARelease,PreThreeOne,LevelOfService):
+        def ReleaseTester(HRARelease,LevelOfService):
             LevelOfService = str(LevelOfService)
-            if PreThreeOne == "No" and LevelOfService.startswith("Advice"):
+            if LevelOfService.startswith("Advice"):
                 return "Unnecessary advice/brief"
             else:
                 return HRARelease
        
-        df['HRA Release?'] = df.apply(lambda x: ReleaseTester(x['HRA Release?'],x['Pre-3/1/20 Elig Date?'],x["Housing Level of Service"]),axis = 1)
+        df['HRA Release?'] = df.apply(lambda x: ReleaseTester(x['HRA Release?'],x["Housing Level of Service"]),axis = 1)
         
-        df['Housing Income Verification'] = df.apply(lambda x: ReleaseTester(x['Housing Income Verification'],x['Pre-3/1/20 Elig Date?'],x["Housing Level of Service"]),axis = 1)
+        df['Housing Income Verification'] = df.apply(lambda x: ReleaseTester(x['Housing Income Verification'],x["Housing Level of Service"]),axis = 1)
         
        
        
         #PA Tester if theres no dhci, not needed for post-covid advice/brief cases
-        def PATester (PANum,DHCI,PreThreeOne,LevelOfService):
+        def PATester (PANum,DHCI,LevelOfService):
             LevelOfService = str(LevelOfService)
-            if PreThreeOne == "No" and LevelOfService.startswith("Advice"):
+            if LevelOfService.startswith("Advice"):
                 return "Unnecessary advice/brief"
             elif DHCI == "DHCI Form" and PANum == "":
                 return "Not Needed due to DHCI"
             else:
                 return PANum
             
-        df['Gen Pub Assist Case Number'] = df.apply(lambda x: PATester(x['Gen Pub Assist Case Number'],x['Housing Income Verification'],x['Pre-3/1/20 Elig Date?'],x["Housing Level of Service"]),axis = 1)
+        df['Gen Pub Assist Case Number'] = df.apply(lambda x: PATester(x['Gen Pub Assist Case Number'],x['Housing Income Verification'],x["Housing Level of Service"]),axis = 1)
 
         #Outcome Tester - date no outcome or outcome no date
         
@@ -183,7 +197,8 @@ def MLSIntakeConsolidatedHousingCleaner():
         
         "Tester Tester",
         "Assigned Branch/CC",
-        "Intake Paralegal"
+        "Intake Paralegal",
+        "Date Closed"
         ]]      
         
         #Preparing Excel Document
@@ -205,7 +220,11 @@ def MLSIntakeConsolidatedHousingCleaner():
                 ws.autofilter('B1:ZZ1')
                 ws.freeze_panes(1, 2)
 
-                ws.conditional_format('F2:K100000',{'type': 'blanks',
+                FKRowRange='F1:K'+str(dict_df[i].shape[0]+1)
+                print(FKRowRange)
+
+
+                ws.conditional_format(FKRowRange,{'type': 'blanks',
                                                  'format': problem_format})
                 ws.conditional_format('G2:G100000',{'type': 'text',
                                                  'criteria': 'containing',
