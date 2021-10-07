@@ -567,7 +567,31 @@ def draw_frame_border(workbook, worksheet, first_row, first_col, rows_count, col
                                      first_row + rows_count - 2, first_col + cols_count - 1,
                                      {'type': 'formula', 'criteria': 'True', 'format': workbook.add_format({'right': thickness})})    
         
-        
+def UnitSplitter(LPC):
+    if LPC.startswith('0') == True:
+        return 'Consumer'
+    elif LPC.startswith('1') == True:
+        return 'Education'
+    elif LPC.startswith('2') == True or LPC.startswith('76'):
+        return 'Employment'
+    elif LPC.startswith('81') == True:
+        return 'Immigration'
+    elif LPC.startswith('3') == True or LPC.startswith('4') == True:
+        return 'Family-Juvenile'
+    elif LPC.startswith('5') == True:
+        return 'Health'
+    elif LPC.startswith('67') == True or LPC.startswith('68') == True or LPC.startswith('62') == True:
+        return 'Foreclosure'
+    elif LPC.startswith('6') == True:
+        return 'Housing (Tenant)'
+    elif LPC.startswith('71') == True or LPC.startswith('73') == True or LPC.startswith('78') == True or LPC.startswith('72') == True or LPC.startswith('79') == True or LPC.startswith('77') == True :
+        return 'Public Assistance'
+    elif LPC.startswith('74') == True or LPC.startswith('75') == True:
+        return 'DAP'
+    elif LPC.startswith('8') == True:
+        return 'Individual Rights'
+    else:
+        return 'Misc'
         
         
         

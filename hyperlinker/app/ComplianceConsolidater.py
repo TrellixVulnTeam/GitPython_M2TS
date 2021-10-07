@@ -32,6 +32,16 @@ def ComplianceConsolidater():
         #Checkbox determines if it does lsu or all non-LSU
         if request.form.get('LSU'):
             df = df[df['Assigned Branch/CC'] == "Legal Support Unit"]
+        elif request.form.get('QLS'):
+            df = df[df['Assigned Branch/CC'] == "Queens Legal Services"]
+        elif request.form.get('MLS'):
+            df = df[df['Assigned Branch/CC'] == "Manhattan Legal Services"]
+        elif request.form.get('BkLS'):
+            df = df[df['Assigned Branch/CC'] == "Brooklyn Legal Services"]
+        elif request.form.get('BxLS'):
+            df = df[df['Assigned Branch/CC'] == "Bronx Legal Services"]
+        elif request.form.get('SILS'):
+            df = df[df['Assigned Branch/CC'] == "Staten Island Legal Services"]
         else:
             df = df[df['Assigned Branch/CC'] != "Legal Support Unit"]
         
@@ -206,11 +216,13 @@ def ComplianceConsolidater():
         def RetainerTester(Retainer,CloseReason,LevelOfService,PAICase,ConstructAge):
             if Retainer == 'Yes' or PAICase == 'Yes':
                 return ''
+            elif CloseReason.startswith('A') == True or CloseReason.startswith('B') == True:
+                return ''
             elif CloseReason.startswith('F') == True or CloseReason.startswith('G') == True or CloseReason.startswith('H') == True or CloseReason.startswith('IA') == True or CloseReason.startswith('IB') == True or CloseReason.startswith('IC') == True or CloseReason.startswith('L') == True:
                 return 'Needs Retainer'
             elif LevelOfService.startswith('Representation')== True:
                 return 'Needs Retainer'
-            elif LevelOfService == '' and ConstructAge > 200:
+            elif LevelOfService == '' and ConstructAge > 200 and CloseReason == '':
                 return 'Needs Retainer'
             else:
                 return ''
@@ -273,7 +285,7 @@ def ComplianceConsolidater():
         
         #Putting everything in the right order
         
-        df = df[['Hyperlinked CaseID#','Assigned Branch/CC','Primary Advocate Name','Client First Name','Client Last Name','No Legal Assistance Documented Tester','No Time Entered for 90 Days Tester','200% of Poverty Tester','125-200% of Poverty Tester','Funding Code 4000 Tester','No Age for Client Tester','Untimely Closed Tester','Untimely Closed Overridden Tester','Citizenship & Immigration Tester','Active Advocate Tester','Retainer Tester','Closed Before Opened Tester','CSR Agreement Tester','Caseworker Name','Compliance Check Untimely Closed','Compliance Check Untimely Closed Overwritten','Compliance Check 125 to 200 Poverty Income Ineligible','Compliance Check 200 Poverty Income Eligible','Compliance Check Citizenship and Immigration','Citizenship Status','Attestation on File?','Staff Verified Non-Citizenship Documentation','Did any Staff Meet Client in Person?','Close Reason','Date Closed','Date Opened','CSR: Is Legal Assistance Documented?','Age in Days','Percentage of Poverty','LSC Eligible?','CSR Eligible','Income Eligible','Primary Funding Codes','Secondary Funding Codes','DOB Information','Group','CSR: Timely Closing?','Was Timely Closed overridden?','Case Status','PAI Case?','Level of Service','Retainer on File','Python CSR Tester','TodayConstruct','ConstructAge']]
+        df = df[['Hyperlinked CaseID#','Assigned Branch/CC','Primary Advocate Name','Client First Name','Client Last Name','No Legal Assistance Documented Tester','No Time Entered for 90 Days Tester','200% of Poverty Tester','125-200% of Poverty Tester','Funding Code 4000 Tester','No Age for Client Tester','Untimely Closed Tester','Untimely Closed Overridden Tester','Citizenship & Immigration Tester','Active Advocate Tester','Retainer Tester','Closed Before Opened Tester','CSR Agreement Tester','Caseworker Name','Compliance Check Untimely Closed','Compliance Check Untimely Closed Overwritten','Compliance Check 125 to 200 Poverty Income Ineligible','Compliance Check 200 Poverty Income Eligible','Compliance Check Citizenship and Immigration','Citizenship Status','Attestation on File?','Staff Verified Non-Citizenship Documentation','Did any Staff Meet Client in Person?','Close Reason','Date Closed','Date Opened','CSR: Is Legal Assistance Documented?','Age in Days','Percentage of Poverty','LSC Eligible?','CSR Eligible','Income Eligible','Primary Funding Codes','Secondary Funding Codes','DOB Information','Group','CSR: Timely Closing?','Was Timely Closed overridden?','Case Status','PAI Case?','Level of Service','Retainer on File','Python CSR Tester','TodayConstruct','ConstructAge','Legal Problem Code']]
         
         
         
@@ -311,6 +323,8 @@ def ComplianceConsolidater():
         
         if request.form.get('LSU'):
             df['Assigned Branch/CC'] = df.apply(lambda x : TabSplitter(x['Primary Advocate Name']),axis = 1)
+        else:
+            df['Assigned Branch/CC'] = df.apply(lambda x : DataWizardTools.UnitSplitter(x['Legal Problem Code']),axis = 1)
         
         #Preparing Excel Document
 
@@ -394,7 +408,21 @@ def ComplianceConsolidater():
 
         save_xls(dict_df = borough_dictionary, path = "app\\sheets\\" + output_filename)
 
-        return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = "Python " + f.filename)
+        if request.form.get('MLS'):
+            return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = "MLS " + f.filename)
+        elif request.form.get('BkLS'):
+            return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = "BkLS " + f.filename)
+        elif request.form.get('BxLS'):
+            return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = "BxLS " + f.filename)
+        elif request.form.get('SILS'):
+            return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = "SILS " + f.filename)
+        elif request.form.get('QLS'):
+            return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = "QLS " + f.filename)
+        elif request.form.get('LSU'):
+            return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = "LSU " + f.filename)
+        else:
+            return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = "All Boroughs " + f.filename)
+
         
         #***#
        
@@ -413,6 +441,17 @@ def ComplianceConsolidater():
     </br>
     <input type="checkbox" id="LSU" name="LSU" value="LSU">
     <label for="LSU"> LSU Compliance</label><br>
+    <input type="checkbox" id="QLS" name="QLS" value="QLS">
+    <label for="QLS"> QLS Compliance</label><br>
+    <input type="checkbox" id="MLS" name="MLS" value="MLS">
+    <label for="MLS"> MLS Compliance</label><br>
+    <input type="checkbox" id="BkLS" name="BkLS" value="BkLS">
+    <label for="BkLS"> BkLS Compliance</label><br>
+    <input type="checkbox" id="BxLS" name="BxLS" value="BxLS">
+    <label for="BxLS"> BxLS Compliance</label><br>
+    <input type="checkbox" id="SILS" name="SILS" value="SILS">
+    <label for="SILS"> SILS Compliance</label><br>
+    
     
     </form>
     <h3>Instructions:</h3>
