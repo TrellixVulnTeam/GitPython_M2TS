@@ -53,8 +53,13 @@ def AccessLineSplitter():
        
         df['Matter/Case ID#'] = df.apply(lambda x : DataWizardTools.Hyperlinker(x['Matter/Case ID#']),axis=1)  
         
+        
+        if "Intake User" in df:
+            df['Caseworker Name'] = df['Intake User']
+        
+        
         #Split cases in access line:
-        df['Date Opened Construct'] = df.apply(lambda x : DataWizardTools.DateMaker(x['Date Opened']),axis=1) 
+        df['Intake Date Construct'] = df.apply(lambda x : DataWizardTools.DateMaker(x['Intake Date']),axis=1) 
         
         def AccessLineSplit(CaseWorker,DateOpened):
             if CaseWorker in AccessLineDictionary:
@@ -68,9 +73,9 @@ def AccessLineSplitter():
                 return 'Borough'
 
 
-        df['Access Line Case?'] = df.apply(lambda x: AccessLineSplit(x['Caseworker Name'],x['Date Opened Construct']),axis=1)     
+        df['Access Line Case?'] = df.apply(lambda x: AccessLineSplit(x['Caseworker Name'],x['Intake Date Construct']),axis=1)     
         
-        df = df.drop(['Date Opened Construct'], axis=1)
+        df = df.drop(['Intake Date Construct'], axis=1)
         
         #Split into different tabs
         output_dictionary = dict(tuple(df.groupby('Access Line Case?')))
@@ -109,11 +114,8 @@ def AccessLineSplitter():
     
     <h3>Instructions:</h3>
     <ul type="disc">
-    <li>Browse your computer using the field above to find the LegalServer excel document that you want to split into different documents by borough.</li> 
-    <li>Once you have identified this file, click ‘Split!’ and you should shortly be given a prompt to either open the file directly or save the file to your computer.</li> 
     <li>When you first open the file, all case numbers will display as ‘0’ until you click “Enable Editing” in excel, this will populate the fields.</li> 
-    <li>In order for this tool to work your column header with intake paralegal in it needs to read as "Caseworker Name".</li>
-    </ul>
+    <li>This tool was designed to be used with the LegalServer Report <a href="https://lsnyc.legalserver.org/report/dynamic?load=2422" target="_blank">"Access Line Splitter Tool Report"</a> 
     </br>
     <a href="/">Home</a>
     '''
