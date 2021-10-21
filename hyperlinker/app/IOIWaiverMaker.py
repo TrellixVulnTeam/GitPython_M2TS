@@ -128,14 +128,14 @@ def IOIWaiverMaker():
         del df['Temp Hyperlinked Case #']
         
         #add 'Eligible for Waiver Request?' in column p/16 - FPL, prev waiver
-        def NeedWaiver(WaiverType,FPL):
-            if pd.isnull(WaiverType) == False:
-                return "No, Waived in on " + str(WaiverType.strftime("%m/%d/%Y"))
+        def NeedWaiver(WaiverDate,FPL):
+            if pd.isnull(WaiverDate) == False:
+                return "No, Waived in on " + str(WaiverDate)
             elif FPL < 201:
                 return "No, FPL < 201%"
             else:
                 return "Yes"
-                
+                               
         if request.form.get('Immigration'):
             df['Eligible for Waiver Request?'] = df.apply(lambda x : NeedWaiver(x['IOI HRA WAIVER APPROVAL DATE if over 200% of FPL (IOI 2)'],x['Percentage of Poverty']),axis=1)
             
@@ -182,6 +182,9 @@ def IOIWaiverMaker():
         
         #Add income waiver blue/gray header format
         header_format = workbook.add_format({'text_wrap':True,'bold':True,'valign': 'top','align': 'center','bg_color' : '#D6DCE4','font_name':'Arial Narrow','font_size':9})
+        
+        #Add Yellow header format to columns to remove
+        remove_format = workbook.add_format({'text_wrap':True,'bold':True,'valign': 'top','align': 'center','bg_color' : '#FFFF00','font_name':'Arial Narrow','font_size':9})
         #worksheet.set_row(0, None, header_format)
         
         
@@ -192,6 +195,7 @@ def IOIWaiverMaker():
         worksheet.set_column('L:L',9)
         worksheet.set_column('M:M',18)
         worksheet.set_column('P:P',25)
+        worksheet.set_column('Q:Q',18.5)
         
         #create problem format
         problem_format = workbook.add_format({'bg_color':'yellow'})
@@ -214,6 +218,8 @@ def IOIWaiverMaker():
         for col_num, value in enumerate(ColNum):
                     worksheet.write(1, col_num, value, numbers_format)
                     
+        
+        
         #Add Borders to everything
         border_format=workbook.add_format({'border':1,'align':'left','font_size':10})
         WaiverRange='A1:W'+str(df.shape[0]+3)
@@ -222,6 +228,11 @@ def IOIWaiverMaker():
         
         #remove header color from blank column
         worksheet.write('N3','',border_format)
+        
+        #add different color to column headers for columns to remove before reporting
+        worksheet.write('O3','Hyperlinked Case #',remove_format)
+        worksheet.write('P3','Eligible for Waiver Request?',remove_format)
+        worksheet.write('Q3','Primary Advocate',remove_format)
         
         #worksheet.write('A:W',13,header_format)
         #worksheet.set_row(0, None, header_format)
