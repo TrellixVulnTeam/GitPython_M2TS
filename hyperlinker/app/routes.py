@@ -63,6 +63,9 @@ def index():
     
     <li><a href="/IOIempQuarterly">Quarterly IOI Employment</a></li>
     <li><a href="/IOIempTally">IOI Employment Tally</a></li>
+    <br>
+    
+    <li><a href="/IOIWaiverMaker">Prepare Waiver Request Templates</a></li>
     </ul>
     
     <b>Pascale Tools:</b>

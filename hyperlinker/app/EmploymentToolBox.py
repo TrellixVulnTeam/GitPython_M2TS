@@ -7252,6 +7252,9 @@ GroupCaseNumber = ["20-1927410","20-1928389","20-1927216"]
 #Putting Employment Work in HRA Baskets
         
 def HRA_Case_Coding(LoS,LPC,SLPC,Retainer,CaseNumber):
+    LoS = str(LoS)
+    SLPC = str(SLPC)
+    Retainer = str(Retainer)    
     if LoS.startswith('Advice') and Retainer.startswith('Investigation'):
         return "T1-EMPOTH_"
     elif CaseNumber in GroupCaseNumber:

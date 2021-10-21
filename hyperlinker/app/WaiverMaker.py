@@ -301,7 +301,7 @@ def WaiverMaker():
     <link rel="stylesheet" href="/static/css/main.css"> 
     <h1>Complete Income Waiver Template:</h1>
     <form action="" method=post enctype=multipart/form-data>
-    <p><input type=file name=file><input type=submit value=Waive In!>
+    <p><input type=file name=file><input type=submit value='Waive In!'>
     </form>
     <h3>Instructions:</h3>
     <ul type="disc">
