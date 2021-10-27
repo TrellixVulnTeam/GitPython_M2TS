@@ -594,10 +594,58 @@ def UnitSplitter(LPC):
         return 'Misc'
         
         
+def RaceConsolidator(Race):
+            if Race == "Black/African American/African Descent":
+                return "Black/African American"
+            elif Race == "White (Not Hispanic)":
+                return "White"
+            elif Race == "Asian or Pacific Islander" or Race == "South Asian":
+                return "Asian"
+            elif Race == "Hispanic" or Race == "Latina/o/x":
+                return "Hispanic/Latinx"
+            elif Race == "" or Race == "Prefer Not To Say" or Race == "Self-Identified/Other" or Race == "Native American/American Indian":
+                return "Other/Not Given"
+            else: 
+                return Race        
+                
+def AgeConsolidator(Age):
+    if Age < 18:
+        return "0-17"
+    elif Age <35:
+        return "18-34"
+    elif Age < 60:
+        return "35-59"
+    else:
+        return "60+"
+        
+def PovertyConsolidator(PercentPoverty):
+    if PercentPoverty < 50:
+        return "0-50%"
+    elif PercentPoverty <100:
+        return "50-100%"
+    elif PercentPoverty <200:
+        return "100-200%"
+    else:
+        return "200%+"
         
         
-        
-        
+def CloseReasonConsolidator(CloseReason):
+    if CloseReason.startswith('A') == True:
+        return 'Limited Service'
+    elif CloseReason.startswith('B') == True:
+        return 'Limited Service'
+    elif CloseReason.startswith('F') == True:
+        return 'Negotiated Settlement'
+    elif CloseReason.startswith('G') == True:
+        return 'Negotiated Settlement'
+    elif CloseReason.startswith('H') == True:
+        return 'Court/Agency Decision'
+    elif CloseReason.startswith('I') == True:
+        return 'Court/Agency Decision'
+    elif CloseReason.startswith('L') == True:
+        return 'Other'
+    else:
+        return 'Other'
         
         
         
