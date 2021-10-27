@@ -72,20 +72,17 @@ def upload_IOIempQuarterly():
                 return Effective_Date
             else:
                 return Date_Opened
-        df['Eligibility_Date'] = df.apply(lambda x : Eligibility_Date(x['HRA IOI Employment Law HRA Date Substantial Activity Performed 2021'],x['IOI HRA Effective Date (optional) (IOI 2)'],x['Date Opened']), axis = 1)
+        df['Eligibility_Date'] = df.apply(lambda x : Eligibility_Date(x['HRA IOI Employment Law HRA Date Substantial Activity Performed 2022'],x['IOI HRA Effective Date (optional) (IOI 2)'],x['Date Opened']), axis = 1)
         
-        
-        df['Open Month'] = df['Eligibility_Date'].apply(lambda x: str(x)[:2])
-        df['Open Day'] = df['Eligibility_Date'].apply(lambda x: str(x)[3:5])
-        df['Open Year'] = df['Eligibility_Date'].apply(lambda x: str(x)[6:])
-        df['Open Construct'] = df['Open Year'] + df['Open Month'] + df['Open Day']
+
+        df['Open Construct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['Date Opened']),axis = 1)
         
         #DateMaker Substantial Activity FY21
-        df['Subs Construct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['HRA IOI Employment Law HRA Date Substantial Activity Performed 2021']),axis = 1)
+        df['Subs Construct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['HRA IOI Employment Law HRA Date Substantial Activity Performed 2022']),axis = 1)
                 
-        #Substantial Activity for Rollover FY21?
+        #Substantial Activity for Rollover FY22?
 
-        df['Needs Substantial Activity?'] = df.apply(lambda x: EmploymentToolBox.Needs_Rollover(x['Open Construct'],x['HRA IOI Employment Law HRA Substantial Activity 2021'],x['Subs Construct'],x['Matter/Case ID#']), axis=1)
+        df['Needs Substantial Activity?'] = df.apply(lambda x: EmploymentToolBox.Needs_Rollover(x['Open Construct'],x['HRA IOI Employment Law HRA Substantial Activity 2022'],x['Subs Construct'],x['Matter/Case ID#']), axis=1)
                     
         #Reportable?
         df['Reportable?'] = df.apply(lambda x: EmploymentToolBox.ReportableTester(x['Exclude due to Income?'],x['Needs DHCI?'],x['Needs Substantial Activity?'],x['HRA_Case_Coding']),axis=1)
@@ -184,7 +181,9 @@ def upload_IOIempQuarterly():
                 return "NO"
                 
         def PriorEnrollment (casenumber):
-            if casenumber in EmploymentToolBox.ReportedFY20:
+            if casenumber in EmploymentToolBox.ReportedFY21:
+                return 'FY 21'
+            elif casenumber in EmploymentToolBox.ReportedFY20:
                 return 'FY 20'
             elif casenumber in EmploymentToolBox.ReportedFY19:
                 return 'FY 19'
@@ -212,7 +211,7 @@ def upload_IOIempQuarterly():
         
         
         #REPORTING VERSION Put everything in the right order
-        df = df[['Unique_ID','Last_Initial','First_Initial','Year_of_Birth','Gender','Country of Origin','Borough','Zip Code','Language','Household_Size','Number_of_Children','Annual_Income','Income_Eligible','Waiver_Type','Waiver_Approval_Date','Eligibility_Date','Referral_Source','Service_Type_Code','Proceeding_Type_Code','Outcome','Outcome_Date','Seized_at_Border','Group','Prior_Enrollment_FY','Pro_Bono','Hyperlinked Case #','Office','Primary Advocate','Client Name','Level of Service','Legal Problem Code','Special Legal Problem Code','HRA_Case_Coding','Exclude due to Income?','Needs DHCI?','Needs Substantial Activity?','HRA IOI Employment Law HRA Date Substantial Activity Performed 2021','Units of Service','Reportable?']]
+        df = df[['Unique_ID','Last_Initial','First_Initial','Year_of_Birth','Gender','Country of Origin','Borough','Zip Code','Language','Household_Size','Number_of_Children','Annual_Income','Income_Eligible','Waiver_Type','Waiver_Approval_Date','Eligibility_Date','Referral_Source','Service_Type_Code','Proceeding_Type_Code','Outcome','Outcome_Date','Seized_at_Border','Group','Prior_Enrollment_FY','Pro_Bono','Hyperlinked Case #','Office','Primary Advocate','Client Name','Level of Service','Legal Problem Code','Special Legal Problem Code','HRA_Case_Coding','Exclude due to Income?','Needs DHCI?','Needs Substantial Activity?','HRA IOI Employment Law HRA Date Substantial Activity Performed 2022','HRA IOI Employment Law HRA Substantial Activity 2022','Units of Service','Reportable?']]
         
 
         output_filename = f.filename     

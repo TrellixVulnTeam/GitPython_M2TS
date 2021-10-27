@@ -7413,3 +7413,18 @@ def ReportableTester(Income,DHCI,SubsActivity,DeliverableTally):
         return 'No'
     else:
         return 'Reportable'
+        
+
+
+
+def Needs_Rollover(Open_Construct,Substantial_Activity, Substantial_Activity_Date,CaseID) :
+    if int(Open_Construct) >= 20210701:
+        return ''
+    elif Substantial_Activity != '' and int(Substantial_Activity_Date) >20210701 and int(Substantial_Activity_Date) <=20220630:
+        return ''
+    elif CaseID in ReportedFY19 or CaseID in ReportedFY21 or CaseID in ReportedFY20:
+        return 'Needs Substantial Activity in FY22'
+    else: return ''
+
+
+

@@ -100,18 +100,17 @@ def upload_IOIimmQuarterly():
                 return Effective_Date
             else:
                 return Date_Opened
-        df['Eligibility_Date'] = df.apply(lambda x : Eligibility_Date(x['IOI Date FY21 Substantial Activity Performed'],x['IOI HRA Effective Date (optional) (IOI 2)'],x['Date Opened']), axis = 1)
+        df['Eligibility_Date'] = df.apply(lambda x : Eligibility_Date(x['IOI Date Substantial Activity Performed 2022'],x['IOI HRA Effective Date (optional) (IOI 2)'],x['Date Opened']), axis = 1)
         
+    
         #Manipulable Dates               
         
         
         df['Open Construct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['Eligibility_Date']),axis = 1)
         
-        df['Subs Month'] = df['IOI Date FY21 Substantial Activity Performed'].apply(lambda x: str(x)[5:7])
-        df['Subs Day'] = df['IOI Date FY21 Substantial Activity Performed'].apply(lambda x: str(x)[8:])
-        df['Subs Year'] = df['IOI Date FY21 Substantial Activity Performed'].apply(lambda x: str(x)[:4])
-        df['Subs Construct'] = df['Subs Year'] + df['Subs Month'] + df['Subs Day']
-        df['Subs Construct'] = df.apply(lambda x : x['Subs Construct'] if x['Subs Construct'] != '' else 0, axis = 1)
+        #Substantial Activity construct
+        df['Subs Construct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['IOI Date Substantial Activity Performed 2022']),axis = 1)
+        
         
         df['Outcome1 Month'] = df['IOI Outcome 2 Date (IOI 2)'].apply(lambda x: str(x)[:2])
         df['Outcome1 Day'] = df['IOI Outcome 2 Date (IOI 2)'].apply(lambda x: str(x)[3:5])
@@ -144,22 +143,11 @@ def upload_IOIimmQuarterly():
         
         
         
-        #Needs Substantial Activity to Rollover into FY'20
+        #Needs Substantial Activity to Rollover into FY'22
         
         
         
-         #Needs Substantial Activity to Rollover into FY'21
-        
-        
-        def Needs_Rollover(Open_Construct,Substantial_Activity, Substantial_Activity_Date,CaseID) :
-            if int(Open_Construct) >= 20200701:
-                return ''
-            elif Substantial_Activity != '' and int(Substantial_Activity_Date) >20200701 and int(Substantial_Activity_Date) <=20210630:
-                return ''
-            elif CaseID in ImmigrationToolBox.ReportedFY20 or CaseID in ImmigrationToolBox.ReportedFY19:
-                return 'Needs Substantial Activity in FY21'
-            else: return ''
-        df['Needs Substantial Activity?'] = df.apply(lambda x: Needs_Rollover(x['Open Construct'],x['IOI FY21 Substantial Activity (Choose One)'],x['Subs Construct'],x['Matter/Case ID#']), axis=1)  
+        df['Needs Substantial Activity?'] = df.apply(lambda x: ImmigrationToolBox.Needs_Rollover(x['Open Construct'],x['IOI FY22 Substantial Activity 2022'],x['Subs Construct'],x['Matter/Case ID#']), axis=1) 
         
         
 
@@ -344,7 +332,9 @@ def upload_IOIimmQuarterly():
         #Prior Enrollment
         
         def PriorEnrollment (casenumber):
-            if casenumber in ImmigrationToolBox.ReportedFY20:
+            if casenumber in ImmigrationToolBox.ReportedFY21:
+                return 'FY 21'
+            elif casenumber in ImmigrationToolBox.ReportedFY20:
                 return 'FY 20'
             elif casenumber in ImmigrationToolBox.ReportedFY19:
                 return 'FY 19'
@@ -363,7 +353,7 @@ def upload_IOIimmQuarterly():
           
                 
         #REPORTING VERSION Put everything in the right order
-        df = df[['Unique_ID','Last_Initial','First_Initial','Year_of_Birth','Gender','Country of Origin','Borough','Zip Code','Language','Household_Size','Number_of_Children','Annual_Income','Income_Eligible','Waiver_Type','Waiver_Approval_Date','Eligibility_Date','Referral_Source','Service_Type_Code','Proceeding_Type_Code','Outcome','Outcome_Date','Seized_at_Border','Group','Prior_Enrollment_FY','Pro_Bono','Special Legal Problem Code','HRA Level of Service','HRA Case Coding','Hyperlinked Case #','Office','Primary Advocate','Client Name','Special Legal Problem Code','Level of Service','Needs DHCI?','Exclude due to Income?','Needs Substantial Activity?','IOI Date FY21 Substantial Activity Performed','Country of Origin','Outcome To Report','HRA Case Coding','IOI Was client apprehended at border? (IOI 2&3)','Deliverable Tally','Modified Deliverable Tally','Reportable?']]
+        df = df[['Unique_ID','Last_Initial','First_Initial','Year_of_Birth','Gender','Country of Origin','Borough','Zip Code','Language','Household_Size','Number_of_Children','Annual_Income','Income_Eligible','Waiver_Type','Waiver_Approval_Date','Eligibility_Date','Referral_Source','Service_Type_Code','Proceeding_Type_Code','Outcome','Outcome_Date','Seized_at_Border','Group','Prior_Enrollment_FY','Pro_Bono','Special Legal Problem Code','HRA Level of Service','HRA Case Coding','Hyperlinked Case #','Office','Primary Advocate','Client Name','Special Legal Problem Code','Level of Service','Needs DHCI?','Exclude due to Income?','Needs Substantial Activity?','IOI FY22 Substantial Activity 2022','IOI Date Substantial Activity Performed 2022','Country of Origin','Outcome To Report','HRA Case Coding','IOI Was client apprehended at border? (IOI 2&3)','Deliverable Tally','Modified Deliverable Tally','Reportable?']]
             
         
                 

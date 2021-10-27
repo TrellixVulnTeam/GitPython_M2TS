@@ -134,12 +134,12 @@ def MLSIntakeConsolidatedHousingCleaner():
 
         #assign casehandlers to Intake Paralegals:
         
-        Evelyn_Casehandlers = ['Delgadillo, Omar','Heller, Steven E','Latterner, Matt J','Robles-Castillo, Camila J','Tilyayeva, Rakhil','Almanzar, Yocari']
-        Diana_V_Casehandlers = ['Abbas, Sayeda','Evers, Erin C.','Hao, Lindsay','He, Ricky','Sharma, Sagar','Spencer, Eleanor G','Wilkes, Nicole','Allen, Sharette','Ortiz, Matthew B','Sun, Dao','Risener, Jennifer A','Evers, Erin C.','Surface, Ben L']
-        Diana_G_Casehandlers = ['Frierson, Jerome C','Saxton, Jonathan G','Orsini, Mary K','Allen, Sharette','Duffy-Greaves, Kevin','Freeman, Daniel A','Gokhale, Aparna S','Gonzalez, Matias','Gonzalez, Matias G','Labossiere, Samantha J.','Shah, Ami Mahendra']
-        Keiannis_Casehandlers = ['Almanzar, Milagros','Briggs, John M','Dittakavi, Archana','Gonzalez-Munoz, Rossana G','Honan, Thomas J','James, Lelia','Kelly, Kitanya','Mottley, Darlene','Yamasaki, Emily Woo J','McCune, Mary','Vogltanz, Amy K']
-        Dennis_Casehandlers = ['Braudy, Erica','Kulig, Jessica M','Mercedes, Jannelys J','Harshberger, Sae','Black, Rosalind','Basu, Shantonu J']
-        Rosa_Casehandlers = ['Acron, Denise D','Anunkor, Ifeoma O','Reyes, Nicole V','Vega, Rita']
+        Evelyn_Casehandlers = ['Delgadillo, Omar','Heller, Steven E','Latterner, Matt J','Robles-Castillo, Camila J','Tilyayeva, Rakhil','Almanzar, Yocari', 'Vergeli, Evelyn']
+        Diana_V_Casehandlers = ['Abbas, Sayeda','Evers, Erin C.','Hao, Lindsay','He, Ricky','Sharma, Sagar','Spencer, Eleanor G','Wilkes, Nicole','Allen, Sharette','Ortiz, Matthew B','Sun, Dao','Risener, Jennifer A','Evers, Erin C.','Surface, Ben L','Velasquez, Diana']
+        Diana_G_Casehandlers = ['Frierson, Jerome C','Saxton, Jonathan G','Orsini, Mary K','Allen, Sharette','Duffy-Greaves, Kevin','Freeman, Daniel A','Gokhale, Aparna S','Gonzalez, Matias','Gonzalez, Matias G','Labossiere, Samantha J.','Shah, Ami Mahendra', 'Garcia, Diana']
+        Keiannis_Casehandlers = ['Almanzar, Milagros','Briggs, John M','Dittakavi, Archana','Gonzalez-Munoz, Rossana G','Honan, Thomas J','James, Lelia','Kelly, Kitanya','Mottley, Darlene','Yamasaki, Emily Woo J','McCune, Mary','Vogltanz, Amy K', 'Garcia, Keiannis']
+        Dennis_Casehandlers = ['Braudy, Erica','Kulig, Jessica M','Mercedes, Jannelys J','Harshberger, Sae','Black, Rosalind','Basu, Shantonu J', 'Sanchez, Dennis']
+        Rosa_Casehandlers = ['Acron, Denise D','Anunkor, Ifeoma O','Reyes, Nicole V','Vega, Rita', 'Acosta, Rosa F']
 
         def IntakeAssign(Casehandler):
             if Casehandler in Evelyn_Casehandlers:
@@ -179,7 +179,8 @@ def MLSIntakeConsolidatedHousingCleaner():
         "HAL Eligibility Date",
         
         
-        
+        "Gen Case Index Number",
+
         "Gen Pub Assist Case Number",
         "Housing Income Verification",
 
@@ -220,11 +221,11 @@ def MLSIntakeConsolidatedHousingCleaner():
                 ws.autofilter('B1:ZZ1')
                 ws.freeze_panes(1, 2)
 
-                FKRowRange='F1:K'+str(dict_df[i].shape[0]+1)
-                print(FKRowRange)
+                FLRowRange='F1:L'+str(dict_df[i].shape[0]+1)
+                print(FLRowRange)
 
 
-                ws.conditional_format(FKRowRange,{'type': 'blanks',
+                ws.conditional_format(FLRowRange,{'type': 'blanks',
                                                  'format': problem_format})
                 ws.conditional_format('G2:G100000',{'type': 'text',
                                                  'criteria': 'containing',
@@ -234,7 +235,7 @@ def MLSIntakeConsolidatedHousingCleaner():
                                                  'criteria': 'containing',
                                                  'value': 'No',
                                                  'format': problem_format})
-                ws.conditional_format('L2:M100000',{'type': 'text',
+                ws.conditional_format('M2:N100000',{'type': 'text',
                                                  'criteria': 'containing',
                                                  'value': 'Needs',
                                                  'format': problem_format})

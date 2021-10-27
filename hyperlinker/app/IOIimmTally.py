@@ -159,21 +159,11 @@ def upload_IOIimmTally():
         #Needs Substantial Activity to Rollover into FY'20
         
               
-         #Needs Substantial Activity to Rollover into FY'21
          
          #Needs Substantial Activity to Rollover into FY'22
+       
         
-        
-        def Needs_Rollover(Open_Construct,Substantial_Activity, Substantial_Activity_Date,CaseID) :
-            if int(Open_Construct) >= 20210701:
-                return ''
-            elif Substantial_Activity != '' and int(Substantial_Activity_Date) >20210701 and int(Substantial_Activity_Date) <=20220630:
-                return ''
-            elif CaseID in ImmigrationToolBox.ReportedFY19 or CaseID in ImmigrationToolBox.ReportedFY21 or CaseID in ImmigrationToolBox.ReportedFY20:
-                return 'Needs Substantial Activity in FY22'
-            else: return ''
-        df['Needs Substantial Activity?'] = df.apply(lambda x: Needs_Rollover(x['Open Construct'],x['IOI FY22 Substantial Activity 2022'],x['Subs Construct'],x['Matter/Case ID#']), axis=1)  
-        
+        df['Needs Substantial Activity?'] = df.apply(lambda x: ImmigrationToolBox.Needs_Rollover(x['Open Construct'],x['IOI FY22 Substantial Activity 2022'],x['Subs Construct'],x['Matter/Case ID#']), axis=1)  
         
 
 
@@ -286,9 +276,6 @@ def upload_IOIimmTally():
         df['Reportable?'] = df.apply(lambda x: ImmigrationToolBox.ReportableTester(x['Exclude due to Income?'],x['Needs DHCI?'],x['Needs Substantial Activity?'],x['Deliverable Tally']),axis=1)
         
         #***add code to make it so that it deletes any extra 'brief' cases for clients that have mutliple cases
-        
-        
-        
         
         
         #gender
