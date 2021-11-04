@@ -268,14 +268,17 @@ def upload_IOIempTally():
         def save_xls(dict_df, path):
             writer = pd.ExcelWriter(path, engine = 'xlsxwriter')
             for i in dict_df:
-                city_pivot.to_excel(writer, sheet_name='City Pivot',index=False)
+                city_pivot.to_excel(writer, sheet_name='City Pivot',index=False,header = False,startrow=1)
                 dict_df[i].to_excel(writer, i, index = False)
                 workbook = writer.book
+                header_format = workbook.add_format({'text_wrap':True,'bold':True, 'align': 'center', 'bg_color': '#eeece1'})
+                PercentHead_format = workbook.add_format({'text_wrap':True,'bold':True,'align': 'center','bg_color': '#d2b48c'})
                 percent_format = workbook.add_format({'bold':True})
                 percent_format.set_num_format('0.00%')
                 link_format = workbook.add_format({'font_color':'blue','bold':True,'underline':True})
                 problem_format = workbook.add_format({'bg_color':'yellow'})
                 totals_format = workbook.add_format({'bold':True})
+                border_format=workbook.add_format({'border':1,'align':'left','font_size':10})
                 CityPivot = writer.sheets['City Pivot']
                 worksheet = writer.sheets[i]
                 worksheet.autofilter('A1:O1')
@@ -284,14 +287,28 @@ def upload_IOIempTally():
                 worksheet.set_column('C:BL',30)
                 worksheet.freeze_panes(1,1)
                 
-                CityPivot.set_column('A:F',20)
+                #Add column header data back in
+                for col_num, value in enumerate(city_pivot.columns.values):
+                    CityPivot.write(0, col_num, value, header_format)
+                                  
+                #CityPivot.set_row(0,14.5,header_format)
                 #CityPivot.set_row(6,20,totals_format)
                 CityPivot.set_column('D:D',20,percent_format)
                 CityPivot.set_column('F:F',30,percent_format)
                 
                 CityPivot.write('A7', 'Totals', totals_format)
+                CityPivot.write('D1', 'Annual Percentage', PercentHead_format)
+                CityPivot.write('F1', 'Proportional Percentage',PercentHead_format)
+                CityPivot.set_column('A:C',11.3)
+                CityPivot.set_column('D:D',11.3)
+                CityPivot.set_column('E:E',11.3)
+                CityPivot.set_column('F:F',11.3)
+                CityPivot.conditional_format( 'A1:F7' , { 'type' : 'cell' ,'criteria': '!=','value':'""','format' : border_format} )
+                                           
+                ERowRange='E1:E'+str(dict_df[i].shape[0]+1)
+                print(ERowRange)
                 
-                worksheet.conditional_format('E1:E2000',{'type': 'cell',
+                worksheet.conditional_format(ERowRange,{'type': 'cell',
                                                  'criteria': '==',
                                                  'value': '""',
                                                  'format': problem_format})
@@ -319,6 +336,8 @@ def upload_IOIempTally():
                                                  'criteria': '==',
                                                  'value': '"Needs Substantial Activity in FY22"',
                                                  'format': problem_format})
+                                                 
+                                   
             writer.save()
         
         output_filename = f.filename
