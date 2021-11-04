@@ -15,27 +15,10 @@ def CNYCNCleaner():
         print(request.files['file'])
         print(request.files.getlist('file')[:])
         print(len(request.files.getlist('file')[:]))
+        print(type(request.files.getlist('file')))
         #print((request.files ['file']))
         
-        #adds blank dataframe
-        df = pd.DataFrame()
-        
-        for i in request.files.getlist('file'):
-            print (i)
-            #turn the excel file into a dataframe, but skip the top 2 rows if they are blank
-            test = pd.read_excel(i)
-            test.fillna('',inplace=True)
-            if test.iloc[0][0] == '':
-                tdf = pd.read_excel(i,skiprows=2)
-                print("skipped two rows")
-            else:
-                tdf = pd.read_excel(i)
-                print("did not skip")
-                
-           #Add dataframes to blank dataframe
-            df = df.append(tdf, ignore_index=True)
-                      
-        '''#assigns varaible f to one file arbitrarily
+        #assigns varaible f to one file arbitrarily
         f = request.files.getlist('file')[0]
         
         if len(request.files.getlist('file')[:]) == 2:
@@ -50,7 +33,13 @@ def CNYCNCleaner():
         
                      
         
-
+        #turn the excel file into a dataframe, but skip the top 2 rows if they are blank
+        test1 = pd.read_excel(f)
+        test1.fillna('',inplace=True)
+        if test1.iloc[0][0] == '':
+            df1 = pd.read_excel(f,skiprows=2)
+        else:
+            df1 = pd.read_excel(f)
 
         if len(request.files.getlist('file')[:]) == 2:
             test2 = pd.read_excel(g)
@@ -58,9 +47,13 @@ def CNYCNCleaner():
             if test2.iloc[0][0] == '':
                 df2 = pd.read_excel(g,skiprows=2)
             else:
-                df2 = pd.read_excel(g)'''
+                df2 = pd.read_excel(g)
             
-        
+        #combine dataframes into 1
+        if len(request.files.getlist('file')[:]) == 2:
+            df = df1.append(df2, ignore_index=True)
+        else:
+            df = df1
         
         #Remove Rows without Case ID values
         df.fillna('',inplace = True)
@@ -318,8 +311,6 @@ def CNYCNCleaner():
                 EFGRowRange='E2:G'+str(dict_df[i].shape[0]+1)
                 print(EFGRowRange)
                 
-                KRowRange='K1:K'+str(dict_df[i].shape[0]+1)
-                
                 if request.form.get('formatter'):
                     worksheet.set_column('A:CE',20)
                 else:
@@ -328,7 +319,7 @@ def CNYCNCleaner():
                     worksheet.set_column('C:D',15)
                     worksheet.set_column('E:L',30)
                     worksheet.set_column('M:AG',0)
-                    worksheet.conditional_format(KRowRange,{'type': 'text',
+                    worksheet.conditional_format('K1:K10000',{'type': 'text',
                                                  'criteria': 'containing',
                                                  'value': 'Fix',
                                                  'format': problem_format})
@@ -336,7 +327,7 @@ def CNYCNCleaner():
                                                              'format': problem_format})
                     worksheet.freeze_panes(1,1)
             writer.save()
-        output_filename = "Cleaned Foreclosure Report.xlsx"
+        output_filename = f.filename
 
         save_xls(dict_df = borough_dictionary, path = "app\\sheets\\" + output_filename)
         
@@ -345,7 +336,7 @@ def CNYCNCleaner():
         else:
             FilePrefix = "Cleanup "
         
-        return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = FilePrefix + output_filename)
+        return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = FilePrefix + f.filename)
         
         #***#
        
