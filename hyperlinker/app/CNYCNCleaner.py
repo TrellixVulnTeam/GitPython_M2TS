@@ -32,6 +32,8 @@ def CNYCNCleaner():
                 tdf = pd.read_excel(i)
                 print("did not skip")
                 
+            print(tdf)
+           
            #Add dataframes to blank dataframe
             df = df.append(tdf, ignore_index=True)
                       
