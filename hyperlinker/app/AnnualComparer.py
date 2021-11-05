@@ -39,9 +39,11 @@ def AnnualComparer():
         dflist.append(df3)
         dflist.append(df4)
         
-        #create empty dataframes to append datasheets to based
+        #create empty dataframes to append datasheets to base
         dfopened = pd.DataFrame()
         dfclosed = pd.DataFrame()
+        
+        
         
         #for each data frame in the list
         for i in dflist:
@@ -57,6 +59,44 @@ def AnnualComparer():
                 print ('All Cases Closed')
                 i['Open/Close Dataset?'] = 'Closed'
                 dfclosed = dfclosed.append(i, ignore_index=True)
+        
+        
+        
+        #filter dataframes depending on which borough is selected
+        
+        if not request.form.get('LSU') and not request.form.get('QLS') and not request.form.get('MLS') and not request.form.get('BkLS') and not request.form.get('BxLS') and not request.form.get('SILS'):
+            print ("nothing pressed")
+        
+        else:
+            if not request.form.get('LSU'):
+                print("LSU not pressed")
+                dfopened = dfopened[dfopened['Assigned Branch/CC'] != "Legal Support Unit"]
+            if not request.form.get('QLS'):
+                print("QLS not pressed")
+                dfopened = dfopened[dfopened['Assigned Branch/CC'] != "Queens Legal Services"]
+            if not request.form.get('MLS'):
+                dfopened = dfopened[dfopened['Assigned Branch/CC'] != "Manhattan Legal Services"]
+            if not request.form.get('BkLS'):
+                dfopened = dfopened[dfopened['Assigned Branch/CC'] != "Brooklyn Legal Services"]
+            if not request.form.get('BxLS'):
+                dfopened = dfopened[dfopened['Assigned Branch/CC'] != "Bronx Legal Services"]
+            if not request.form.get('SILS'):
+                dfopened = dfopened[dfopened['Assigned Branch/CC'] != "Staten Island Legal Services"]
+
+
+            if not request.form.get('LSU'):
+                dfclosed = dfclosed[dfclosed['Assigned Branch/CC'] != "Legal Support Unit"]
+            if not request.form.get('QLS'):
+                dfclosed = dfclosed[dfclosed['Assigned Branch/CC'] != "Queens Legal Services"]
+            if not request.form.get('MLS'):
+                dfclosed = dfclosed[dfclosed['Assigned Branch/CC'] != "Manhattan Legal Services"]
+            if not request.form.get('BkLS'):
+                dfclosed = dfclosed[dfclosed['Assigned Branch/CC'] != "Brooklyn Legal Services"]
+            if not request.form.get('BxLS'):
+                dfclosed = dfclosed[dfclosed['Assigned Branch/CC'] != "Bronx Legal Services"]
+            if not request.form.get('SILS'):
+                dfclosed = dfclosed[dfclosed['Assigned Branch/CC'] != "Staten Island Legal Services"]
+        
         
         """
         df1.fillna('',inplace = True)
@@ -124,7 +164,7 @@ def AnnualComparer():
         #Make Ages into categories
         dfopened['Client Age at Intake'] = dfopened.apply(lambda x: DataWizardTools.AgeConsolidator(x['Client Age at Intake']),axis=1)
         
-        #Make Ages into categories
+        #Make poverty percentage into categories
         dfopened['Percentage of Poverty'] = dfopened.apply(lambda x: DataWizardTools.PovertyConsolidator(x['Percentage of Poverty']),axis=1)
         
         #Consolidate legal problem codes into units
@@ -139,6 +179,7 @@ def AnnualComparer():
         Unit_opened_pivot = pd.pivot_table(dfopened,values=['Matter/Case ID#'], index=['Unit'],columns = ['Year Opened'], aggfunc=lambda x: len(x.unique()))
         
         #pivot table for cases closed by close reason
+        
         Close_reason_pivot = pd.pivot_table(dfclosed,values=['Matter/Case ID#'], index=['Close Reason Category'],columns = ['Year Closed'], aggfunc=lambda x: len(x.unique()))
         
         #pivot table for cases opened by race
@@ -146,6 +187,14 @@ def AnnualComparer():
         
         #opened by age
         Age_opened_pivot = pd.pivot_table(dfopened,values=['Matter/Case ID#'], index=['Client Age at Intake'],columns = ['Year Opened'],aggfunc=lambda x: len(x.unique()))
+        
+        """
+        #Create pivot table for housing cases closed by IOLA Outcome
+        dfhousingclosed = dfclosed[dfclosed['Unit'] == 'Housing (Tenant)']
+        Outcome_closed_pivot = pd.pivot_table(dfhousingclosed,values=['Matter/Case ID#'], index=['Outcome'],columns = ['Year Closed'],aggfunc=lambda x: len(x.unique()))
+        
+        print(Outcome_closed_pivot)
+        """
         
         #opened by percentage of poverty
         Poverty_opened_pivot = pd.pivot_table(dfopened,values=['Matter/Case ID#'], index=['Percentage of Poverty'],columns = ['Year Opened'],aggfunc=lambda x: len(x.unique()))
@@ -199,6 +248,46 @@ def AnnualComparer():
         #add chart to the spreadsheet
         unitclosedpivot.insert_chart('D2', unitclosedchart)
         
+        """
+        #Pivot Table and Chart for Cases Closed by IOLA Outcome
+        
+        #create new excel tab
+        Outcome_closed_pivot.to_excel(writer, sheet_name='Outcome Closed Pivot')
+        #create the formatter for this sheet
+        outcomeclosedpivot = writer.sheets['Outcome Closed Pivot']
+        #create the chart for this sheet
+        outcomeclosedchart = workbook.add_chart({'type':'column'})
+        #set column width
+        outcomeclosedpivot.set_column('A:A',60)
+        #get the names from the pivot table
+        OutcomeClosedCategoriesRange="='Outcome Closed Pivot'!$A$4:$A$"+str(Outcome_closed_pivot.shape[0]+3)
+        #get the values for the first & second column from the pivot table
+        OutcomeClosedSeriesOneRange="='Outcome Closed Pivot'!$B$4:$B$"+str(Outcome_closed_pivot.shape[0]+3)
+        OutcomeClosedSeriesTwoRange="='Outcome Closed Pivot'!$C$4:$C$"+str(Outcome_closed_pivot.shape[0]+3)
+        #Name the y axis
+        outcomeclosedchart.set_y_axis({
+            'name': 'Cases Closed',
+            'name_font': {'size': 14, 'bold': True},})
+        #Name the x axis    
+        outcomeclosedchart.set_x_axis({
+            'name': 'IOLA Close Reason',
+            'name_font': {'size': 14, 'bold': True},}) 
+        #set size of chart
+        outcomeclosedchart.set_size({'width': 720, 'height': 576})
+        #add pivot table values as 2 series to chart
+        outcomeclosedchart.add_series({
+            'categories': OutcomeClosedCategoriesRange,
+            'name': "2020",
+            'values': OutcomeClosedSeriesOneRange})
+        outcomeclosedchart.add_series({
+            'name': "2021",
+            'values': OutcomeClosedSeriesTwoRange})
+        #hide the useless row
+        outcomeclosedpivot.set_row(0, None, None, {'hidden': True})
+        #add chart to the spreadsheet
+        outcomeclosedpivot.insert_chart('D2', outcomeclosedchart)
+        
+        """
         
         #Pivot Table and Chart for Cases Opened by Unit
         Unit_opened_pivot.to_excel(writer, sheet_name='Unit Opened Pivot')
@@ -339,9 +428,38 @@ def AnnualComparer():
         openedraw.set_column('A:A',20,link_format)
 
         
+        
+        
         #send file back to user
+        
+        
+        BoroughsPrefix = ''
+        
+        if request.form.get('MLS') and request.form.get('BkLS') and request.form.get('BxLS') and request.form.get('SILS') and request.form.get('QLS') and request.form.get('LSU'):
+            BoroughsPrefix = 'Citywide '
+        elif not request.form.get('MLS') and not request.form.get('BkLS') and not request.form.get('BxLS') and not request.form.get('SILS') and not request.form.get('QLS') and not request.form.get('LSU'):
+            BoroughsPrefix = 'Citywide '
+        else:
+            if request.form.get('MLS'):
+                BoroughsPrefix = BoroughsPrefix + 'MLS '
+            if request.form.get('BkLS'):
+                BoroughsPrefix = BoroughsPrefix + 'BkLS '
+            if request.form.get('BxLS'):
+                BoroughsPrefix = BoroughsPrefix + 'BxLS '
+            if request.form.get('SILS'):
+                BoroughsPrefix = BoroughsPrefix + 'SILS '
+            if request.form.get('QLS'):
+                BoroughsPrefix = BoroughsPrefix + 'QLS '
+            if request.form.get('LSU'):
+                BoroughsPrefix = BoroughsPrefix + 'LSU '
+        
+        unitclosedpivot.write(40,0,"This report contains data for:")
+        unitclosedpivot.write(41,0,BoroughsPrefix)
         writer.save()
-        return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = "Comparison " + f.filename)
+        
+        return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = BoroughsPrefix + f.filename)
+     
+
         
 #what the user-facing site looks like
     return '''
@@ -352,13 +470,33 @@ def AnnualComparer():
     <h1>Compare FOUR spreadsheets:</h1>
     <form action="" method=post enctype=multipart/form-data>
     <p><input type=file name=file multiple =""><input type=submit value=Compare!>
+    </br>
+    </br>
+    <input type="checkbox" id="LSU" name="LSU" value="LSU">
+    <label for="LSU"> LSU</label><br>
+    <input type="checkbox" id="QLS" name="QLS" value="QLS">
+    <label for="QLS"> QLS</label><br>
+    <input type="checkbox" id="MLS" name="MLS" value="MLS">
+    <label for="MLS"> MLS</label><br>
+    <input type="checkbox" id="BkLS" name="BkLS" value="BkLS">
+    <label for="BkLS"> BkLS</label><br>
+    <input type="checkbox" id="BxLS" name="BxLS" value="BxLS">
+    <label for="BxLS"> BxLS</label><br>
+    <input type="checkbox" id="SILS" name="SILS" value="SILS">
+    <label for="SILS"> SILS</label><br>
+    
+    
     </form>
     <h3>Instructions:</h3>
     <ul type="disc">
-    <li>Browse your computer using the field above to find the LegalServer excel document that you want to add case hyperlinks to.</li> 
-    <li>Once you have identified this file, click ‘Hyperlink!’ and you should shortly be given a prompt to either open the file directly or save the file to your computer.</li> 
-    <li>When you first open the file, all case numbers will display as ‘0’ until you click “Enable Editing” in excel, this will populate the fields.</li> 
-    <li>Note, the column with your case ID numbers in it must be titled "Matter/Case ID#" or "id" for this to work.</li>
+    
+    <li>You will need to upload 4 LegalServer Reports for this tool to function.</li>
+    <ul class="square">
+    <li>First, run the report: <a href="https://lsnyc.legalserver.org/report/dynamic?load=2424" target="_blank">"Comparison Tool Date Closed"</a> for any given time period this year.</li>
+    <li>Second, change the filter of this report to cover the same time period in the previous year with the same date and month.</li>
+    <li>Third, run the report: <a href="https://lsnyc.legalserver.org/report/dynamic?load=2425" target="_blank">"Comparison Tool Date Opened"</a> for the same time period you chose above, in the current year.</li>
+    <li>Fourth, change the filter of this second report to cover the same time period in the previous year.</li>
+    </ul>
     </ul>
     </br>
     <a href="/">Home</a>

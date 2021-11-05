@@ -20,20 +20,18 @@ def split_by_supervisor():
         test = pd.read_excel(f)
         test.fillna('',inplace=True)
         if test.iloc[0][0] == '':
-            data_xls = pd.read_excel(f,skiprows=2)
+            df = pd.read_excel(f,skiprows=2)
         else:
-            data_xls = pd.read_excel(f)
+            df = pd.read_excel(f)
         
-        if 'Primary Assignment' not in data_xls.columns:
-            data_xls['Primary Assignment'] = data_xls['Primary Advocate']
         
-        if 'Matter/Case ID#' not in data_xls.columns:
+        if 'Matter/Case ID#' not in df.columns:
             try:
-                data_xls['Matter/Case ID#'] = data_xls['Hyperlinked Case #']
-                del data_xls['Hyperlinked Case #']
+                df['Matter/Case ID#'] = df['Hyperlinked Case #']
+                del df['Hyperlinked Case #']
             except: 
-                data_xls['Matter/Case ID#'] = data_xls['Hyperlinked CaseID#']
-                del data_xls['Hyperlinked CaseID#']
+                df['Matter/Case ID#'] = df['Hyperlinked CaseID#']
+                del df['Hyperlinked CaseID#']
         
         
         #apply hyperlink methodology with splicing and concatenation
@@ -43,70 +41,84 @@ def split_by_supervisor():
                 return 'No Case ID'
             else:
                 return str(CaseID)
-        data_xls['Matter/Case ID#'] = data_xls.apply(lambda x: NoIDDelete(x['Matter/Case ID#']), axis=1)
+        df['Matter/Case ID#'] = df.apply(lambda x: NoIDDelete(x['Matter/Case ID#']), axis=1)
         
-        last7 = data_xls['Matter/Case ID#'].apply(lambda x: x[3:])
-        CaseNum = data_xls['Matter/Case ID#']
-        data_xls['Temp Hyperlinked Case #']='=HYPERLINK("https://lsnyc.legalserver.org/matter/dynamic-profile/view/'+last7+'",'+ '"' + CaseNum +'"' +')'
-        del data_xls['Matter/Case ID#']
-        move=data_xls['Temp Hyperlinked Case #']
-        data_xls.insert(0,'Hyperlinked Case #', move)           
-        del data_xls['Temp Hyperlinked Case #']
+        last7 = df['Matter/Case ID#'].apply(lambda x: x[3:])
+        CaseNum = df['Matter/Case ID#']
+        df['Temp Hyperlinked Case #']='=HYPERLINK("https://lsnyc.legalserver.org/matter/dynamic-profile/view/'+last7+'",'+ '"' + CaseNum +'"' +')'
+        del df['Matter/Case ID#']
+        move=df['Temp Hyperlinked Case #']
+        df.insert(0,'Hyperlinked Case #', move)           
+        del df['Temp Hyperlinked Case #']
         
         JoseAbrigo_Supervisees = [
-        "Bromberg, Iris",
         "Torres, Jasmin",
+        "Torres, Jasmin E",
         "Granfield, Rachel",
+        "Granfield, Rachel W",
         "Anderson, Theresa"
         ]
         
         ShantonuBasu_Supervisees = [
         "Shah, Ami",
+        "Shah, Ami Mahendra",
         "Sharma, Sagar",
-        "Abbas, Sayeda",
+        "Grater, Ashley",
+        "Arboleda, Heather",
         "Evers, Erin",
-        "Spencer, Eleanor"
+        "Evers, Erin C.",
+        "Spencer, Eleanor",
+        "Spencer, Eleanor G"
         ]
         
         EricaBraudy_Supervisees = [
         "Mercedes, Jannelys",
-        "Kulig, Jessica",
-        "James, Lelia",
-        "Sanchez, Dennis"
+        "Mercedes, Jannelys J",
+        "Sanchez, Dennis",
+        "Gelly-Rahim, Jibril",
+        "Flores, Aida",
+        "Harshberger, Sae"
+
         ]
         
         ArchanaDittakavi_Supervisees = [
         "Briggs, John",
-        "Mottley, Darlene",
-        "Porcelli, Ronald",
+        "Briggs, John M",
         "Gonzalez-Munoz, Rossana",
+        "Gonzalez-Munoz, Rossana G",
         "Honan, Thomas",
-        "Kelly, Kitanya",
-        "Almanzar, Milagros",
-        "Yamasaki, Emily Woo"
+        "Honan, Thomas J",
+        "Yamasaki, Emily Woo",
+        "Yamasaki, Emily Woo J"
         ]
         
         DeniseAcron_Supervisees = [
         "Anunkor, Ifeoma",
         "Mendia-Yadaicela, Michelle",
-        "Reyes, Nicole"
+        "Reyes, Nicole",
+        "Vega, Rita"
+
         ]
         
         RosalindBlack_Supervisees = [
         "Dittakavi, Archana",
         "Basu, Shantonu",
+        "Basu, Shantonu J",
         "Freeman, Daniel",
         "Braudy, Erica",
         "Frierson, Jerome",
-        "Heller, Steven"
+        "Frierson, Jerome C",
+        "Heller, Steven",
+        "Heller, Steven E",
+        "Sun, Dao"
         ]
         
         TanyaDouglas_Supervisees = [
         "Kaplan, William",
-        "Sun, Dao",
+        "Kaplan, William D.",
         "Williams, Gerald",
+        "Williams, Gerald S",
         "Robles, Eliana",
-        "Heaton, Betty",
         "Isaacs, Nicole"
         ]
         
@@ -114,35 +126,44 @@ def split_by_supervisor():
         "Martinez-Gunter, Maribel",
         "Black, Rosalind",
         "Douglas, Tanya",
+        "Douglas, Tanya M.",
         "Goldman, Caitlin",
-        "Abrigo, Jose"
+        "Goldman, Caitlin S",
+        "Abrigo, Jose",
+        "Abrigo, Jose I",
+        "Henriquez, Luis A"
         ]
         
-        DanielFreeman_Supervisees = [
-        "Labossiere, Samantha",
+        DaoSun_Supervisees = [
+        "Agarwal, Rachna",
+        "Gonzalez, Matias G",
         "Gonzalez, Matias",
-        "Gokhale, Aparna",
-        "Vega, Rita"
+        "Gokhale, Aparna S"
         ]
         
+
         JeromeFrierson_Supervisees = [
         "Duffy-Greaves, Kevin",
-        "Ortiz, Matthew",
-        "Allen, Sharette"
+        "Saxton, Jonathan G",
+        "Allen, Sharette",
+        "Orsini, Mary",
+        "Harris, Tycel"
         ]
         
         CaitlinGoldman_Supervisees = [
-        "Pepitone, Dan",
         "McCune, Mary",
         "Rosner, Julia",
+        "Rosner, Julia P",
         "Martinez Alonzo, Washcarina",
+        "Martinez Alonzo, Washcarina B",
         "Brito, Victor"
         ]
         
         StevenHeller_Supervisees = [
         "Latterner, Matt",
+        "Latterner, Matt J",
         "Delgadillo, Omar",
-        "Robles-Castillo, Camila",
+        "Avila, Giselle",
         "Almanzar, Yocari"
         ]
         
@@ -152,22 +173,46 @@ def split_by_supervisor():
         
         MaribelMartinezGunter_Supervisees = [
         "Trinidad, Lenina",
+        "Trinidad, Lenina C.",
         "Caban-Gandhi, Celina",
         "Restrepo-Serrano, Francois",
+        "Restrepo-Serrano, Francois M",
+        "Guerra, Yolanda",
+        "Sanchez, Ingrid",
+        "Smith-Menjivar, Eleise",
+        "Smith-Menjivar, Eleise C",
+        "Maldonando, Brenda",
+        "Sambartaro, Debra"
+        ]
+        
+        YolandaGuerra_Supervisees = [
         "Singh, Ermela",
         "Carlier, Milton",
         "Ventura, Lynn",
         "Patel, Roopal",
-        "Guerra, Yolanda",
-        "Sanchez, Ingrid",
-        "Smith-Menjivar, Eleise",
-        "Maldonando, Brenda"
+        "Patel, Roopal B",
         ]
         
         AmiShah_Supervisees = [
         "Wilkes, Nicole",
         "He, Ricky",
-        "Hao, Lindsay"
+        "Hao, Lindsay",
+        "Abbas, Sayeda",
+        "Risener, Jennifer",
+        "Surface, Ben"
+        ]
+        
+        SayedaAbbas_Supervisees = [
+        "Bocangel, Maricella",
+        "Chow, Corrin"
+        ]
+        
+        ThomasHonan_Supervisees = [
+        "James, Lelia",
+        "Kelly, Kitanya",
+        "Mattar, Amira",
+        "Whedon, Rebecca V",
+        "Almanzar, Milagros"
         ]
         
         def SuperAssign(advocate):
@@ -187,8 +232,6 @@ def split_by_supervisor():
                 return "Tanya Douglas"
             elif advocate in PeggyEarisman_Supervisees:
                 return "Peggy Earisman"
-            elif advocate in DanielFreeman_Supervisees:
-                return "Daniel Freeman"
             elif advocate in JeromeFrierson_Supervisees:
                 return "Jerome Frierson"
             elif advocate in CaitlinGoldman_Supervisees:
@@ -201,137 +244,47 @@ def split_by_supervisor():
                 return "Maribel Martinez-Gunter"
             elif advocate in AmiShah_Supervisees:
                 return "Ami Shah"
+            elif advocate in DaoSun_Supervisees:
+                return "Dao Sun"
+            elif advocate in ThomasHonan_Supervisees:
+                return "Thomas Honan"
+            elif advocate in YolandaGuerra_Supervisees:
+                return "Yolanda Guerra"                
             else:
-                return "Unaffiliated"
+                return "zzNo Assignment"
         
-        data_xls["Supervisor"] = data_xls.apply(lambda x: SuperAssign(x['Primary Assignment']), axis = 1)
+        df["Supervisor"] = df.apply(lambda x: SuperAssign(x['Primary Advocate Name']), axis = 1)
         
-        data_xls = data_xls.sort_values(by=['Primary Assignment'])
+        df = df.sort_values(by=['Primary Advocate Name'])
         
         #split into separate dataframes
-        
-        Jose_data_xls = data_xls[data_xls['Supervisor'] == 'Jose Abrigo']
-        Shantonu_data_xls = data_xls[data_xls['Supervisor'] == 'Shantonu Basu']
-        Erica_data_xls = data_xls[data_xls['Supervisor'] == 'Erica Braudy']
-        Archana_data_xls = data_xls[data_xls['Supervisor'] == 'Archana Dittakavi']
-        Denise_data_xls = data_xls[data_xls['Supervisor'] == 'Denise Acron']
-        Rosalind_data_xls = data_xls[data_xls['Supervisor'] == 'Rosalind Black']
-        Tanya_data_xls = data_xls[data_xls['Supervisor'] == 'Tanya Douglas']
-        Peggy_data_xls = data_xls[data_xls['Supervisor'] == 'Peggy Earisman']
-        Daniel_data_xls = data_xls[data_xls['Supervisor'] == 'Daniel Freeman']
-        Jerome_data_xls = data_xls[data_xls['Supervisor'] == 'Jerome Frierson']
-        Caitlin_data_xls = data_xls[data_xls['Supervisor'] == 'Caitlin Goldman']
-        Steven_data_xls = data_xls[data_xls['Supervisor'] == 'Steven Heller']
-        Luis_data_xls = data_xls[data_xls['Supervisor'] == 'Luis Henriquez']
-        Maribel_data_xls = data_xls[data_xls['Supervisor'] == 'Maribel Martinez-Gunter']
-        Ami_data_xls = data_xls[data_xls['Supervisor'] == 'Ami Shah']
-        Unaffiliated_data_xls = data_xls[data_xls['Supervisor'] == 'Unaffiliated']
+        df_dictionary = dict(tuple(df.groupby('Supervisor')))
         
         #bounce worksheets back to excel
-        output_filename = f.filename     
-        writer = pd.ExcelWriter("app\\sheets\\"+output_filename, engine = 'xlsxwriter')
-        
-        Jose_data_xls.to_excel(writer, sheet_name='JoseAbrigo',index=False)
-        Shantonu_data_xls.to_excel(writer, sheet_name='ShantonuBasu',index=False)
-        Erica_data_xls.to_excel(writer, sheet_name='EricaBraudy',index=False)
-        Archana_data_xls.to_excel(writer, sheet_name='ArchanaDittakavi',index=False)
-        Denise_data_xls.to_excel(writer, sheet_name='DeniseAcron',index=False)
-        Rosalind_data_xls.to_excel(writer, sheet_name='RosalindBlack',index=False)
-        Tanya_data_xls.to_excel(writer, sheet_name='TanyaDouglas',index=False)
-        Peggy_data_xls.to_excel(writer, sheet_name='PeggyEarisman',index=False)
-        Daniel_data_xls.to_excel(writer, sheet_name='DanielFreeman',index=False)
-        Jerome_data_xls.to_excel(writer, sheet_name='JeromeFrierson',index=False)
-        Caitlin_data_xls.to_excel(writer, sheet_name='CaitlinGoldman',index=False)
-        Steven_data_xls.to_excel(writer, sheet_name='StevenHeller',index=False)
-        Luis_data_xls.to_excel(writer, sheet_name='LuisHenriquez',index=False)
-        Maribel_data_xls.to_excel(writer, sheet_name='MaribelMartinezGunter',index=False)
-        Ami_data_xls.to_excel(writer, sheet_name='AmiShah',index=False)
-        Unaffiliated_data_xls.to_excel(writer, sheet_name='Unaffiliated',index=False)
-        
-        
-        workbook = writer.book
-        
-        worksheetJose = writer.sheets['JoseAbrigo']
-        worksheetShantonu = writer.sheets['ShantonuBasu']
-        worksheetErica = writer.sheets['EricaBraudy']
-        worksheetArchana = writer.sheets['ArchanaDittakavi']
-        worksheetDenise = writer.sheets['DeniseAcron']
-        worksheetRosalind = writer.sheets['RosalindBlack']
-        worksheetTanya = writer.sheets['TanyaDouglas']
-        worksheetPeggy = writer.sheets['PeggyEarisman']
-        worksheetDaniel = writer.sheets['DanielFreeman']
-        worksheetJerome = writer.sheets['JeromeFrierson']
-        worksheetCaitlin = writer.sheets['CaitlinGoldman']
-        worksheetSteven = writer.sheets['StevenHeller']
-        worksheetLuis = writer.sheets['LuisHenriquez']
-        worksheetMaribel = writer.sheets['MaribelMartinezGunter']
-        worksheetAmi = writer.sheets['AmiShah']
-        worksheetUnaffiliated = writer.sheets['Unaffiliated']
+        def save_xls(dict_df, path):
+            writer = pd.ExcelWriter(path, engine = 'xlsxwriter')
+            for i in dict_df:
+                dict_df[i].to_excel(writer, i, index = False)
+                workbook = writer.book
+                ws = writer.sheets[i]
+                link_format = workbook.add_format({'font_color':'blue','bold':True,'underline':True})
+                ws.set_column('A:A',20,link_format)
+                ws.set_column('B:ZZ',25)
+                ws.autofilter('B1:ZZ1')
+                ws.freeze_panes(1, 2)
 
-
-        link_format = workbook.add_format({'font_color':'blue', 'bold':True, 'underline':True})
+            writer.save()
         
-        worksheetJose.freeze_panes(1, 1)
-        worksheetShantonu.freeze_panes(1, 1)
-        worksheetErica.freeze_panes(1, 1)
-        worksheetArchana.freeze_panes(1, 1)
-        worksheetDenise.freeze_panes(1, 1)
-        worksheetRosalind.freeze_panes(1, 1)
-        worksheetTanya.freeze_panes(1, 1)
-        worksheetPeggy.freeze_panes(1, 1)
-        worksheetDaniel.freeze_panes(1, 1)
-        worksheetJerome.freeze_panes(1, 1)
-        worksheetCaitlin.freeze_panes(1, 1)
-        worksheetSteven.freeze_panes(1, 1)
-        worksheetLuis.freeze_panes(1, 1)
-        worksheetMaribel.freeze_panes(1, 1)
-        worksheetAmi.freeze_panes(1, 1)
-        worksheetUnaffiliated.freeze_panes(1, 1)
+        output_filename = f.filename
         
-        worksheetJose.set_column('A:A',20,link_format)
-        worksheetShantonu.set_column('A:A',20,link_format)
-        worksheetErica.set_column('A:A',20,link_format)
-        worksheetArchana.set_column('A:A',20,link_format)
-        worksheetDenise.set_column('A:A',20,link_format)
-        worksheetRosalind.set_column('A:A',20,link_format)
-        worksheetTanya.set_column('A:A',20,link_format)
-        worksheetPeggy.set_column('A:A',20,link_format)
-        worksheetDaniel.set_column('A:A',20,link_format)
-        worksheetJerome.set_column('A:A',20,link_format)
-        worksheetCaitlin.set_column('A:A',20,link_format)
-        worksheetSteven.set_column('A:A',20,link_format)
-        worksheetLuis.set_column('A:A',20,link_format)
-        worksheetMaribel.set_column('A:A',20,link_format)
-        worksheetAmi.set_column('A:A',20,link_format)
-        worksheetUnaffiliated.set_column('A:A',20,link_format)
-        
-        worksheetJose.set_column('B:ZZ',25)
-        worksheetShantonu.set_column('B:ZZ',25)
-        worksheetErica.set_column('B:ZZ',25)
-        worksheetArchana.set_column('B:ZZ',25)
-        worksheetDenise.set_column('B:ZZ',25)
-        worksheetRosalind.set_column('B:ZZ',25)
-        worksheetTanya.set_column('B:ZZ',25)
-        worksheetPeggy.set_column('B:ZZ',25)
-        worksheetDaniel.set_column('B:ZZ',25)
-        worksheetJerome.set_column('B:ZZ',25)
-        worksheetCaitlin.set_column('B:ZZ',25)
-        worksheetSteven.set_column('B:ZZ',25)
-        worksheetLuis.set_column('B:ZZ',25)
-        worksheetMaribel.set_column('B:ZZ',25)
-        worksheetAmi.set_column('B:ZZ',25)
-        worksheetUnaffiliated.set_column('B:ZZ',25)
-        
-        writer.save()
-        
-        #send file back to user
-        return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = "SuperSplit " + f.filename)
-
+        save_xls(dict_df = df_dictionary, path = "app\\sheets\\" + output_filename)
+   
+        return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = "Split " + f.filename)
         
 #what the user-facing site looks like
     return '''
     <!doctype html>
-    <title>Supervisor Splitter</title>
+    <title>MLS Supervisor Splitter</title>
     <link rel="stylesheet" href="/static/css/main.css">  
     <h1>Split Your Spreadsheet by Supervisor:</h1>
     <form action="" method=post enctype=multipart/form-data>

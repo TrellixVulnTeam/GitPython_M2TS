@@ -593,7 +593,8 @@ def UnitSplitter(LPC):
     else:
         return 'Misc'
         
-        
+#Used in:
+#AnnualComparer         
 def RaceConsolidator(Race):
             if Race == "Black/African American/African Descent":
                 return "Black/African American"
@@ -607,7 +608,9 @@ def RaceConsolidator(Race):
                 return "Other/Not Given"
             else: 
                 return Race        
-                
+
+#Used in:
+#AnnualComparer                 
 def AgeConsolidator(Age):
     if Age < 18:
         return "0-17"
@@ -617,7 +620,9 @@ def AgeConsolidator(Age):
         return "35-59"
     else:
         return "60+"
-        
+
+#Used in:
+#AnnualComparer         
 def PovertyConsolidator(PercentPoverty):
     if PercentPoverty < 50:
         return "0-50%"
@@ -628,20 +633,21 @@ def PovertyConsolidator(PercentPoverty):
     else:
         return "200%+"
         
-        
+#Used in:
+#AnnualComparer        
 def CloseReasonConsolidator(CloseReason):
     if CloseReason.startswith('A') == True:
         return 'Limited Service'
     elif CloseReason.startswith('B') == True:
         return 'Limited Service'
     elif CloseReason.startswith('F') == True:
-        return 'Negotiated Settlement'
+        return 'Full Representation'
     elif CloseReason.startswith('G') == True:
-        return 'Negotiated Settlement'
+        return 'Full Representation'
     elif CloseReason.startswith('H') == True:
-        return 'Court/Agency Decision'
+        return 'Full Representation'
     elif CloseReason.startswith('I') == True:
-        return 'Court/Agency Decision'
+        return 'Full Representation'
     elif CloseReason.startswith('L') == True:
         return 'Other'
     else:
