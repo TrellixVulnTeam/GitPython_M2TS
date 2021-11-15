@@ -193,7 +193,16 @@ def TRCExternalPrepCovid():
             
         df['rent'] = df.apply(lambda x: RedactAnything(x['service_type'], x['rent'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
         
-        df['LT_index'] = df.apply(lambda x: RedactAnything(x['service_type'], x['LT_index'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
+        def RedactLT(ServiceType, ToRedact, PrimaryFunding, ProblemCode, Consent):
+            if ServiceType == 'Advice Only':
+                if Consent == "Yes":
+                    return ToRedact
+                else:
+                    return ""
+            else:
+                return ToRedact
+        
+        df['LT_index'] = df.apply(lambda x: RedactLT(x['service_type'], x['LT_index'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
          
         df['proceeding_level'] = df.apply(lambda x: RedactAnything(x['service_type'], x['proceeding_level'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
           
