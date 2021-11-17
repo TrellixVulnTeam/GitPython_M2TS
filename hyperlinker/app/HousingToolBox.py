@@ -51,7 +51,9 @@ def HousingTypeClean (HousingType):
     else:
         return ''
  
-#Has to have a Housing Level of Service - and if DHCR case has to be admin proceeding or rep - admin agency 
+#Has to have a Housing Level of Service - and if DHCR case has to be admin proceeding or rep - admin agency. 
+#TRCCovidClean
+#...and? 
 def HousingLevelClean (HousingLevel,HousingType):
     if HousingLevel == '':
         return 'Needs Level of Service'
@@ -60,6 +62,8 @@ def HousingLevelClean (HousingLevel,HousingType):
 
 
 #Has to say whether or not it's a building case        
+#TRCCovidClean
+#...and?
 def BuildingCaseClean (BuildingCase):
     if BuildingCase == '':
         return 'Needs Building Case Answer'
@@ -641,9 +645,11 @@ def NeedsRedactingTester(LevelOfService, PreThreeOne,FundingCodeSorter):
         return ""
         
       
-def TRCRedactForCovid(LevelOfService, ToRedact, PrimaryFunding, HRARelease):
+def TRCRedactForCovid(Edate, LevelOfService, ToRedact, PrimaryFunding, HRARelease):
             LevelOfService = str(LevelOfService)
-            if LevelOfService.startswith("Advice") == True and ToRedact != "":
+            if Edate >= 20211201:
+                return ToRedact
+            elif LevelOfService.startswith("Advice") == True and ToRedact != "":
                 if PrimaryFunding == "3011 TRC FJC Initiative" and HRARelease == "Yes":
                     return ToRedact
                 else:
