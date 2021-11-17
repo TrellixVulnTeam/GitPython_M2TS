@@ -121,8 +121,12 @@ def CNYCNCleaner():
             FundsNum = str(FundsNum)
             if FundsNum.startswith('2') == True or FundsNum2.startswith('2') == True:
                 return 'HOPP'
-            elif FundsNum.startswith('5') == True or FundsNum2.startswith('5') == True:
+            elif FundsNum.startswith('54') == True or FundsNum2.startswith('54') == True:
                 return 'CNYCN'
+            elif FundsNum.startswith('555') == True or FundsNum2.startswith('555') == True:
+                return 'CNYCN'
+            elif FundsNum.startswith('556') == True or FundsNum2.startswith('556') == True:
+                return 'SENIOR'
             else:   
                 return 'Funding Code Error'
                 
@@ -151,6 +155,8 @@ def CNYCNCleaner():
             if Outcome == "Obtained credit/budget counseling" or Outcome == "Referred to legal services":
                 return "Referral"
             elif Outcome == "Resolved non-mortgage lien issue":
+                return "Resolved Non-mortgage Lien Issue"
+            elif Outcome == "Resolved non-mortgage lien":
                 return "Resolved Non-mortgage Lien Issue"
             elif Outcome == "Mortgage Refinanced-In House":
                 return "Mortgage Modified - In House"
@@ -297,7 +303,7 @@ def CNYCNCleaner():
         #Cleanup Version
         else:
         
-            df = df[['Case ID#','Caseworker Name','Client First Name','Client Last Name','Type Of Assistance','FPU Prim Src Client Prob','Servicer','FPU Primary Outcome','FPU Secondary Outcome','Loan Modification Status','FPU Mod PITI Payment - 1st','Benefits','Funds Obtained','Assigned Branch/CC','FundsNum','Date Opened','Time Updated','Race (CNYCN)','Number of People 18 and Over','Number of People under 18','Number Of Seniors In Household','Total Annual Income ','Zip Code','County of Residence','FPU Sec Src Client Prob','FPU Num Prop Units','Secondary Assistance Type','Loan Modification Status 2','FPU Secondary Outcome','FPU Mod PITI Payment - 2nd','Debt Discharged In Short Sales','Settlement Amount','Total Saved Due To Rate Reduction','Amount Of Principal Reduction']]
+            df = df[['Case ID#','Caseworker Name','Time Updated','Client First Name','Client Last Name','Type Of Assistance','FPU Prim Src Client Prob','Servicer','FPU Primary Outcome','FPU Secondary Outcome','Loan Modification Status','FPU Mod PITI Payment - 1st','Benefits','Funds Obtained','FundsNum','Assigned Branch/CC','Date Opened','Race (CNYCN)','Number of People 18 and Over','Number of People under 18','Number Of Seniors In Household','Total Annual Income ','Zip Code','County of Residence','FPU Sec Src Client Prob','FPU Num Prop Units','Secondary Assistance Type','Loan Modification Status 2','FPU Secondary Outcome','FPU Mod PITI Payment - 2nd','Debt Discharged In Short Sales','Settlement Amount','Total Saved Due To Rate Reduction','Amount Of Principal Reduction']]
         
         
         
@@ -327,9 +333,10 @@ def CNYCNCleaner():
                 else:
                     worksheet.set_column('A:A',12,link_format)
                     worksheet.set_column('B:B',20)
-                    worksheet.set_column('C:D',15)
-                    worksheet.set_column('E:L',30)
-                    worksheet.set_column('M:AG',0)
+                    worksheet.set_column('C:E',15)
+                    worksheet.set_column('F:L',27)
+                    worksheet.set_column('M:O',14)
+                    worksheet.set_column('P:AH',0)
                     worksheet.conditional_format(KRowRange,{'type': 'text',
                                                  'criteria': 'containing',
                                                  'value': 'Fix',
