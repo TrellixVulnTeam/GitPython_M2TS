@@ -62,14 +62,17 @@ def upload_TRCCovidClean():
         #Puts dates in readable format
         df['DateConstruct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['HAL Eligibility Date']), axis=1)
         
-        #Reformat date to mm/dd/yyyy *causes issues with dates coming from excel
+        #Reformat date to mm/dd/yyyy whether the date was a date or a string on the document
+        #print(type(df['HAL Eligibility Date'].index))
+        print(df[['HAL Eligibility Date'][0:8]].strptime('%m/%d/%Y'))
+        #print(df['HAL Eligibility Date'].index)
         def DateCheck (EligibilityDate):
             try:
                 EligibilityDate = EligibilityDate.strftime('%m/%d/%Y')
                 return EligibilityDate
-                print("Converted dates to strings")
+                #print("Converted dates to strings")
             except:
-                print("Did not convert dates to strings")
+                #print("Did not convert dates to strings")
                 return EligibilityDate
                 
         df['HAL Eligibility Date'] = df.apply(lambda x: DateCheck(x['HAL Eligibility Date']), axis=1)

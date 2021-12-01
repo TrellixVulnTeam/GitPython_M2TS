@@ -29,6 +29,8 @@ def TRCExternalPrepCovid():
         
         df['DateConstruct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['HAL Eligibility Date']), axis=1)
         
+        df['Post 12/1/21 Elig Date?'] = df.apply(lambda x: HousingToolBox.PostTwelveOne(x['DateConstruct']), axis=1)
+        
         ###This is where all the functions happen:###
         
         #Just direct mapping for new column names
@@ -71,20 +73,20 @@ def TRCExternalPrepCovid():
         df['proceeding'] = df.apply(lambda x: HousingToolBox.TRCProceedingType(x['Housing Type Of Case'],x['Legal Problem Code'],x['Housing Level of Service'],x['DateConstruct']), axis=1)
 
         #if it's a multi-tenant/group case? change it from saying Yes/no to say "no = individual" or 'yes = Group'
-        #Also, if it's an eviction case, it's individual, otherwise make it "needs review"
-        
+        #Also, if it's an eviction case, post 12/1/21, no response, otherwise make it "needs review"
+                
         def ProceedingLevel(GroupCase,TypeOfCase,EvictionProceedings):
-            if GroupCase == "Yes":
+            if TypeOfCase in EvictionProceedings:
+                return ""
+            elif GroupCase == "Yes":
                 return "Group"
             elif GroupCase == "No":
-                return "Individual"
-            elif TypeOfCase in EvictionProceedings:
                 return "Individual"
             else:
                 return "Needs Review"
         df['proceeding_level'] = df.apply(lambda x: ProceedingLevel(x['Housing Building Case?'], x['proceeding'], HousingToolBox.evictionproceedings), axis=1)
         
-        #For years in apartment, negative 1 or less = 0.5
+        #For years in apartment, negative 1 or less = 0.5***
         df['years_in_apt'] = df['Housing Years Living In Apartment'].apply(lambda x: .5 if x <= -1 else x)
         
         
@@ -140,97 +142,113 @@ def TRCExternalPrepCovid():
         ##If case is advice and has a post-3/1 eligibility date
         
         #Sum household in adult column and leave children blank
-        def HousholdSum (ServiceType,  NumAdults, NumChildren, PrimaryFunding):
-            if ServiceType == "Advice Only" and PrimaryFunding != "3011 TRC FJC Initiative":
-                return NumAdults + NumChildren
+        #These changes only applied to 3018??
+        def HousholdSum (PostTwelveOne, ServiceType,  NumAdults, NumChildren, PrimaryFunding):
+            if PostTwelveOne == "No":
+                if ServiceType == "Advice Only" and PrimaryFunding != "3011 TRC FJC Initiative":
+                    return NumAdults + NumChildren
+                else:
+                    return NumAdults
             else:
                 return NumAdults
-        df['num_adults'] = df.apply(lambda x: HousholdSum(x['service_type'], x['num_adults'], x['num_children'],x['Primary Funding Code']), axis=1)
+        df['num_adults'] = df.apply(lambda x: HousholdSum(x['Post 12/1/21 Elig Date?'], x['service_type'], x['num_adults'], x['num_children'],x['Primary Funding Code']), axis=1)
         
-        def DeleteChildren (ServiceType, NumChildren, PrimaryFunding):
-            if ServiceType == "Advice Only" and PrimaryFunding != "3011 TRC FJC Initiative":
-                return ""
+        def DeleteChildren (PostTwelveOne, ServiceType, NumChildren, PrimaryFunding):
+            if PostTwelveOne == "No":
+                if ServiceType == "Advice Only" and PrimaryFunding != "3011 TRC FJC Initiative":
+                    return ""
+                else:
+                    return NumChildren
             else:
                 return NumChildren
-        df['num_children'] = df.apply(lambda x: DeleteChildren(x['service_type'], x['num_children'],x['Primary Funding Code']), axis=1)
+        df['num_children'] = df.apply(lambda x: DeleteChildren(x['Post 12/1/21 Elig Date?'], x['service_type'], x['num_children'],x['Primary Funding Code']), axis=1)
         
         #Only have to report birth year 
-        def RedactBirthday(ServiceType,DOB,PrimaryFunding):
-            if ServiceType == "Advice Only" and PrimaryFunding != "3011 TRC FJC Initiative":
-                return DOB[6:]
+        def RedactBirthday(PostTwelveOne,ServiceType,DOB,PrimaryFunding):
+            if PostTwelveOne == "No":
+                if ServiceType == "Advice Only" and PrimaryFunding != "3011 TRC FJC Initiative":
+                    return DOB[6:]
+                else:
+                    return DOB
             else:
                 return DOB
-        df['DOB'] = df.apply(lambda x: RedactBirthday(x['service_type'], x['Date of Birth'],x['Primary Funding Code']), axis=1)
+        df['DOB'] = df.apply(lambda x: RedactBirthday(x['Post 12/1/21 Elig Date?'], x['service_type'], x['Date of Birth'],x['Primary Funding Code']), axis=1)
         
         #Redacting Function Blank
-        def RedactAnything(ServiceType, ToRedact, PrimaryFunding, ProblemCode, Consent):
-            if ServiceType == 'Advice Only':
-                if PrimaryFunding == "3011 TRC FJC Initiative" and Consent == "Yes":
-                    return ToRedact
+        def RedactAnything(PostTwelveOne, ServiceType, ToRedact, PrimaryFunding, ProblemCode, Consent):
+            if PostTwelveOne == "No":
+                if ServiceType == 'Advice Only':
+                    if PrimaryFunding == "3011 TRC FJC Initiative" and Consent == "Yes":
+                        return ToRedact
+                    else:
+                        return ""
                 else:
-                    return ""
+                    return ToRedact
             else:
                 return ToRedact
-        df['DHCI'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Housing Signed DHCI Form'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
+        df['DHCI'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['Housing Signed DHCI Form'], x['Primary Funding Code'], x['Legal Problem Code'], x['HRA Release?']), axis=1)
         
         #No names, (not full date etc.)
-        df['first_name'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Client First Name'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
-        df['last_name'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Client Last Name'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
+        df['first_name'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['Client First Name'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
+        df['last_name'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['Client Last Name'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
         
         #also redact PA#, SS#, LT#, address, monthly rent, individual or group, years in apt, referral source, annual income, DHCI, posture of case on eligibility, at or below 200%, # of units in buildling, subsidy type, housing type, outcome, outcome date, services renderd to client, activity indicators, 
         
-        df['PA_number'] = df.apply(lambda x: RedactAnything(x['service_type'], x['PA_number'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
+        df['PA_number'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['PA_number'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
         
-        df['SSN'] = df.apply(lambda x: RedactAnything(x['service_type'], x['SSN'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
+        df['SSN'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['SSN'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
         
-        df['Street'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Street'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
+        df['Street'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['Street'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
          
-        df['Unit'] = df.apply(lambda x: RedactAnything(x['service_type'], x['Unit'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
+        df['Unit'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['Unit'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
           
         #df['city'] = df.apply(lambda x: RedactAnything(x['service_type'], x['city'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
            
-        df['street_number'] = df.apply(lambda x: RedactAnything(x['service_type'], x['street_number'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
+        df['street_number'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['street_number'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
             
-        df['rent'] = df.apply(lambda x: RedactAnything(x['service_type'], x['rent'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
+        df['rent'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['rent'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
         
-        def RedactLT(ServiceType, ToRedact, PrimaryFunding, ProblemCode, Consent):
-            if ServiceType == 'Advice Only':
-                if Consent == "Yes":
-                    return ToRedact
+        def RedactLT(PostTwelveOne, ServiceType, ToRedact, PrimaryFunding, ProblemCode, Consent):
+            if PostTwelveOne == "No":
+                if ServiceType == 'Advice Only':
+                    if Consent == "Yes":
+                        return ToRedact
+                    else:
+                        return ""
                 else:
-                    return ""
+                    return ToRedact
             else:
                 return ToRedact
         
-        df['LT_index'] = df.apply(lambda x: RedactLT(x['service_type'], x['LT_index'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
+        df['LT_index'] = df.apply(lambda x: RedactLT(x['Post 12/1/21 Elig Date?'], x['service_type'], x['LT_index'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
          
-        df['proceeding_level'] = df.apply(lambda x: RedactAnything(x['service_type'], x['proceeding_level'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
+        df['proceeding_level'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['proceeding_level'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
           
-        df['years_in_apt'] = df.apply(lambda x: RedactAnything(x['service_type'], x['years_in_apt'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
+        df['years_in_apt'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['years_in_apt'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
            
-        df['referral_source'] = df.apply(lambda x: RedactAnything(x['service_type'], x['referral_source'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
+        df['referral_source'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['referral_source'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
             
-        df['income'] = df.apply(lambda x: RedactAnything(x['service_type'], x['income'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
+        df['income'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['income'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
              
-        df['DHCI'] = df.apply(lambda x: RedactAnything(x['service_type'], x['DHCI'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
+        df['DHCI'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['DHCI'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
         
-        df['posture'] = df.apply(lambda x: RedactAnything(x['service_type'], x['posture'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
+        df['posture'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['posture'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
          
-        df['below_200_FPL'] = df.apply(lambda x: RedactAnything(x['service_type'], x['below_200_FPL'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
+        df['below_200_FPL'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['below_200_FPL'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
           
-        df['units_in_bldg'] = df.apply(lambda x: RedactAnything(x['service_type'], x['units_in_bldg'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
+        df['units_in_bldg'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['units_in_bldg'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
         
-        df['subsidy_type'] = df.apply(lambda x: RedactAnything(x['service_type'], x['subsidy_type'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
+        df['subsidy_type'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['subsidy_type'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
          
-        df['housing_type'] = df.apply(lambda x: RedactAnything(x['service_type'], x['housing_type'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
+        df['housing_type'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['housing_type'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
           
-        df['outcome_date'] = df.apply(lambda x: RedactAnything(x['service_type'], x['outcome_date'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
+        df['outcome_date'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['outcome_date'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
            
-        df['outcome'] = df.apply(lambda x: RedactAnything(x['service_type'], x['outcome'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
+        df['outcome'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['outcome'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
         
-        df['services_rendered'] = df.apply(lambda x: RedactAnything(x['service_type'], x['services_rendered'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
+        df['services_rendered'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['services_rendered'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
            
-        df['activities'] = df.apply(lambda x: RedactAnything(x['service_type'], x['activities'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
+        df['activities'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['activities'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
         
         ###Finalizing Report###
         #put columns in correct order

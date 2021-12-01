@@ -405,6 +405,26 @@ def AllHousing():
                 
         df['Funding Tester'] = df.apply(lambda x: FundingTester(x['Primary Funding Code'],x['Secondary Funding Codes']), axis = 1)
         
+             
+        
+        
+        #Puts dates in a format that can be compared (yyyymmdd)
+        df['DateConstruct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['HAL Eligibility Date']), axis=1)
+        
+        #Label pre 12/1 eligible cases needing short data requirements
+        def PreDecOne (EligibilityDate):
+            '''if isinstance (EligibilityDate, int) == False:
+                return EligibilityDate
+            elif EligibilityDate < 20211201:
+                return "Pre 12/1 Eligible Case"'''
+            try:
+                if EligibilityDate < 20211201:
+                    return "Pre 12/1 Eligible Case"
+            except:
+                return EligibilityDate
+                
+                
+        df['Pre-12/1/21 Elig Date?'] = df.apply(lambda x: PreDecOne(x['DateConstruct']), axis=1)
         
         #COVID Modifications - make the testers blank if it's an advice only pre-3/1 case!
         """
@@ -560,6 +580,7 @@ def AllHousing():
         "Zip Code",
         "HRA Release?",
         "HAL Eligibility Date",
+        "Pre-12/1/21 Elig Date?",
         'Release & Elig Tester',
         "Housing Income Verification",
         #'Income Verification Tester',
@@ -628,9 +649,10 @@ def AllHousing():
                 bad_problem_format = workbook.add_format({'bg_color':'red'})
                 medium_problem_format = workbook.add_format({'bg_color':'cyan'})
                 ws.set_column('A:A',20,link_format)
-                ws.set_column('B:ZZ',25)
-                ws.set_column('C:C',32)
-                ws.autofilter('B1:ZZ1')
+                ws.set_column('B:B',16)
+                ws.set_column('D:ZZ',25)
+                ws.set_column('C:C',18)
+                ws.autofilter('B1:CG1')
                 ws.freeze_panes(1, 2)
                 ws.conditional_format('C2:BO100000',{'type': 'text',
                                                  'criteria': 'containing',

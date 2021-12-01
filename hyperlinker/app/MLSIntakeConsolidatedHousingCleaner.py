@@ -37,8 +37,7 @@ def MLSIntakeConsolidatedHousingCleaner():
         #Delete cases closed before 7/1/2021
         
         df['ClosedConstruct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['Date Closed']), axis=1)
-        #NOT RIGHT YET, don't delete currently open cases.
-        
+                
         def CaseSelector(DateClosed,EligDate):
             if EligDate == '':
                 if DateClosed == '':
@@ -59,32 +58,50 @@ def MLSIntakeConsolidatedHousingCleaner():
        
         df['DateConstruct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['HAL Eligibility Date']), axis=1)
         
+        df['Post 12/1/21 Elig Date?'] = df.apply(lambda x: HousingToolBox.PostTwelveOne(x['DateConstruct']), axis=1)
        
         #don't need consent form if it's post-covid advice/brief
-        def ReleaseTester(HRARelease,LevelOfService):
+        def ReleaseTester(HRARelease,LevelOfService,PostTwelveOne,PrimaryCode,DateConstruct):
             LevelOfService = str(LevelOfService)
-            if LevelOfService.startswith("Advice"):
-                return "Unnecessary advice/brief"
+            if DateConstruct == "":
+                return HRARelease
+            elif PostTwelveOne == "No":
+                if LevelOfService.startswith("Advice"):
+                    return "Unnecessary advice/brief"
+                elif PrimaryCode.startswith("31") and LevelOfService.startswith("Brief"):
+                    return "Unnecessary advice/brief"
+                else:
+                    return HRARelease
             else:
                 return HRARelease
        
-        df['HRA Release?'] = df.apply(lambda x: ReleaseTester(x['HRA Release?'],x["Housing Level of Service"]),axis = 1)
+        df['HRA Release?'] = df.apply(lambda x: ReleaseTester(x['HRA Release?'],x["Housing Level of Service"],x['Post 12/1/21 Elig Date?'],x["Primary Funding Code"],x['DateConstruct']),axis = 1)
         
-        df['Housing Income Verification'] = df.apply(lambda x: ReleaseTester(x['Housing Income Verification'],x["Housing Level of Service"]),axis = 1)
+        df['Housing Income Verification'] = df.apply(lambda x: ReleaseTester(x['Housing Income Verification'],x["Housing Level of Service"],x['Post 12/1/21 Elig Date?'],x["Primary Funding Code"],x['DateConstruct']),axis = 1)
         
        
        
         #PA Tester if theres no dhci, not needed for post-covid advice/brief cases
-        def PATester (PANum,DHCI,LevelOfService):
+        def PATester (PANum,DHCI,LevelOfService,DateConstruct,PostTwelveOne,PrimaryCode):
             LevelOfService = str(LevelOfService)
-            if LevelOfService.startswith("Advice"):
-                return "Unnecessary advice/brief"
-            elif DHCI == "DHCI Form" and PANum == "":
-                return "Not Needed due to DHCI"
+            if DateConstruct == "":
+                if DHCI == "DHCI Form" and PANum == "":
+                    return "Not Needed due to DHCI"
+                else:
+                    return PANum
+            elif PostTwelveOne == "No":
+                if LevelOfService.startswith("Advice"):
+                    return "Unnecessary advice/brief"
+                elif PrimaryCode.startswith("31") and LevelOfService.startswith("Brief"):
+                    return "Unnecessary advice/brief"
+                elif DHCI == "DHCI Form" and PANum == "":
+                    return "Not Needed due to DHCI"
+                else:
+                    return PANum
             else:
                 return PANum
             
-        df['Gen Pub Assist Case Number'] = df.apply(lambda x: PATester(x['Gen Pub Assist Case Number'],x['Housing Income Verification'],x["Housing Level of Service"]),axis = 1)
+        df['Gen Pub Assist Case Number'] = df.apply(lambda x: PATester(x['Gen Pub Assist Case Number'],x['Housing Income Verification'],x["Housing Level of Service"],x['DateConstruct'],x['Post 12/1/21 Elig Date?'],x["Primary Funding Code"]),axis = 1)
 
         #Outcome Tester - date no outcome or outcome no date
         

@@ -635,6 +635,15 @@ def PreThreeOne(EligibilityDate):
         return "Yes"
     elif EligibilityDate >= 20200301:
         return "No"
+        
+#Does Client have an eligibility date after Dec 1st, 2021?
+def PostTwelveOne(EligibilityDate):
+    if isinstance(EligibilityDate, int) == False:
+        return "Undetermined"
+    elif EligibilityDate > 20211201:
+        return "Yes"
+    elif EligibilityDate <= 20211130:
+        return "No"
 
 def NeedsRedactingTester(LevelOfService, PreThreeOne,FundingCodeSorter):
     if LevelOfService.startswith("Advice") == True and PreThreeOne == "No":
