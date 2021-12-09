@@ -64,7 +64,7 @@ def upload_TRCCovidClean():
         
         #Reformat date to mm/dd/yyyy whether the date was a date or a string on the document
         #print(type(df['HAL Eligibility Date'].index))
-        print(df[['HAL Eligibility Date'][0:8]].strptime('%m/%d/%Y'))
+        #print(df[['HAL Eligibility Date'][0:8]].strptime('%m/%d/%Y'))
         #print(df['HAL Eligibility Date'].index)
         def DateCheck (EligibilityDate):
             try:
