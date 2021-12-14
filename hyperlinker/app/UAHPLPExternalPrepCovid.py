@@ -201,7 +201,7 @@ def UAHPLPExternalPrepCovid():
          
         df['Unit'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['service_type'], x['Post 12/1/21 Elig Date?'], x['Unit']), axis=1)
           
-        df['city'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['service_type'], x['Post 12/1/21 Elig Date?'], x['city']), axis=1)
+        #df['city'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['service_type'], x['Post 12/1/21 Elig Date?'], x['city']), axis=1)
            
         df['street_number'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['service_type'], x['Post 12/1/21 Elig Date?'], x['street_number']), axis=1)
             
@@ -221,7 +221,7 @@ def UAHPLPExternalPrepCovid():
         
         df['posture'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['service_type'], x['Post 12/1/21 Elig Date?'], x['posture']), axis=1)
          
-        df['below_200_FPL'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['service_type'], x['Post 12/1/21 Elig Date?'], x['below_200_FPL']), axis=1)
+        #df['below_200_FPL'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['service_type'], x['Post 12/1/21 Elig Date?'], x['below_200_FPL']), axis=1)
           
         df['units_in_bldg'] = df.apply(lambda x: HousingToolBox.RedactForCovid(x['service_type'], x['Post 12/1/21 Elig Date?'], x['units_in_bldg']), axis=1)
         

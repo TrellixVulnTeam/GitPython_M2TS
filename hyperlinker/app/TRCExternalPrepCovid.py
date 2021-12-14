@@ -234,7 +234,7 @@ def TRCExternalPrepCovid():
         
         df['posture'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['posture'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
          
-        df['below_200_FPL'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['below_200_FPL'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
+        #df['below_200_FPL'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['below_200_FPL'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
           
         df['units_in_bldg'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['units_in_bldg'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
         

@@ -387,6 +387,8 @@ def TRCProceedingType(TypeOfCase,LegalProblemCode,LevelOfService,EligDate):
         return "EA"
     elif TypeOfCase == "Illegal Lockout":
         return "IL"
+    elif TypeOfCase == "":
+        return "OO"
     else:
         return "Needs Review"
  
@@ -438,6 +440,8 @@ def UACProceedingType(TypeOfCase,LegalProblemCode,CloseReason,LevelOfService):
         return "EA"
     elif TypeOfCase == "Illegal Lockout":
         return "IL"
+    elif TypeOfCase == "":
+        return "OO"
     else:
         return ""
 
