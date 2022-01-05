@@ -5,11 +5,16 @@ from app.forms import PostForm
 from werkzeug.urls import url_parse
 from datetime import datetime
 import pandas as pd
+from playsound import playsound
+
 
 
 @app.route("/UAHPLPConsolidatedBoroughCleaner", methods=['GET', 'POST'])
 def UAHPLPConsolidatedBoroughCleaner():
     if request.method == 'POST':
+    
+        
+    
         print(request.files['file'])
         f = request.files['file']
         
@@ -356,6 +361,8 @@ def UAHPLPConsolidatedBoroughCleaner():
         else:
             return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = "Cleaned " + f.filename)
         
+        playsound("app\\static\\sound.wav")
+        print ("played")
 
     return '''
     <!doctype html>
