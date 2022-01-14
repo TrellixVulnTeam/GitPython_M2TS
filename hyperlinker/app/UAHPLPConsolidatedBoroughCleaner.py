@@ -159,6 +159,8 @@ def UAHPLPConsolidatedBoroughCleaner():
         
         df = df.sort_values(by=['Primary Advocate'])
         
+        playsound("app\\static\\sound.wav")
+        print ("played")
         
         #Create borough-specific tabs for MLS and BkLS as needed
         if request.form.get('MLS'):
@@ -361,8 +363,7 @@ def UAHPLPConsolidatedBoroughCleaner():
         else:
             return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = "Cleaned " + f.filename)
         
-        playsound("app\\static\\sound.wav")
-        print ("played")
+        
 
     return '''
     <!doctype html>
