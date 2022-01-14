@@ -224,10 +224,13 @@ def upload_IOIempQuarterly():
         link_format = workbook.add_format({'font_color':'blue', 'bold':True, 'underline':True})
         problem_format = workbook.add_format({'bg_color':'yellow'})
         
-        
+        ERowRange='E1:E'+str(df.shape[0]+1)
+        print("ERowRange = "+ERowRange)
+        JRowRange='J1:J'+str(df.shape[0]+1)
+        print("JRowRange = "+JRowRange)
         
         worksheet.set_column('C:BL',30)
-        worksheet.conditional_format('E1:E100000',{'type': 'cell',
+        worksheet.conditional_format(ERowRange,{'type': 'cell',
                                                  'criteria': '==',
                                                  'value': '""',
                                                  'format': problem_format})
@@ -247,7 +250,7 @@ def upload_IOIempQuarterly():
                                                  'criteria': '==',
                                                  'value': '"Needs Substantial Activity in FY20"',
                                                  'format': problem_format})
-        worksheet.conditional_format('J1:J100000',{'type': 'cell',
+        worksheet.conditional_format(JRowRange,{'type': 'cell',
                                                  'criteria': '==',
                                                  'value': '""',
                                                  'format': problem_format})

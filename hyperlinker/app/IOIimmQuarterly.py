@@ -375,11 +375,18 @@ def upload_IOIimmQuarterly():
         worksheet.set_column('B:B',19)
         worksheet.set_column('C:BL',30)
         
-        worksheet.conditional_format('E1:F100000',{'type': 'cell',
+        EFRowRange='E1:F'+str(df.shape[0]+1)
+        print("EFRowRange = "+EFRowRange)
+        FRowRange='F1:F'+str(df.shape[0]+1)
+        print("FRowRange = "+FRowRange)
+        JKRowRange='J1:K'+str(df.shape[0]+1)
+        print("JKRowRange = "+JKRowRange)
+        
+        worksheet.conditional_format(EFRowRange,{'type': 'cell',
                                                  'criteria': '==',
                                                  'value': '""',
                                                  'format': problem_format})
-        worksheet.conditional_format('F1:F100000',{'type': 'cell',
+        worksheet.conditional_format(FRowRange,{'type': 'cell',
                                                  'criteria': '==',
                                                  'value': '"Hold for Review"',
                                                  'format': problem_format})
@@ -395,7 +402,7 @@ def upload_IOIimmQuarterly():
                                                  'criteria': '==',
                                                  'value': '"Needs Substantial Activity in FY21"',
                                                  'format': problem_format})
-        worksheet.conditional_format('J1:K100000',{'type': 'cell',
+        worksheet.conditional_format(JKRowRange,{'type': 'cell',
                                                  'criteria': '==',
                                                  'value': '""',
                                                  'format': problem_format})
