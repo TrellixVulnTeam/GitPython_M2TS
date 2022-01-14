@@ -14,15 +14,40 @@ def AnnualComparer():
     #upload file from computer
     if request.method == 'POST':
     
-        #reads in four files in arbitrary order
+        #create empty dataframes to append datasheets to base
+        dfopened = pd.DataFrame()
+        dfclosed = pd.DataFrame()
+        
+        for cat in request.files.getlist('file'):
+            print(cat)
+            tdf = pd.read_excel(cat,skiprows=2)
+            
+            #fill all the blanks with empty strings
+            tdf.fillna('',inplace = True)
+            #if any of the 'date closed values' are blank, assign to 'opened' dataset
+            if '' in tdf['Date Closed'].values:
+                print ('Some Cases Still Open')
+                tdf['Open/Close Dataset?'] = 'Opened'
+                dfopened = dfopened.append(tdf, ignore_index=True)
+            #otherwise all the cases are closed and it should go to that sheet
+            else:
+                print ('All Cases Closed')
+                tdf['Open/Close Dataset?'] = 'Closed'
+                dfclosed = dfclosed.append(tdf, ignore_index=True)
+    
+        '''#reads in four files in arbitrary order
         f = request.files.getlist('file')[0]
         g = request.files.getlist('file')[1]
         h = request.files.getlist('file')[2]
         i = request.files.getlist('file')[3]
+        j = request.files.getlist('file')[4]
+        k = request.files.getlist('file')[5]
         print(f)
         print(g)
         print(h)
         print(i)
+        print(j)
+        print(k)
         
         #create 4 dataframes from 4 files
         
@@ -30,6 +55,8 @@ def AnnualComparer():
         df2 = pd.read_excel(g,skiprows=2)
         df3 = pd.read_excel(h,skiprows=2)
         df4 = pd.read_excel(i,skiprows=2)
+        df5 = pd.read_excel(j,skiprows=2)
+        df6 = pd.read_excel(k,skiprows=2)
        
        #create an empty list for dataframes and append them
         
@@ -38,12 +65,11 @@ def AnnualComparer():
         dflist.append(df2)
         dflist.append(df3)
         dflist.append(df4)
-        
-        #create empty dataframes to append datasheets to base
-        dfopened = pd.DataFrame()
-        dfclosed = pd.DataFrame()
+        dflist.append(df5)
+        dflist.append(df6)
         
         
+                
         
         #for each data frame in the list
         for i in dflist:
@@ -58,7 +84,7 @@ def AnnualComparer():
             else:
                 print ('All Cases Closed')
                 i['Open/Close Dataset?'] = 'Closed'
-                dfclosed = dfclosed.append(i, ignore_index=True)
+                dfclosed = dfclosed.append(i, ignore_index=True)'''
         
         
         
@@ -154,6 +180,11 @@ def AnnualComparer():
         #Separates the year values we'll use for pivot tables
         dfclosed['Year Closed'] = dfclosed['Date Closed'].apply(lambda x: x[-4:] if x !='' else '')
         dfopened['Year Opened'] = dfopened['Date Opened'].apply(lambda x: x[-4:])
+        print("Length of date closed "+str(len(dfclosed['Year Closed'].unique())))
+        print("Length of date opened "+str(len(dfopened['Year Opened'].unique())))
+        print(max(len(dfclosed['Year Closed'].unique()),len(dfopened['Year Opened'].unique())))
+        HowManyYears=max(len(dfclosed['Year Closed'].unique()),len(dfopened['Year Opened'].unique()))
+        print(HowManyYears)
 
         #consolidate 'close reason' into categories
         dfclosed['Close Reason Category'] = dfclosed.apply(lambda x: DataWizardTools.CloseReasonConsolidator(x['Close Reason']),axis = 1)
@@ -204,219 +235,71 @@ def AnnualComparer():
         
         
         #bounce worksheets back to excel
-        output_filename = f.filename     
+        output_filename = "YearsCompared.xlsx"     
         writer = pd.ExcelWriter("app\\sheets\\"+output_filename, engine = 'xlsxwriter')
         workbook = writer.book
         
         
         
         #Pivot Table and Chart for Cases Closed by Unit
+        def ChartTabMaker (PivotData, SheetName,YAxis,XAxis):
+            #create new excel tab
+            PivotData.to_excel(writer, sheet_name=SheetName)
+            #create the formatter for this sheet
+            TabWriter = writer.sheets[SheetName]
+            #create the chart for this sheet
+            chart = workbook.add_chart({'type':'column'})
+            #set column width
+            TabWriter.set_column('A:A',20)
+            #Name the y axis
+            chart.set_y_axis({
+                'name': YAxis,
+                'name_font': {'size': 14, 'bold': True},})
+            #Name the x axis    
+            chart.set_x_axis({
+                'name': XAxis,
+                'name_font': {'size': 14, 'bold': True},}) 
+            #set size of chart
+            chart.set_size({'width': 720, 'height': 576})
+            #add pivot table values as HowManyYears series to chart
+            YearsList=list(range(1,HowManyYears+1))
+            for coordinate in (YearsList):
+                if HowManyYears >= coordinate:
+                    chart.add_series({
+                        'categories': [SheetName,3,0,PivotData.shape[0]+2,0],
+                        'name': [SheetName,1,coordinate],
+                        'values': [SheetName,3,coordinate,PivotData.shape[0]+2,coordinate]})
+            '''if HowManyYears >=2:
+                chart.add_series({
+                    'categories': [SheetName,3,0,PivotData.shape[0]+2,0],
+                    'name': [SheetName,1,2],
+                    'values': [SheetName,3,2,PivotData.shape[0]+2,2]})
+            if HowManyYears >=3:
+                chart.add_series({
+                    'name': [SheetName,1,3],
+                    'values': [SheetName,3,3,PivotData.shape[0]+2,3]})
+            if HowManyYears >=4:
+                chart.add_series({
+                    'name': [SheetName,1,4],
+                    'values': [SheetName,3,4,PivotData.shape[0]+2,4]})
+            if HowManyYears >=5:
+                chart.add_series({
+                    'name': [SheetName,1,5],
+                    'values': [SheetName,3,5,PivotData.shape[0]+2,5]})'''
+            
+            #hide the useless row
+            TabWriter.set_row(0, None, None, {'hidden': True})
+            #add chart to the spreadsheet
+            TabWriter.insert_chart(1,HowManyYears+2, chart)
         
-        #create new excel tab
-        Unit_closed_pivot.to_excel(writer, sheet_name='Unit Closed Pivot')
-        #create the formatter for this sheet
-        unitclosedpivot = writer.sheets['Unit Closed Pivot']
-        #create the chart for this sheet
-        unitclosedchart = workbook.add_chart({'type':'column'})
-        #set column width
-        unitclosedpivot.set_column('A:A',20)
-        #get the names from the pivot table
-        UnitClosedCategoriesRange="='Unit Closed Pivot'!$A$4:$A$"+str(Unit_closed_pivot.shape[0]+3)
-        #get the values for the first & second column from the pivot table
-        UnitClosedSeriesOneRange="='Unit Closed Pivot'!$B$4:$B$"+str(Unit_closed_pivot.shape[0]+3)
-        UnitClosedSeriesTwoRange="='Unit Closed Pivot'!$C$4:$C$"+str(Unit_closed_pivot.shape[0]+3)
-        #Name the y axis
-        unitclosedchart.set_y_axis({
-            'name': 'Cases Closed',
-            'name_font': {'size': 14, 'bold': True},})
-        #Name the x axis    
-        unitclosedchart.set_x_axis({
-            'name': 'Practice Area',
-            'name_font': {'size': 14, 'bold': True},}) 
-        #set size of chart
-        unitclosedchart.set_size({'width': 720, 'height': 576})
-        #add pivot table values as 2 series to chart
-        unitclosedchart.add_series({
-            'categories': UnitClosedCategoriesRange,
-            'name': "2020",
-            'values': UnitClosedSeriesOneRange})
-        unitclosedchart.add_series({
-            'name': "2021",
-            'values': UnitClosedSeriesTwoRange})
-        #hide the useless row
-        unitclosedpivot.set_row(0, None, None, {'hidden': True})
-        #add chart to the spreadsheet
-        unitclosedpivot.insert_chart('D2', unitclosedchart)
+        ChartTabMaker(Unit_closed_pivot,'Unit Closed Pivot','Cases Closed','Practice Area')      
+        ChartTabMaker(Unit_opened_pivot,'Unit Opened Pivot','Cases Opened','Practice Area')
+        ChartTabMaker(PivotData=Close_reason_pivot,SheetName='Close Reason Pivot',YAxis='Cases Closed',XAxis='Close Reason')
+        ChartTabMaker(YAxis='Cases Opened',XAxis='Client Race',PivotData=Race_opened_pivot,SheetName='Opened by Race')
+        ChartTabMaker(PivotData=Age_opened_pivot,SheetName='Opened by Age',YAxis='Cases Opened',XAxis='Client Age')
+        ChartTabMaker(PivotData=Poverty_opened_pivot,SheetName='Opened by Poverty',YAxis='Cases Opened',XAxis='Client Percentage of Poverty')
         
-        """
-        #Pivot Table and Chart for Cases Closed by IOLA Outcome
-        
-        #create new excel tab
-        Outcome_closed_pivot.to_excel(writer, sheet_name='Outcome Closed Pivot')
-        #create the formatter for this sheet
-        outcomeclosedpivot = writer.sheets['Outcome Closed Pivot']
-        #create the chart for this sheet
-        outcomeclosedchart = workbook.add_chart({'type':'column'})
-        #set column width
-        outcomeclosedpivot.set_column('A:A',60)
-        #get the names from the pivot table
-        OutcomeClosedCategoriesRange="='Outcome Closed Pivot'!$A$4:$A$"+str(Outcome_closed_pivot.shape[0]+3)
-        #get the values for the first & second column from the pivot table
-        OutcomeClosedSeriesOneRange="='Outcome Closed Pivot'!$B$4:$B$"+str(Outcome_closed_pivot.shape[0]+3)
-        OutcomeClosedSeriesTwoRange="='Outcome Closed Pivot'!$C$4:$C$"+str(Outcome_closed_pivot.shape[0]+3)
-        #Name the y axis
-        outcomeclosedchart.set_y_axis({
-            'name': 'Cases Closed',
-            'name_font': {'size': 14, 'bold': True},})
-        #Name the x axis    
-        outcomeclosedchart.set_x_axis({
-            'name': 'IOLA Close Reason',
-            'name_font': {'size': 14, 'bold': True},}) 
-        #set size of chart
-        outcomeclosedchart.set_size({'width': 720, 'height': 576})
-        #add pivot table values as 2 series to chart
-        outcomeclosedchart.add_series({
-            'categories': OutcomeClosedCategoriesRange,
-            'name': "2020",
-            'values': OutcomeClosedSeriesOneRange})
-        outcomeclosedchart.add_series({
-            'name': "2021",
-            'values': OutcomeClosedSeriesTwoRange})
-        #hide the useless row
-        outcomeclosedpivot.set_row(0, None, None, {'hidden': True})
-        #add chart to the spreadsheet
-        outcomeclosedpivot.insert_chart('D2', outcomeclosedchart)
-        
-        """
-        
-        #Pivot Table and Chart for Cases Opened by Unit
-        Unit_opened_pivot.to_excel(writer, sheet_name='Unit Opened Pivot')
-        unitopenedpivot = writer.sheets['Unit Opened Pivot']
-        unitopenedchart = workbook.add_chart({'type':'column'})
-        unitopenedpivot.set_column('A:A',20)
-        UnitOpenedCategoriesRange="='Unit Opened Pivot'!$A$4:$A$"+str(Unit_opened_pivot.shape[0]+3)
-        UnitOpenedSeriesOneRange="='Unit Opened Pivot'!$B$4:$B$"+str(Unit_opened_pivot.shape[0]+3)
-        UnitOpenedSeriesTwoRange="='Unit Opened Pivot'!$C$4:$C$"+str(Unit_opened_pivot.shape[0]+3)
-        unitopenedchart.set_y_axis({
-            'name': 'Cases Opened',
-            'name_font': {'size': 14, 'bold': True},})
-        unitopenedchart.set_x_axis({
-            'name': 'Practice Area',
-            'name_font': {'size': 14, 'bold': True},}) 
-        unitopenedchart.set_size({'width': 720, 'height': 576})
-        unitopenedchart.add_series({
-            'categories': UnitOpenedCategoriesRange,
-            'name': "2020",
-            'values': UnitOpenedSeriesOneRange})
-        unitopenedchart.add_series({
-            'name': "2021",
-            'values': UnitOpenedSeriesTwoRange})
-        unitopenedpivot.set_row(0, None, None, {'hidden': True})
-        unitopenedpivot.insert_chart('D2', unitopenedchart)
-        
-        
-        #Pivot Table and Chart for Cases Closed by Close Reason
-        Close_reason_pivot.to_excel(writer, sheet_name='Close Reason Pivot')
-        closereasonpivot = writer.sheets['Close Reason Pivot']
-        closereasonchart = workbook.add_chart({'type':'column'})
-        closereasonpivot.set_column('A:A',40)
-        CloseReasonCategoriesRange="='Close Reason Pivot'!$A$4:$A$"+str(Close_reason_pivot.shape[0]+3)
-        CloseReasonSeriesOneRange="='Close Reason Pivot'!$B$4:$B$"+str(Close_reason_pivot.shape[0]+3)
-        CloseReasonSeriesTwoRange="='Close Reason Pivot'!$C$4:$C$"+str(Close_reason_pivot.shape[0]+3)
-        closereasonchart.set_y_axis({
-            'name': 'Cases Closed',
-            'name_font': {'size': 14, 'bold': True},})
-        closereasonchart.set_x_axis({
-            'name': 'Close Reason',
-            'name_font': {'size': 14, 'bold': True},})    
-        closereasonchart.set_size({'width': 720, 'height': 576})
-        closereasonchart.add_series({
-            'categories': CloseReasonCategoriesRange,
-            'name': "2020",
-            'values': CloseReasonSeriesOneRange})
-        closereasonchart.add_series({
-            'name': "2021",
-            'values': CloseReasonSeriesTwoRange})
-        closereasonpivot.set_row(0, None, None, {'hidden': True})
-        closereasonpivot.insert_chart('D2', closereasonchart)
-        
-        #Pivot Table and Chart for Cases Opened by Race
-        Race_opened_pivot.to_excel(writer, sheet_name='Opened by Race')
-        openracepivot = writer.sheets['Opened by Race']
-        openedracechart = workbook.add_chart({'type':'column'})
-        openracepivot.set_column('A:A',40)
-        OpenedRaceCategoriesRange="='Opened by Race'!$A$4:$A$"+str(Race_opened_pivot.shape[0]+3)
-        OpenedRaceSeriesOneRange="='Opened by Race'!$B$4:$B$"+str(Race_opened_pivot.shape[0]+3)
-        OpenedRaceSeriesTwoRange="='Opened by Race'!$C$4:$C$"+str(Race_opened_pivot.shape[0]+3)
-        openedracechart.set_y_axis({
-            'name': 'Cases Opened',
-            'name_font': {'size': 14, 'bold': True},})
-        openedracechart.set_x_axis({
-            'name': 'Client Race',
-            'name_font': {'size': 14, 'bold': True},}) 
-        openedracechart.set_size({'width': 720, 'height': 576})
-        openedracechart.add_series({
-            'categories': OpenedRaceCategoriesRange,
-            'name': "2020",
-            'values': OpenedRaceSeriesOneRange})
-        openedracechart.add_series({
-            'name': "2021",
-            'values': OpenedRaceSeriesTwoRange})
-        openracepivot.set_row(0, None, None, {'hidden': True})
-        openracepivot.insert_chart('D2', openedracechart)
-        
-        
-        #Pivot Table and Chart for Cases Opened by Age
-        Age_opened_pivot.to_excel(writer, sheet_name='Opened by Age')
-        openagepivot = writer.sheets['Opened by Age']
-        openedagechart = workbook.add_chart({'type':'column'})
-        openagepivot.set_column('A:A',40)
-        OpenedAgeCategoriesRange="='Opened by Age'!$A$4:$A$"+str(Age_opened_pivot.shape[0]+3)
-        OpenedAgeSeriesOneRange="='Opened by Age'!$B$4:$B$"+str(Age_opened_pivot.shape[0]+3)
-        OpenedAgeSeriesTwoRange="='Opened by Age'!$C$4:$C$"+str(Age_opened_pivot.shape[0]+3)
-        openedagechart.set_y_axis({
-            'name': 'Cases Opened',
-            'name_font': {'size': 14, 'bold': True},})
-        openedagechart.set_x_axis({
-            'name': 'Client Age',
-            'name_font': {'size': 14, 'bold': True},}) 
-        openedagechart.set_size({'width': 720, 'height': 576})
-        openedagechart.add_series({
-            'categories': OpenedAgeCategoriesRange,
-            'name': "2020",
-            'values': OpenedAgeSeriesOneRange})
-        openedagechart.add_series({
-            'name': "2021",
-            'values': OpenedAgeSeriesTwoRange})
-        openagepivot.set_row(0, None, None, {'hidden': True})
-        openagepivot.insert_chart('D2', openedagechart)
-        
-        #Pivot Table and Chart for Cases Opened by Percentage of Poverty
-        Poverty_opened_pivot.to_excel(writer, sheet_name='Opened by Poverty')
-        openpovertypivot = writer.sheets['Opened by Poverty']
-        openedpovertychart = workbook.add_chart({'type':'column'})
-        openpovertypivot.set_column('A:A',20)
-        OpenedPovertyCategoriesRange="='Opened by Poverty'!$A$4:$A$"+str(Poverty_opened_pivot.shape[0]+3)
-        OpenedPovertySeriesOneRange="='Opened by Poverty'!$B$4:$B$"+str(Poverty_opened_pivot.shape[0]+3)
-        OpenedPovertySeriesTwoRange="='Opened by Poverty'!$C$4:$C$"+str(Poverty_opened_pivot.shape[0]+3)
-        openedpovertychart.set_y_axis({
-            'name': 'Cases Opened',
-            'name_font': {'size': 14, 'bold': True},})
-        openedpovertychart.set_x_axis({
-            'name': 'Client Percentage of Poverty',
-            'name_font': {'size': 14, 'bold': True},}) 
-        openedpovertychart.set_size({'width': 720, 'height': 576})
-        openedpovertychart.add_series({
-            'categories': OpenedPovertyCategoriesRange,
-            'name': "2020",
-            'values': OpenedPovertySeriesOneRange})
-        openedpovertychart.add_series({
-            'name': "2021",
-            'values': OpenedPovertySeriesTwoRange})
-        openpovertypivot.set_row(0, None, None, {'hidden': True})
-        openpovertypivot.insert_chart('D2', openedpovertychart)
-        
-        
+            
         
         #raw data tabs
         dfclosed.to_excel(writer, sheet_name='Closed Raw Data',index=False)
@@ -453,11 +336,11 @@ def AnnualComparer():
             if request.form.get('LSU'):
                 BoroughsPrefix = BoroughsPrefix + 'LSU '
         
-        unitclosedpivot.write(40,0,"This report contains data for:")
-        unitclosedpivot.write(41,0,BoroughsPrefix)
+        #unitclosedpivot.write(40,0,"This report contains data for:")
+        #unitclosedpivot.write(41,0,BoroughsPrefix)
         writer.save()
         
-        return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = BoroughsPrefix + f.filename)
+        return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = BoroughsPrefix + output_filename)
      
 
         
