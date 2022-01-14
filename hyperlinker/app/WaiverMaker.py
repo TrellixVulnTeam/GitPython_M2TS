@@ -59,8 +59,26 @@ def WaiverMaker():
         #Add Date of Request column
         df['Date of Request'] = date.today().strftime("%m/%d/%Y")
         
+        #Fix Blank Names issue
+        def BlankFirstName(CFN):
+            if pd.isnull(CFN) == True:
+                return "9"
+            elif pd.isnull(CFN) == False:
+                return CFN
+                
+        df['First Name'] = df.apply(lambda x : BlankFirstName(x['Client First Name']),axis=1)
+        
+        def BlankLastName(CLN):        
+            if pd.isnull(CLN) == True:
+                return "9"
+            elif pd.isnull(CLN) == False:
+                return CLN
+        
+        df['Last Name'] = df.apply(lambda x : BlankLastName(x['Client Last Name']),axis=1)
+        
         #Add First & Last Initials column
-        df['First & Last Initials'] = df['Client First Name'].apply(lambda x: x[0])+df['Client Last Name'].apply(lambda x: x[0])
+        #Now any blank names come up as 99 but they need to be flagged***
+        df['First & Last Initials'] = df['First Name'].apply(lambda x: x[0])+df['Last Name'].apply(lambda x: x[0])
                 
         #Add New/Reconsideration? column
         df['New/Reconsideration?'] = 'New'
@@ -190,7 +208,7 @@ def WaiverMaker():
         '''and CaseType == "Holdover" or CaseType == "Non-payment" or CaseType == "Illegal Lockout" or CaseType == "NYCHA Housing Termination"'''
         
         #Add Eligible for Waiver Request? column
-        def NeedWaiver(WaiverType,Ref,FPL,Waived):
+        def NeedWaiver(WaiverType,Ref,FPL,Waived,NN):
             if pd.isnull(WaiverType) == False:
                 return WaiverType
             elif FPL < 201:
@@ -198,11 +216,13 @@ def WaiverMaker():
             elif Ref == "HRA" and FPL >= 201:
                 return "HRA Referral"
             elif Waived ==  "EVC w Court Case":
-                return "Categorically Waived In" 
+                return "Categorically Waived In"
+            elif NN == "99":
+                return "No Name"
             else:
                 return "Yes"
                 
-        df['Eligible for Waiver Request?'] = df.apply(lambda x : NeedWaiver(x['Housing TRC HRA Waiver Categories'],x['Referral Source'],x['Percentage of Poverty'],x['Already Waived In?']),axis=1)
+        df['Eligible for Waiver Request?'] = df.apply(lambda x : NeedWaiver(x['Housing TRC HRA Waiver Categories'],x['Referral Source'],x['Percentage of Poverty'],x['Already Waived In?'],x['First & Last Initials']),axis=1)
         
         #Sorting Eligible Cases on top
         df = df.sort_values(by=['Eligible for Waiver Request?'],ascending = False)
