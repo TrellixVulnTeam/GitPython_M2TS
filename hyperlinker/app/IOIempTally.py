@@ -304,6 +304,42 @@ def upload_IOIempTally():
                 CityPivot.set_column('E:E',11.3)
                 CityPivot.set_column('F:F',11.3)
                 CityPivot.conditional_format( 'A1:F7' , { 'type' : 'cell' ,'criteria': '!=','value':'""','format' : border_format} )
+                
+                #Chartmaking Section
+                #add chart
+                AnnualPercentageChart = workbook.add_chart({'type':'column'})
+                AnnualPercentageChart.set_title({'name': 'Progress Toward Annual Goal'})
+                #get names from pivot table
+                OfficeRange="='City Pivot'!$A$2:$A$6"
+                #get the values for the column from the pivot table
+                AnnualPercentageRange="='City Pivot'!$D$2:$D$6"
+                AnnualGoalsRange="='City Pivot'!$C$2:$C$6"
+                #Name the y axis
+                AnnualPercentageChart.set_y_axis({
+                    'name': 'Percentage of Annual Goal',
+                    'name_font': {'size': 14, 'bold': True},
+                    'num_format': '0%',
+                    'max': 1})
+                #Name the x axis    
+                AnnualPercentageChart.set_x_axis({
+                    'name': 'Office',
+                    'name_font': {'size': 14, 'bold': True},}) 
+                #set size of chart
+                AnnualPercentageChart.set_size({'width': 509, 'height': 413})
+                #add pivot table values to chart
+                AnnualPercentageChart.add_series({
+                    'categories': OfficeRange,
+                    'name': "Units Completed",
+                    'values': AnnualPercentageRange,
+                    'fill': {'color':'#59B3CB'},
+                    'border': {'color': 'black'}})
+                '''goalscomparisonchart.add_series({
+                    'name': "Annual Goals",
+                    'values': AnnualGoalsRange,
+                    'fill': {'color':'#B3A2C7'},
+                    'border': {'color': 'black'}})'''
+                
+                
                                            
                 ERowRange='E1:E'+str(dict_df[i].shape[0]+1)
                 print(ERowRange)
@@ -336,6 +372,9 @@ def upload_IOIempTally():
                                                  'criteria': '==',
                                                  'value': '"Needs Substantial Activity in FY22"',
                                                  'format': problem_format})
+                                                 
+            #add chart to the spreadsheet
+            CityPivot.insert_chart('H1', AnnualPercentageChart)
                                                  
                                    
             writer.save()
