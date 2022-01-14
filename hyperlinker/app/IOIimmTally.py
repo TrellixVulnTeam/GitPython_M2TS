@@ -6,6 +6,7 @@ from werkzeug.urls import url_parse
 from datetime import datetime
 from datetime import date
 import pandas as pd
+#import numpy as np
 #import textwrap
 
 
@@ -641,7 +642,9 @@ def upload_IOIimmTally():
                     
                     #CityPivot.write('A7', 'Totals', totals_format)
                     #CityPivot.set_column('L:L',10,percent_format)
-                
+                    
+                    
+                                    
                 else:
                     print('Annual here')
                 
@@ -728,7 +731,65 @@ def upload_IOIimmTally():
                                                  'criteria': '==',
                                                  'value': '"No"',
                                                  'format': problem_format})
-                
+            #Chartmaking Section     
+            #get the values for the column from the pivot table
+            ChartList=["3","4","5","6","7","8"]
+            for cat in ChartList:
+                #add chart 1
+                AnnualPercentageChartB1 = workbook.add_chart({'type':'column'})
+                if request.form.get('Proportional'):   
+                    print('Hello proportional Chart!')
+                    #get names from pivot table
+                    CategoryRange="='City Pivot'!$L$2,'City Pivot'!$Q$2,'City Pivot'!$V$2,'City Pivot'!$AA$2,'City Pivot'!$AF$2"
+                                
+                    PercentagesRangeB1="='City Pivot'!$L$"+cat+",'City Pivot'!$Q$"+cat+",'City Pivot'!$V$"+cat+",'City Pivot'!$AA$"+cat+",'City Pivot'!$AF$"+cat
+                else:
+                    print('Annual Chart Here!')
+                    #get names from pivot table
+                    CategoryRange="='City Pivot'!$L$2,'City Pivot'!$O$2,'City Pivot'!$R$2,'City Pivot'!$U$2,'City Pivot'!$X$2"
+                                
+                    PercentagesRangeB1="='City Pivot'!$L$"+cat+",'City Pivot'!$O$"+cat+",'City Pivot'!$R$"+cat+",'City Pivot'!$U$"+cat+",'City Pivot'!$X$"+cat
+                #Name the y axis
+                AnnualPercentageChartB1.set_y_axis({
+                    'name': 'Percentage of Annual Goal',
+                    'name_font': {'size': 14, 'bold': True},
+                    'num_format': '0%',
+                    'max': 1})
+                #Name the x axis    
+                AnnualPercentageChartB1.set_x_axis({
+                    'name': 'Type of Case',
+                    'name_font': {'size': 14, 'bold': True},}) 
+                #set size of chart
+                AnnualPercentageChartB1.set_size({'width': 509, 'height': 413})
+                #add pivot table values as a series to chart
+                if cat=="3":
+                    Namer = "Brooklyn Goal Progress"
+                    CityPivot.insert_chart('K11',AnnualPercentageChartB1)
+                elif cat=="4":
+                    Namer = "Bronx Goal Progress"
+                    CityPivot.insert_chart('K34',AnnualPercentageChartB1)
+                elif cat=="5":
+                    Namer = "LSU Goal Progress"
+                    CityPivot.insert_chart('K56',AnnualPercentageChartB1)
+                elif cat=="6":
+                    Namer = "MLS Goal Progress"
+                    CityPivot.insert_chart('R11',AnnualPercentageChartB1)
+                elif cat=="7":
+                    Namer = "QLS Goal Progress"
+                    CityPivot.insert_chart('R34',AnnualPercentageChartB1)
+                elif cat=="8":
+                    Namer = "SILS Goal Progress"
+                    CityPivot.insert_chart('R56',AnnualPercentageChartB1)
+               
+                AnnualPercentageChartB1.add_series({
+                    'categories': CategoryRange,
+                    'name': Namer,
+                    'values': PercentagesRangeB1,
+                    'fill': {'color':'#B3A2C7'},
+                    'border': {'color': 'black'}})
+                                                            
+                      
+                                 
             writer.save()
         
         output_filename = f.filename
