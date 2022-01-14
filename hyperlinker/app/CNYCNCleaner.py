@@ -15,7 +15,20 @@ def CNYCNCleaner():
         print(request.files['file'])
         print(request.files.getlist('file')[:])
         print(len(request.files.getlist('file')[:]))
+        print(request.form['HOPPdate'])
+        print(request.form['CNYCNdate'])
         #print((request.files ['file']))
+        HOPPContractDate = request.form['HOPPdate']
+        HOPPContractDate =  DataWizardTools.DateMaker(HOPPContractDate)
+        CNYCNContractDate = request.form['CNYCNdate']
+        CNYCNContractDate =  DataWizardTools.DateMaker(CNYCNContractDate)
+        EndDate = request.form['EndDate']
+        EndDateConstruct = DataWizardTools.DateMaker(EndDate)
+        EndDate = datetime.strptime(EndDate, '%Y-%m-%d').strftime('%m/%d/%Y') 
+        print(HOPPContractDate)
+        print(CNYCNContractDate)
+        print(EndDate)
+        
         
         #adds blank dataframe
         df = pd.DataFrame()
@@ -188,7 +201,41 @@ def CNYCNCleaner():
                 return '=TEXT("' + Date + '","mm/dd/yyyy")'
             else:   
                 return Date
-            
+                
+        def OldCaseDeleter (FundingSource,DateClosed):
+            if DateClosed == "":
+                return "In contract"
+            elif FundingSource == 'HOPP':
+                if HOPPContractDate == "":
+                    return "In contract"
+                elif DateClosed < HOPPContractDate:
+                    return "delete"
+                else:
+                    return "In contract"
+            elif FundingSource != 'HOPP':
+                if CNYCNContractDate == "":
+                    return "In Contract"
+                if DateClosed < CNYCNContractDate:
+                    return "delete"
+                else:
+                    return "In contract"
+                    
+        def DateBackDater (TimeUpdated, TimeUpdatedConstruct):
+            print(type(TimeUpdated))
+            print(type(EndDate))
+            if TimeUpdatedConstruct == "":
+                return ""
+            elif EndDate == "":
+                return TimeUpdated
+            elif EndDateConstruct < TimeUpdatedConstruct:
+                return EndDate
+            else:
+                return TimeUpdated
+                
+        
+        df['Time Updated Construct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['Time Updated']),axis = 1)        
+        df['Time Updated'] = df.apply(lambda x: DateBackDater(x['Time Updated'],x['Time Updated Construct']), axis = 1)
+                      
         
         df['FundingSource'] = df.apply(lambda x: FundingSourceNamer(x['FundsNum'],x['Secondary Funding Codes']),axis = 1)
         df['Staff'] = df['Caseworker Name']
@@ -272,6 +319,9 @@ def CNYCNCleaner():
         #df['Benefits'] = 'Slightly More Complicated - see above'
         df['NewHousing'] = ''
         df['CaseClose'] = ''
+        df['Date Closed Construct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['Date Closed']),axis = 1)
+        df['In Contract?'] = df.apply(lambda x: OldCaseDeleter(x['FundingSource'],x['Date Closed Construct']),axis = 1)
+        df['Active Cases'] = df.apply(lambda x: OldCaseDeleter(x['FundingSource'],x['Time Updated Construct']),axis = 1)
 
         #Putting everything in the right order
         df = df.sort_values(by=['Caseworker Name'])
@@ -282,6 +332,9 @@ def CNYCNCleaner():
         
         #Wacky Apostrophes coming out of LegalServer
         df = df.replace("’","'",regex = True)
+        
+        #Remove cases w date closed before contract date
+        df = df[df['In Contract?'] != "delete"]
         
         #Remove Unreportables (servicer, Servdate, primary distress, primarylegal)
         
@@ -297,6 +350,7 @@ def CNYCNCleaner():
         
         if request.form.get('formatter'):
             
+            df = df[df['Active Cases'] != "delete"]
             
             df = df[['FundingSource','ClientID','Staff','IntakeDate','ServDate','Race','Ethnicity','Language','Children','Adults','Seniors','Income','Household','ZIP','County','PrimaryDist','SecondaryDist','Units','PurchaseDate','OrigDate','OrigDate2','OrigAmount','OrigAmount2','OrigTerm','OrigTerm2','LoanOwner','LoanOwner2','IntakePrincipal','IntakePrincipal2','IntakeProd','IntakeProd2','IntakeRate','IntakeRate2','IntakePay','IntakePay2','InterestOnly','InterestOnly2','LoanStatus','LoanStatus2','LPDate','Servicer','LoanNumber','Servicer2','LoanNumber2','Violation','Violation2','ServicerChange','ServicerChange2','Conference#','FirstConference','BadFaith','LegalHr','PrimaryLegal','SecondLegal','PrimarySandy','SecondSandy','ModStatus','ModStatus2','PrimaryOutcome','SecondOutcome','PrimaryOutcome2','SecondaryOutcome2','NewPrincipal','NewPrincipal2','NewTerm','NewTerm2','NewType','NewType2','NewRate','NewRate2','NewPay','NewPay2','PrincipalForgive','PrincipalForgive2','ForbearAmt','ForbearAmt2','SSPrice','SSDate','Forgiven','DILDate','Benefits','NewHousing','CaseClose','Branch&Report']]
             
@@ -371,14 +425,30 @@ def CNYCNCleaner():
     
     </br>
     </br>
+       
+    <input type = "date" id="HOPPdate" name="HOPPdate">
+    <label for = "HOPPdate"> choose HOPP contract start date! </label>
+    
+    </br>
+    
+    <input type = "date" id="CNYCNdate" name="CNYCNdate">
+    <label for = "CNYCNdate"> choose CNYCN contract start date! </label>
+    
+    </br>
+    
+    <input type = "date" id="EndDate" name="EndDate">
+    <label for = "EndDate"> choose reporting period end date! </label>
+    
+    </br>
+    </br>
 
     <input type="checkbox" id="formatter" name="formatter" value="formatter">
     <label for="formatter"> Format for Submission</label><br>
     
-    </br>
-
     <input type="checkbox" id="remover" name="remover" value="remover">
     <label for="remover"> Remove Unreportables for Formatted Report</label><br>
+    
+    
     
     </form>
     <h3>Instructions:</h3>
