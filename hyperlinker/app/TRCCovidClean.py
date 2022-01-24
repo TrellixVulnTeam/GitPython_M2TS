@@ -158,12 +158,12 @@ def upload_TRCCovidClean():
             
             if First3 == '000' and Middle2 == '00' and Last4 == '0000':
                 return ''
-            elif First3 == '000' and Middle2 == '00':
-                return 'Needs  Full SS#'
+            elif First3 == '000' and Middle2 == '00' and str.isnumeric(Last4) == True and FirstDash == '-' and SecondDash == '-': 
+                return ''
             elif str.isnumeric(First3) == True and str.isnumeric(Middle2) == True and str.isnumeric(Last4) == True and FirstDash == '-' and SecondDash == '-': 
                 return ''
             else:
-                return "Needs Correct SS # Format"
+                return 'Needs  Full SS#'
                 
         df['SS # Tester'] = df.apply(lambda x: SSNumClean(x['Social Security #']), axis=1)
         
@@ -366,6 +366,7 @@ def upload_TRCCovidClean():
         #'Duplicate Tester',
         #'Non-Housing Case Tester',
         #"Assigned Branch/CC",
+        'Caseworker Name',
         "Tester Tester",
         'Non-Housing Case?',
         'Assigned Branch/CC',
@@ -407,7 +408,14 @@ def upload_TRCCovidClean():
                 ws.conditional_format('C2:BO100000',{'type': 'text',
                                                  'criteria': 'containing',
                                                  'value': 'Must Have DHCI or PA#',
-                                                 'format': medium_problem_format})            
+                                                 'format': medium_problem_format})   
+                ws.conditional_format('C2:BO100000',{'type': 'text',
+                                                 'criteria': 'containing',
+                                                 'value': 'Enter Verification Type in LegalServer',
+                                                 'format': problem_format})
+                
+                
+                
             writer.save()
         
         output_filename = f.filename

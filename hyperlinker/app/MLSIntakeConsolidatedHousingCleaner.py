@@ -147,7 +147,7 @@ def MLSIntakeConsolidatedHousingCleaner():
         
         #Delete if everything's okay **
 
-        df = df[df['Tester Tester'] == "Case Needs Attention"]
+        #df = df[df['Tester Tester'] == "Case Needs Attention"]
 
         #assign casehandlers to Intake Paralegals:
         

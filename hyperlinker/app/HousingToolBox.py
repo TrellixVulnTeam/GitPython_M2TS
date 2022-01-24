@@ -160,7 +160,7 @@ def IncomeVerificationClean (IncomeVerification, Children, PovertyPercent, Dispo
     elif Disposition == 'Closed' and IncomeVerification =='None':
         return ''
     elif IncomeVerification == '':
-        return 'Needs Income Verification'
+        return 'Enter Verification Type in LegalServer'
     else:
         return ''
         
