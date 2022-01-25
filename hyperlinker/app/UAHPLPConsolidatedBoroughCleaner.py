@@ -5,7 +5,7 @@ from app.forms import PostForm
 from werkzeug.urls import url_parse
 from datetime import datetime
 import pandas as pd
-from playsound import playsound
+#from playsound import playsound
 
 
 
@@ -159,8 +159,8 @@ def UAHPLPConsolidatedBoroughCleaner():
         
         df = df.sort_values(by=['Primary Advocate'])
         
-        playsound("app\\static\\sound.wav")
-        print ("played")
+        #playsound("app\\static\\sound.wav")
+        #print ("played")
         
         #Create borough-specific tabs for MLS and BkLS as needed
         if request.form.get('MLS'):
