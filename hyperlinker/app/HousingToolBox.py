@@ -1,7 +1,7 @@
 #HOUSING CODE
 
 #List of proceeding types that constitute an eviction case
-evictionproceedings = ['HO','NP','IL','TT','EA','EJ']
+evictionproceedings = ['HO','NP','IL','TT']
 #Housing Type of Case Eviction-Types:
 evictiontypes = ['Holdover','Non-payment','Illegal Lockout','NYCHA Housing Termination']
 #Highest Level of Service Reps

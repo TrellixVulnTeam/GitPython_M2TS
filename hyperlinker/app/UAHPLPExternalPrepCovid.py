@@ -63,10 +63,8 @@ def UAHPLPExternalPrepCovid():
         #***should this be changed for nonhousing and/or bounced to housing tools?
         
         def UAorNonUA (TypeOfCase):
-            if TypeOfCase== "CON" or TypeOfCase== "FAM" or TypeOfCase== "HEA" or TypeOfCase== "BEN":
-                return "UA"
-            
-            elif TypeOfCase in HousingToolBox.evictionproceedings:
+
+            if TypeOfCase in HousingToolBox.evictionproceedings:
                 return "UA"
             else:
                 return "Non-UA"

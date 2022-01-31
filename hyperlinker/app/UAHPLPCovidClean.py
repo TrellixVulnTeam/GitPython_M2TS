@@ -132,7 +132,7 @@ def upload_UAHPLPCovidClean():
         #cases in certain zip codes (RTC zips) that are eviction are UA - everything else is non-UA **Bounce this to housing tools**
         
         def UAorNonUA (TypeOfCase,Zip):
-            if TypeOfCase in HousingToolBox.evictionproceedings and str(Zip) in HousingToolBox.UACZipCodes:
+            if TypeOfCase in HousingToolBox.evictionproceedings:
                 return "UA"
             else:
                 return "Non-UA"
