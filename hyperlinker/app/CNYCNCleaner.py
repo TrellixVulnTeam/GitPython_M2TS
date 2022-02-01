@@ -7,6 +7,7 @@ from werkzeug.urls import url_parse
 from datetime import datetime
 import pandas as pd
 import os
+from zipfile import ZipFile
 
 @app.route("/CNYCNCleaner", methods=['GET', 'POST'])
 def CNYCNCleaner():
@@ -18,12 +19,19 @@ def CNYCNCleaner():
         print(request.form['HOPPdate'])
         print(request.form['CNYCNdate'])
         #print((request.files ['file']))
+        #Take date from input field on cleaning tool
         HOPPContractDate = request.form['HOPPdate']
+        #Turn HOPP date into an integer
         HOPPContractDate =  DataWizardTools.DateMaker(HOPPContractDate)
+        #Take date from input field on cleaning tool
         CNYCNContractDate = request.form['CNYCNdate']
+        #Turn CNYCN date into integer
         CNYCNContractDate =  DataWizardTools.DateMaker(CNYCNContractDate)
+        #Take date from input field on cleaning tool
         EndDate = request.form['EndDate']
+        #Turn End Date into an integer
         EndDateConstruct = DataWizardTools.DateMaker(EndDate)
+        #Return date to a string in CNYCN appropriate format
         EndDate = datetime.strptime(EndDate, '%Y-%m-%d').strftime('%m/%d/%Y') 
         print(HOPPContractDate)
         print(CNYCNContractDate)
@@ -201,7 +209,9 @@ def CNYCNCleaner():
                 return '=TEXT("' + Date + '","mm/dd/yyyy")'
             else:   
                 return Date
-                
+        
+        # This function labels cases as in/out of contract period based on date input in cleaning tool   
+        #If no date is entered on cleaning tool, no case is deleted and if case is still open, it is not deleted.
         def OldCaseDeleter (FundingSource,DateClosed):
             if DateClosed == "":
                 return "In contract"
@@ -220,6 +230,7 @@ def CNYCNCleaner():
                 else:
                     return "In contract"
                     
+        #This function takes any case with a time updated after the end of contract date input to cleaning tool and changes the time updated to match the end of contract date
         def DateBackDater (TimeUpdated, TimeUpdatedConstruct):
             print(type(TimeUpdated))
             print(type(EndDate))
@@ -319,7 +330,9 @@ def CNYCNCleaner():
         #df['Benefits'] = 'Slightly More Complicated - see above'
         df['NewHousing'] = ''
         df['CaseClose'] = ''
+        #Turn Date Closed dates into integers
         df['Date Closed Construct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['Date Closed']),axis = 1)
+        #Use the (integer) dates and the funding source to determine if each case is in the contract
         df['In Contract?'] = df.apply(lambda x: OldCaseDeleter(x['FundingSource'],x['Date Closed Construct']),axis = 1)
         df['Active Cases'] = df.apply(lambda x: OldCaseDeleter(x['FundingSource'],x['Time Updated Construct']),axis = 1)
 
@@ -361,14 +374,77 @@ def CNYCNCleaner():
         
         
         
-        
+            
+        #define function, with single variable of dictionary created immediately above
+        def save_xls(ExcelSplit, TabSplit):
+            #Create dictionary of dataframes, each named after each unique value of 'assigned branch/cc'
+            excel_dict_df = dict(tuple(df.groupby(ExcelSplit)))
+            #use 'ZipFile' create empty zip folder, and assign 'newzip' as function-calling name
+            with ZipFile("app\\sheets\\zipped\\SplitBoroughs.zip","w") as newzip:
+                
+                #starts cycling through each dataframe (each borough's data)
+                for i in excel_dict_df:
+                    
+                    #because this is in for loop it creates a new excel file for each 'i' (i.e. each borough)
+                    writer = pd.ExcelWriter(path = "app\\sheets\\zipped\\" + i + ".xlsx", engine = 'xlsxwriter')
+                    
+                    #create a dictionary of dataframes for each unique advocate, within the borough that our 'i' for loop is cycling through
+                    tab_dict_df = dict(tuple(excel_dict_df[i].groupby(TabSplit)))
+                    
+                    #start cycling through each of these new advocate-based dataframes
+                    for j in tab_dict_df:
+                        
+                        #write a tab in the borough's excel sheet, composed just of the advocate's cases, with the advocate's name
+                        if request.form.get('formatter'):
+                            tab_dict_df[j].to_csv(path_or_buf = "app\\sheets\\zipped\\" + j + ".csv", index = False, sep=str(','))
+                        else:
+                            tab_dict_df[j].to_excel(writer, j, index = False)
+                        
+                            #creates ability to format tabs
+                            worksheet = writer.sheets[j]
+                            
+                            #creates and adds formatting to tab
+                            workbook = writer.book
+                            link_format = workbook.add_format({'font_color':'blue','bold':True,'underline':True})
+                            problem_format = workbook.add_format({'bg_color':'yellow'})
+                    
+                            #worksheet = writer.sheets[i]
+                            #Type of Assistance, FPU Prim Src Client Prob, Servicer
+                            FGHRowRange='F2:H'+str(tab_dict_df[j].shape[0]+1)
+                            print(FGHRowRange)
+                            
+                            #Funds Obtained
+                            NRowRange='K1:K'+str(tab_dict_df[j].shape[0]+1)
+                            
+                            worksheet.set_column('A:A',12,link_format)
+                            worksheet.set_column('B:B',20)
+                            worksheet.set_column('C:E',15)
+                            worksheet.set_column('F:L',27)
+                            worksheet.set_column('M:O',14)
+                            worksheet.set_column('P:AH',0)
+                            worksheet.conditional_format(NRowRange,{'type': 'text',
+                                                         'criteria': 'containing',
+                                                         'value': 'Fix',
+                                                         'format': problem_format})
+                            worksheet.conditional_format(FGHRowRange,{'type': 'blanks',
+                                                                     'format': problem_format})
+                            worksheet.freeze_panes(1,1)
+                        
+                    #save's excel file
+                    writer.save()
+                    #adds excel file to zipped folder
+                    if request.form.get('formatter'):
+                        newzip.write("app\\sheets\\zipped\\" + i + ".csv",arcname = i + ".csv")
+                    else:
+                        newzip.write("app\\sheets\\zipped\\" + i + ".xlsx",arcname = i + ".xlsx")
+          
         #Preparing Excel Document
         if request.form.get('formatter'):
-            borough_dictionary = dict(tuple(df.groupby('Branch&Report')))
+            save_xls(ExcelSplit = 'Branch&Report', TabSplit = 'Branch&Report')
         else:
-            borough_dictionary = dict(tuple(df.groupby('Assigned Branch/CC')))
+            save_xls(ExcelSplit = 'Assigned Branch/CC', TabSplit = 'Caseworker Name')
 
-        def save_xls(dict_df, path):
+        '''def save_xls(dict_df, path):
             writer = pd.ExcelWriter(path, engine = 'xlsxwriter')
             for i in dict_df:
                 dict_df[i].to_excel(writer, i, index = False)
@@ -401,14 +477,19 @@ def CNYCNCleaner():
             writer.save()
         output_filename = "Cleaned Foreclosure Report.xlsx"
 
-        save_xls(dict_df = borough_dictionary, path = "app\\sheets\\" + output_filename)
+        save_xls(dict_df = borough_dictionary, path = "app\\sheets\\" + output_filename)'''
         
+        output_filename = "Cleaned Foreclosure Report.xlsx"
         if request.form.get('formatter'):
             FilePrefix = "Formatted "
+            #return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = FilePrefix + output_filename)
+            return send_from_directory('sheets\\zipped','SplitBoroughs.zip', as_attachment = True)
         else:
             FilePrefix = "Cleanup "
+            return send_from_directory('sheets\\zipped','SplitBoroughs.zip', as_attachment = True)
         
-        return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = FilePrefix + output_filename)
+        #return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = FilePrefix + output_filename)
+        #return send_from_directory('sheets\\zipped','SplitBoroughs.zip', as_attachment = True,attachment_filename = FilePrefix + output_filename)
         
         #***#
        
