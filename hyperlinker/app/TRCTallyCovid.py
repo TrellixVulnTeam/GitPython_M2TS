@@ -220,7 +220,7 @@ def upload_TRCtallyCovid():
         advice_proportion['Percentage']=advice_proportion['Case Value Sum']/advice_proportion['city total enrollments']
         del advice_proportion['city total enrollments']
         #advice_proportion = advice_proportion.drop('')
-        
+            
         
         #put sheets in right order
         
@@ -267,6 +267,66 @@ def upload_TRCtallyCovid():
         ZipPivot.set_column('A:C',20,number_format)
         ProportionTable.set_column('A:D',15,number_format)
         ProportionTable.set_column('D:D',20,percent_format)
+        
+        #Chartmaking Section adapted from IOIImmTally  
+        AnnualPercentageChart = workbook.add_chart({'type':'column'})
+        AnnualPercentageChart.set_title({'name': 'Progress Toward Annual Goal'})
+        #get names from pivot table
+        # functional CategoryRange="='City Pivot'!$A$2:$A$6"
+        #Name the y axis
+        AnnualPercentageChart.set_y_axis({
+            'name': 'Percentage of Annual Goal',
+            'name_font': {'size': 14, 'bold': True},
+            'num_format': '0%'})
+        #Name the x axis    
+        AnnualPercentageChart.set_x_axis({
+            'name': 'Borough',
+            'name_font': {'size': 14, 'bold': True},}) 
+        #set size of chart
+        AnnualPercentageChart.set_size({'width': 509, 'height': 413})
+        #add pivot table values as a series to chart
+        CityPivot.insert_chart('A9',AnnualPercentageChart)
+               
+        #[sheetname, first_row, first_col, last_row, last_col]
+        AnnualPercentageChart.add_series({
+            'categories': ['City Pivot',1,0,6,0],
+            'name': "Annual TRC Performance",
+            'values': ['City Pivot',1,5,6,5],
+            'fill': {'color':'#B3A2C7'},
+            'border': {'color': 'black'}})
+            
+        #Chartmaking Testing Section adapted from above 
+        GoalsComparisonChart = workbook.add_chart({'type':'column'})
+        GoalsComparisonChart.set_title({'name': 'Goals Comparison'})
+        #get names from pivot table
+        # functional CategoryRange="='City Pivot'!$A$2:$A$6"
+        #Name the y axis
+        GoalsComparisonChart.set_y_axis({
+            'name': 'Annual Goal',
+            'name_font': {'size': 14, 'bold': True}})
+        #Name the x axis    
+        GoalsComparisonChart.set_x_axis({
+            'name': 'Borough',
+            'name_font': {'size': 14, 'bold': True},}) 
+        #set size of chart
+        GoalsComparisonChart.set_size({'width': 509, 'height': 413})
+        #add pivot table values as a series to chart
+        CityPivot.insert_chart('E9',GoalsComparisonChart)
+               
+        #[sheetname, first_row, first_col, last_row, last_col]
+        GoalsComparisonChart.add_series({
+            'categories': ['City Pivot',1,0,5,0],
+            'name': "Annual Goals",
+            'values': ['City Pivot',1,4,5,4],
+            'fill': {'color':'#B3A2C7'},
+            'border': {'color': 'black'}})
+        GoalsComparisonChart.add_series({
+            'categories': ['City Pivot',1,0,5,0],
+            'name': "Case Value",
+            'values': ['City Pivot',1,1,5,1],
+            'fill': {'color':'#449C0A'},
+            'border': {'color': 'black'},
+            'overlap': 85})
         writer.save()
         
         return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = "Tallied " + f.filename)
