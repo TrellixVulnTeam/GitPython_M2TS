@@ -147,34 +147,11 @@ def MLSIntakeConsolidatedHousingCleaner():
         
         #Delete if everything's okay **
 
-        df = df[df['Tester Tester'] == "Case Needs Attention"]
+        #df = df[df['Tester Tester'] == "Case Needs Attention"]
 
-        #assign casehandlers to Intake Paralegals:
         
-        Evelyn_Casehandlers = ['Delgadillo, Omar','Heller, Steven E','Latterner, Matt J','Robles-Castillo, Camila J','Tilyayeva, Rakhil','Almanzar, Yocari', 'Vergeli, Evelyn']
-        Diana_V_Casehandlers = ['Abbas, Sayeda','Evers, Erin C.','Hao, Lindsay','He, Ricky','Sharma, Sagar','Spencer, Eleanor G','Wilkes, Nicole','Allen, Sharette','Ortiz, Matthew B','Sun, Dao','Risener, Jennifer A','Evers, Erin C.','Surface, Ben L','Velasquez, Diana']
-        Diana_G_Casehandlers = ['Frierson, Jerome C','Saxton, Jonathan G','Orsini, Mary K','Allen, Sharette','Duffy-Greaves, Kevin','Freeman, Daniel A','Gokhale, Aparna S','Gonzalez, Matias','Gonzalez, Matias G','Labossiere, Samantha J.','Shah, Ami Mahendra', 'Garcia, Diana']
-        Keiannis_Casehandlers = ['Almanzar, Milagros','Briggs, John M','Dittakavi, Archana','Gonzalez-Munoz, Rossana G','Honan, Thomas J','James, Lelia','Kelly, Kitanya','Mottley, Darlene','Yamasaki, Emily Woo J','McCune, Mary','Vogltanz, Amy K', 'Garcia, Keiannis']
-        Dennis_Casehandlers = ['Braudy, Erica','Kulig, Jessica M','Mercedes, Jannelys J','Harshberger, Sae','Black, Rosalind','Basu, Shantonu J', 'Sanchez, Dennis']
-        Rosa_Casehandlers = ['Acron, Denise D','Anunkor, Ifeoma O','Reyes, Nicole V','Vega, Rita', 'Acosta, Rosa F']
-
-        def IntakeAssign(Casehandler):
-            if Casehandler in Evelyn_Casehandlers:
-                return "Evelyn V."
-            elif Casehandler in Diana_V_Casehandlers:
-                return "Diana V."
-            elif Casehandler in Diana_G_Casehandlers:
-                return "Diana G."
-            elif Casehandler in Keiannis_Casehandlers:
-                return "Keiannis G."
-            elif Casehandler in Dennis_Casehandlers:
-                return "Dennis S."
-            elif Casehandler in Rosa_Casehandlers:
-                return "Rosa A."
-            else:
-                return "ZZ No Intake Para Assigned"
-
-        df['Intake Paralegal'] = df.apply(lambda x: IntakeAssign(x['Primary Advocate']),axis = 1)
+        #assign casehandlers to Intake Paralegals:
+        df['Intake Paralegal'] = df.apply(lambda x: HousingToolBox.MLSIntakeAssign(x['Primary Advocate']),axis = 1)
 
         #sort by case handler
         

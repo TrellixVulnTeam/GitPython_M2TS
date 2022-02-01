@@ -1,4 +1,5 @@
 #HOUSING CODE
+import pandas as pd
 
 #List of proceeding types that constitute an eviction case
 evictionproceedings = ['HO','NP','IL','TT','EA','EJ']
@@ -702,3 +703,49 @@ def NoReleaseRedactForCovid(LevelOfService, PreThreeOne, ToRedact,Release):
                 return ToRedact
             
       
+#assign casehandlers to Intake Paralegals:
+
+
+#Evelyn_Casehandlers = ['Delgadillo, Omar','Heller, Steven E','Latterner, Matt J','Robles-Castillo, Camila J','Tilyayeva, Rakhil','Almanzar, Yocari', 'Vergeli, Evelyn']
+#Diana_V_Casehandlers = ['Abbas, Sayeda','Evers, Erin C.','Hao, Lindsay','He, Ricky','Sharma, Sagar','Spencer, Eleanor G','Wilkes, Nicole','Allen, Sharette','Ortiz, Matthew B','Sun, Dao','Risener, Jennifer A','Evers, Erin C.','Surface, Ben L','Velasquez, Diana']
+#Diana_G_Casehandlers = ['Frierson, Jerome C','Saxton, Jonathan G','Orsini, Mary K','Allen, Sharette','Duffy-Greaves, Kevin','Freeman, Daniel A','Gokhale, Aparna S','Gonzalez, Matias','Gonzalez, Matias G','Labossiere, Samantha J.','Shah, Ami Mahendra', 'Garcia, Diana']
+#Keiannis_Casehandlers = ['Almanzar, Milagros','Briggs, John M','Dittakavi, Archana','Gonzalez-Munoz, Rossana G','Honan, Thomas J','James, Lelia','Kelly, Kitanya','Mottley, Darlene','Yamasaki, Emily Woo J','McCune, Mary','Vogltanz, Amy K', 'Garcia, Keiannis']
+#Dennis_Casehandlers = ['Braudy, Erica','Kulig, Jessica M','Mercedes, Jannelys J','Harshberger, Sae','Black, Rosalind','Basu, Shantonu J', 'Sanchez, Dennis']
+#Rosa_Casehandlers = ['Acron, Denise D','Anunkor, Ifeoma O','Reyes, Nicole V','Vega, Rita', 'Acosta, Rosa F']
+
+'''def MLSIntakeAssign(Casehandler):
+    IPdf = pd.read_excel("app\\referencesheets\\MLS Intake Paralegal Splitter.xlsx")
+    #print(IPdf)
+    #Evelyn_Casehandlers = list(IPdf['Evelyn_Casehandlers'])
+    #print(Evelyn_Casehandlers)
+    #for loop can iterate over a list
+    IntakeParalegals = list(IPdf.columns.values)
+    print("The Intake Paralegals are"+str(IntakeParalegals))
+    for ColumnHeader in IntakeParalegals:
+        ColumnHeader = list(IPdf[ColumnHeader])
+        print(ColumnHeader)
+        if Casehandler in ColumnHeader:
+            #print(id(str(ColumnHeader)))
+            return ColumnHeader[0]
+            
+    return "ZZ No Intake Para Assigned"'''
+    
+def MLSIntakeAssign(Casehandler):
+    IPdf = pd.read_excel("app\\referencesheets\\MLS Intake Paralegal Splitter.xlsx")
+    #print(IPdf)
+    #Evelyn_Casehandlers = list(IPdf['Evelyn_Casehandlers'])
+    #print(Evelyn_Casehandlers)
+    #for loop can iterate over a list
+    
+    IntakeParalegals = IPdf.to_dict()
+    #print("The Intake Paralegals are"+str(IntakeParalegals))
+    
+    for ColumnHeader in IntakeParalegals:
+        print(IntakeParalegals[ColumnHeader])
+        #ColumnHeader = list(IPdf[ColumnHeader])
+        print(ColumnHeader)
+        if Casehandler in IntakeParalegals[ColumnHeader].values():
+            #print(id(str(ColumnHeader)))
+            return ColumnHeader
+            
+    return "ZZ No Intake Para Assigned"
