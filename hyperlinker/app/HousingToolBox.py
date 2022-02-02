@@ -563,6 +563,8 @@ def ServicesRendered(ServicesRendered):
     for x in splitserviceslist:
         if x == "Secured Rent Abatement":
             x = "Abatement"
+        elif x == "Secured Rent Reduction":
+            x = "Reduction"
         elif x == "Secured Order or Agreement for Repairs in Apartment/Building":
             x = "Repairs"
         elif x == "Returned Unit to Rent Regulation":
