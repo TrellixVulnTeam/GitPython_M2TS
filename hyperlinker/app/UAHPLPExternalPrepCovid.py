@@ -245,6 +245,13 @@ def UAHPLPExternalPrepCovid():
         
         df['2020NewProgramAssignment'] = df.apply(lambda x: NewProgramAssignment(x['proceeding']), axis = 1)
         
+        #remove BEN cases
+        df = df[df['proceeding'] != 'BEN']
+        
+        #remove case where HRA Consent is not Yes
+        df = df[df['HRA Release?'] == 'Yes']
+        
+        
         
         ###Finalizing Report###
         #put columns in correct order
