@@ -280,7 +280,7 @@ def ComplianceConsolidater():
         
         if request.form.get('YearEnd'):
             def TesterTester(NoAssistanceTester,TwoHundredPercentTester,OneTwentyFivePercentTester,LSCCSRTester,NoAgeTester,UntimelyClosedTester,UntimelyClosedOverriddenTester,CitImmTester,RetainerTester,ClosedBeforeOpenedTester,CSRAgreementTester,CaseStatus):
-                if NoAssistanceTester != "" or TwoHundredPercentTester != "" or OneTwentyFivePercentTester != "" or LSCCSRTester != "" or NoAgeTester != "" or UntimelyClosedTester != "" or UntimelyClosedOverriddenTester != "" or CitImmTester != "" or RetainerTester != "" or ClosedBeforeOpenedTester != "" or CSRAgreementTester != "":
+                if NoAssistanceTester != "" or TwoHundredPercentTester != "" or OneTwentyFivePercentTester != "" or LSCCSRTester != "" or NoAgeTester != "" or CitImmTester != "" or RetainerTester != "" or ClosedBeforeOpenedTester != "" or CSRAgreementTester != "":
                     return "Needs Review"
                 else:
                     return ""
@@ -316,8 +316,6 @@ def ComplianceConsolidater():
             '125-200% of Poverty Tester',
             'Funding Code 4000 Tester',
             'No Age for Client Tester',
-            'Untimely Closed Tester',
-            'Untimely Closed Overridden Tester',
             'Citizenship & Immigration Tester',
             'Retainer Tester',
             'Closed Before Opened Tester',
@@ -461,7 +459,7 @@ def ComplianceConsolidater():
         
         #Preparing Excel Document
 
-        borough_dictionary = dict(tuple(df.groupby('Primary Advocate Name')))
+        borough_dictionary = dict(tuple(df.groupby('Assigned Branch/CC')))
 
         def save_xls(dict_df, path):
             writer = pd.ExcelWriter(path, engine = 'xlsxwriter')
@@ -491,7 +489,7 @@ def ComplianceConsolidater():
                 worksheet.set_column('B:B',0)
                 worksheet.set_column('W:ZZ',0)
                 if request.form.get('YearEnd'):
-                    worksheet.set_column('U:ZZ',0)
+                    worksheet.set_column('S:ZZ',0)
                 worksheet.set_row(0,60)
                 worksheet.write_comment('F1',
                     'No Legal Assistance Documented: If we close a case as something other than ZZ, we must have some documentation of the legal assistance provided. For these, whoever closed the case may have misunderstood the meaning of “legal assistance” or “documented.” Please review and add the legal assistance documented in case notes. If there was no legal assistance, change the closing code to ZZ.',
@@ -558,9 +556,7 @@ def ComplianceConsolidater():
                 UnTimelyClosed = 'Untimely closed: These are cases where the date of closing is long past the date opened. For example, a case opened in November of 2017 and closed as A (Counsel and Advice) or B (Brief Service) in April of 2019. All A/B cases should be closed in the year that they were opened, unless they were opened after October 1st of the year or after, unless there is a good reason. If a case was closed A/B outside that rule, there must be an override with a documented reason. Higher levels of service can be closed in the calendar year after the work is completed.'
                 
                 if request.form.get('YearEnd'): 
-                    worksheet.write_comment('K1',
-                        UnTimelyClosed,
-                        {'height':70,'width':500})
+                    print('MLS Custom')
                 else:
                     worksheet.write_comment('L1',
                         UnTimelyClosed,
@@ -571,9 +567,7 @@ def ComplianceConsolidater():
                 UnTimelyOverRidden = 'Untimely Closed Overridden: Please review the reason for the override and make sure it is legitimate. Keep in mind that whether it is a “good reason” applies to us as a law firm and not the individual case handler. Reasons that are not legitimate include advocates not noticing the case had been assigned to them, or the file being lost/unassigned for a year and then an advocate closing it as soon it is assigned to them.'
                 
                 if request.form.get('YearEnd'): 
-                    worksheet.write_comment('L1',
-                        UnTimelyOverRidden,
-                        {'height':70,'width':500})
+                    print('MLS Custom')
                 else:
                     worksheet.write_comment('M1',
                         UnTimelyOverRidden,
@@ -582,7 +576,7 @@ def ComplianceConsolidater():
                 
                 CitizenAndImmigration = 'Citizenship and Immigration Compliance: These are cases for which we should have the immigrant/citizenship compliance completed but do not, such as those where we met the client in person or we provided more than Advice or Brief Service. If a client is eligible under the anti-abuse statutes and all we need is a description of the basis of eligibility, the case note acts as verification. When you fix these, please remember to edit the closing information so that the CSR calculation is updated.'
                 if request.form.get('YearEnd'):     
-                    worksheet.write_comment('M1',
+                    worksheet.write_comment('K1',
                         CitizenAndImmigration,
                         {'height':70,'width':500})
                 else: 
@@ -603,7 +597,7 @@ def ComplianceConsolidater():
                 RetainerText = 'Retainer Tester: Cases that have a Close Reason showing more than Advice/Brief Service, or a Level of Service indicating representation has been provided must have retainers. Open cases with a blank Level of Service will ask for retainers after they have been open for 2 months.'
                 
                 if request.form.get('YearEnd'):  
-                    worksheet.write_comment('N1',
+                    worksheet.write_comment('L1',
                         RetainerText,
                         {'height':70,'width':500})
                 else: 
@@ -614,7 +608,7 @@ def ComplianceConsolidater():
                 ClosedBeforeOpenedText = 'Closed Before Opened Tester: The date that a case was closed must be equal to or later than the date on which it was opened.'
                 
                 if request.form.get('YearEnd'): 
-                    worksheet.write_comment('O1',
+                    worksheet.write_comment('M1',
                         ClosedBeforeOpenedText,
                         {'height':70,'width':500})
                 else: 
@@ -625,7 +619,7 @@ def ComplianceConsolidater():
                 CSRAgreementText = 'CSR Agreement Tester: The underlying case data seems to contradict the CSR value calculated by LegalServer. Please review this case to ensure that CSR was recalculated appropriately or that a manual override was performed for valid reasons.'
                 
                 if request.form.get('YearEnd'): 
-                    worksheet.write_comment('P1',
+                    worksheet.write_comment('N1',
                         CSRAgreementText,
                         {'height':70,'width':500})
                 else:

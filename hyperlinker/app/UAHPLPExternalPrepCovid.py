@@ -248,8 +248,21 @@ def UAHPLPExternalPrepCovid():
         #remove BEN cases
         df = df[df['proceeding'] != 'BEN']
         
-        #remove case where HRA Consent is not Yes
-        df = df[df['HRA Release?'] == 'Yes']
+        
+        #remove non pre-12/1 advice case where HRA Consent is not Yes
+
+        def ReleaseRemove(ServiceType, PostTwelveOne, HRARelease):
+            if ServiceType == "Advice Only" and PostTwelveOne == "No":
+                return "Keep"
+            elif ServiceType == "Brief Legal Assistance" and PostTwelveOne == "No":
+                return "Keep"
+            elif HRARelease == "Yes":
+                return "Keep"
+            else:
+                return "Remove"
+        df['Remove Cases?'] = df.apply(lambda x: ReleaseRemove(x['service_type'], x['Post 12/1/21 Elig Date?'], x['HRA Release?']), axis=1)
+        
+        df = df[df['Remove Cases?'] != 'Remove']
         
         
         
@@ -298,6 +311,7 @@ def UAHPLPExternalPrepCovid():
         #'Pre-3/1/20 Elig Date?',
         'Post 12/1/21 Elig Date?',
         '2020NewProgramAssignment',
+        'Remove Cases?',
         'Legal Problem Code',
         'BoroughByZip',
         'Assigned Branch/CC'
