@@ -58,6 +58,9 @@ def index():
     <b>IOI:</b>
     <ul type="disc">
     
+    <li><a href="/IOIOnePreparer"> IOI 1 Preparer</a></li>
+    <br>
+    
     <li><a href="/IOIimmQuarterly">Quarterly IOI Immigration</a></li>
     <li><a href="/IOIimmTally"> IOI Immigration Tally</a></li>
     <br>
