@@ -125,7 +125,7 @@ def TRCExternalPrepCovid():
         
         
 
-        
+        """
         #Flag cases that don't have housing-based legal problem codes for Kim's review, after 9/30
         
         def NonHousing (LegalProblemCode):
@@ -135,7 +135,7 @@ def TRCExternalPrepCovid():
                 return 'Needs Review'
     
         df['Non-Housing Case Tester'] = df.apply(lambda x: NonHousing(x['Legal Problem Code']), axis=1)
-        
+        """
       
         
         ##different guidelines for post 3/1/20 eligibility dates
@@ -174,40 +174,6 @@ def TRCExternalPrepCovid():
                 return DOB
         df['DOB'] = df.apply(lambda x: RedactBirthday(x['Post 12/1/21 Elig Date?'], x['service_type'], x['Date of Birth'],x['Primary Funding Code']), axis=1)
         
-        #Redacting Function Blank
-        def RedactAnything(PostTwelveOne, ServiceType, ToRedact, PrimaryFunding, ProblemCode, Consent):
-            if PostTwelveOne == "No":
-                if ServiceType == 'Advice Only':
-                    if PrimaryFunding == "3011 TRC FJC Initiative" and Consent == "Yes":
-                        return ToRedact
-                    else:
-                        return ""
-                else:
-                    return ToRedact
-            else:
-                return ToRedact
-        df['DHCI'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['Housing Signed DHCI Form'], x['Primary Funding Code'], x['Legal Problem Code'], x['HRA Release?']), axis=1)
-        
-        #No names, (not full date etc.)
-        df['first_name'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['Client First Name'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
-        df['last_name'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['Client Last Name'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
-        
-        #also redact PA#, SS#, LT#, address, monthly rent, individual or group, years in apt, referral source, annual income, DHCI, posture of case on eligibility, at or below 200%, # of units in buildling, subsidy type, housing type, outcome, outcome date, services renderd to client, activity indicators, 
-        
-        df['PA_number'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['PA_number'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
-        
-        df['SSN'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['SSN'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
-        
-        df['Street'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['Street'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
-         
-        df['Unit'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['Unit'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
-          
-        #df['city'] = df.apply(lambda x: RedactAnything(x['service_type'], x['city'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
-           
-        df['street_number'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['street_number'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
-            
-        df['rent'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['rent'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
-        
         def RedactLT(PostTwelveOne, ServiceType, ToRedact, PrimaryFunding, ProblemCode, Consent):
             if PostTwelveOne == "No":
                 if ServiceType == 'Advice Only':
@@ -221,34 +187,73 @@ def TRCExternalPrepCovid():
                 return ToRedact
         
         df['LT_index'] = df.apply(lambda x: RedactLT(x['Post 12/1/21 Elig Date?'], x['service_type'], x['LT_index'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
-         
-        df['proceeding_level'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['proceeding_level'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
-          
-        df['years_in_apt'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['years_in_apt'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
-           
-        df['referral_source'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['referral_source'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
-            
-        df['income'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['income'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
-             
-        df['DHCI'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['DHCI'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
         
-        df['posture'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['posture'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
+        #Redacting Function Blank
+        def RedactAnything(PostTwelveOne, ServiceType, ToRedact, PrimaryFunding, ProblemCode, Consent, Referral):
+            if PostTwelveOne == "No":
+                if ServiceType == 'Advice Only':
+                    if PrimaryFunding == "3011 TRC FJC Initiative" or Referral.startswith("FJC") == True:
+                        if Consent == "Yes":
+                            return ToRedact
+                        else:
+                            return ""
+                    else:
+                        return ""
+                else:
+                    return ToRedact
+            else:
+                return ToRedact
+        df['DHCI'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['Housing Signed DHCI Form'], x['Primary Funding Code'], x['Legal Problem Code'], x['HRA Release?'], x['Referral Source']), axis=1)
+        
+        #No names, (not full date etc.)
+        df['first_name'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['Client First Name'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?'], x['Referral Source']), axis=1)
+        df['last_name'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['Client Last Name'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?'], x['Referral Source']), axis=1)
+        
+        #also redact PA#, SS#, LT#, address, monthly rent, individual or group, years in apt, referral source, annual income, DHCI, posture of case on eligibility, at or below 200%, # of units in buildling, subsidy type, housing type, outcome, outcome date, services renderd to client, activity indicators, 
+        
+        df['PA_number'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['PA_number'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?'], x['Referral Source']), axis=1)
+        
+        df['SSN'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['SSN'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?'], x['Referral Source']), axis=1)
+        
+        df['Street'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['Street'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?'], x['Referral Source']), axis=1)
+         
+        df['Unit'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['Unit'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?'], x['Referral Source']), axis=1)
+          
+        #df['city'] = df.apply(lambda x: RedactAnything(x['service_type'], x['city'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
+           
+        df['street_number'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['street_number'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?'], x['Referral Source']), axis=1)
+            
+        df['rent'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['rent'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?'], x['Referral Source']), axis=1)
+        
+       
+         
+        df['proceeding_level'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['proceeding_level'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?'], x['Referral Source']), axis=1)
+          
+        df['years_in_apt'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['years_in_apt'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?'], x['Referral Source']), axis=1)
+           
+        df['referral_source'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['referral_source'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?'], x['Referral Source']), axis=1)
+            
+        df['income'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['income'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?'], x['Referral Source']), axis=1)
+             
+        df['DHCI'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['DHCI'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?'], x['Referral Source']), axis=1)
+        
+        df['posture'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['posture'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?'], x['Referral Source']), axis=1)
          
         #df['below_200_FPL'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['below_200_FPL'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
           
-        df['units_in_bldg'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['units_in_bldg'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
+        df['units_in_bldg'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['units_in_bldg'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?'], x['Referral Source']), axis=1)
         
-        df['subsidy_type'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['subsidy_type'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
+        df['subsidy_type'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['subsidy_type'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?'], x['Referral Source']), axis=1)
          
-        df['housing_type'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['housing_type'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
+        df['housing_type'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['housing_type'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?'], x['Referral Source']), axis=1)
           
-        df['outcome_date'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['outcome_date'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
+        df['outcome_date'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['outcome_date'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?'], x['Referral Source']), axis=1)
            
-        df['outcome'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['outcome'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
+        df['outcome'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['outcome'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?'], x['Referral Source']), axis=1)
         
-        df['services_rendered'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['services_rendered'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
+        df['services_rendered'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['services_rendered'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?'], x['Referral Source']), axis=1)
            
-        df['activities'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['activities'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?']), axis=1)
+        df['activities'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['activities'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?'], x['Referral Source']), axis=1)
         
         ###Finalizing Report###
         #put columns in correct order
@@ -294,7 +299,7 @@ def TRCExternalPrepCovid():
         'Primary Advocate',
         'Hyperlinked CaseID#',
         'Legal Problem Code',
-        'Non-Housing Case Tester',
+        #'Non-Housing Case Tester',
         'Primary Funding Code'
         ]]
         
@@ -336,6 +341,7 @@ def TRCExternalPrepCovid():
     <h3>Instructions:</h3>
     <ul type="disc">
     <li>This tool is meant to be used in conjunction with the LegalServer report called <a href="https://lsnyc.legalserver.org/report/dynamic?load=1969" target="_blank">TRC External Report</a>.</li>
+    <li>This tool can also be used with the LegalServer report called <a href="https://lsnyc.legalserver.org/report/dynamic?load=1507" target="_blank">TRC Raw Case Data Report</a>.</li>
     
     </ul>
     </br>
