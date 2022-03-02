@@ -50,6 +50,8 @@ def index():
     <li><a href="/TRCDuplicateIdentifier">TRC Identify Duplicates</a></li>
     </br>
     <li><a href="/MLSIntakeConsolidatedHousingCleaner">MLS Consolidated Intake Cleaner</a></li>
+    </br>
+    <li><a href="/AllHousingSimpler">All Housing Report Tester</a></li>
     
     
     </ul>

@@ -24,7 +24,7 @@ moment = Moment(app)
 
 from app import routes, models, errors, app
 
-from app import IOIimmQuarterly, Hyperlink, IOIempQuarterly, IOIempTally, TRCCovidClean, TRCTallyCovid, UAHPLPCovidClean, BoroughSplitter, DHCIExtractorPrep, SuperSplitter, DAPException, IOLADollarCleaner, TRCExternalPrepCovid, ComplianceConsolidater, UAHPLPExternalPrepCovid, BoxTester, LSCCovidPrep, UAHPLPConsolidatedBoroughCleaner, PTOEstimator, TRCDuplicateIdentifier, AllHousing, CSRDeterminer, ComplianceConsolidaterYearEnd, CNYCNCleaner, RadSearcher, Sandbox1, IOIimmTally, AccessLineSplitter, WaiverMaker, IOIWaiverMaker, MLSIntakeConsolidatedHousingCleaner, AnnualComparer, IOIOnePreparer
+from app import IOIimmQuarterly, Hyperlink, IOIempQuarterly, IOIempTally, TRCCovidClean, TRCTallyCovid, UAHPLPCovidClean, BoroughSplitter, DHCIExtractorPrep, SuperSplitter, DAPException, IOLADollarCleaner, TRCExternalPrepCovid, ComplianceConsolidater, UAHPLPExternalPrepCovid, BoxTester, LSCCovidPrep, UAHPLPConsolidatedBoroughCleaner, PTOEstimator, TRCDuplicateIdentifier, AllHousing, CSRDeterminer, ComplianceConsolidaterYearEnd, CNYCNCleaner, RadSearcher, Sandbox1, IOIimmTally, AccessLineSplitter, WaiverMaker, IOIWaiverMaker, MLSIntakeConsolidatedHousingCleaner, AnnualComparer, IOIOnePreparer, AllHousingSimpler
 
 if not app.debug:
     if app.config['MAIL_SERVER']:
