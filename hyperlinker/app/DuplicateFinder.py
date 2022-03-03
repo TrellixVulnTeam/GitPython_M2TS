@@ -40,7 +40,7 @@ def DuplicateFinder():
         
         #create unique identifier:
         
-        df['DupEligID'] = df["First Name"]+df["Last Name"]+df["Legal Problem Code"] +df["Client Date of Birth"] + df['Close Reason'] + str(df['Client Social Security #'])
+        df['DupEligID'] = df["First Name"]+df["Last Name"]+df["Legal Problem Code"] +df["Client Date of Birth"] + str(df['Client Social Security #'])
         
         df['DuplicatedClient&EligDate?Bool'] = df.duplicated(['DupEligID'])
         
