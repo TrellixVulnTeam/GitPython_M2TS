@@ -277,24 +277,30 @@ def AllHousingSecondStep():
                             ws.autofilter('B1:CG1') 
                             ws.freeze_panes(1, 2) 
                             C2BOFullRange='C2:BO'+str(tab_dict_df[j].shape[0]+1) 
-                            print("BORowRange is "+ str(C2BOFullRange)) 
+                            print("BORowRange is "+ str(C2BOFullRange))
+                            CILoc = df.columns.get_loc("Hyperlinked CaseID#")
+                            #print(CILoc)
+                            #(first_row, first_col, last_row, last_col)
+                            shape = (tab_dict_df[j].shape[0]+1)
+                            FTLoc=df.columns.get_loc("Funding Tester")
+                            #print("0," + str(PALoc) + "," + str(shape) + "," + str(PALoc)   )
                             ws.conditional_format(C2BOFullRange,{'type': 'text', 
                                                              'criteria': 'containing', 
                                                              'value': 'No Release - Remove Elig Date', 
                                                              'format': bad_problem_format}) 
-                            ws.conditional_format('AA2:AA100000',{'type': 'text', 
+                            ws.conditional_format(0,FTLoc,shape,FTLoc,{'type': 'text', 
                                                              'criteria': 'containing', 
                                                              'value': "secondary", 
                                                              'format': bad_problem_format}) 
-                            ws.conditional_format('AA2:AA100000',{'type': 'text', 
+                            ws.conditional_format(0,FTLoc,shape,FTLoc,{'type': 'text', 
                                                              'criteria': 'containing', 
                                                              'value': "Needs", 
                                                              'format': bad_problem_format}) 
-                            ws.conditional_format('AA2:AA100000',{'type': 'text', 
+                            ws.conditional_format(0,FTLoc,shape,FTLoc,{'type': 'text', 
                                                              'criteria': 'containing', 
                                                              'value': "Targeted", 
                                                              'format': bad_problem_format}) 
-                            ws.conditional_format('AA2:AA100000',{'type': 'text', 
+                            ws.conditional_format(0,FTLoc,shape,FTLoc,{'type': 'text', 
                                                              'criteria': 'containing', 
                                                              'value': "many", 
                                                              'format': bad_problem_format}) 
@@ -361,7 +367,7 @@ def AllHousingSecondStep():
                             ws.conditional_format('C1:BO1',{'type': 'text', 
                                                              'criteria': 'containing', 
                                                              'value': 'Date of Birth', 
-                                                             'format': medium_problem_format})                                                          
+                                                             'format': medium_problem_format})                                                                                                            
                         writer.save()
                         #adds excel file to zipped folder
                         newzip.write("app\\sheets\\zipped\\" + i + " " + f.filename[:-5] + ".xlsx",arcname = i + " " + f.filename[:-5] +  ".xlsx")
