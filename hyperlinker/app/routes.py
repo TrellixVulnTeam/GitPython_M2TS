@@ -52,6 +52,7 @@ def index():
     <li><a href="/MLSIntakeConsolidatedHousingCleaner">MLS Consolidated Intake Cleaner</a></li>
     </br>
     <li><a href="/AllHousingSimpler">All Housing Report Tester</a></li>
+    <li><a href="/AllHousingSecondStep">All Housing Second Step</a></li>
     
     
     </ul>
