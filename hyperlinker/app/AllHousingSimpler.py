@@ -573,10 +573,33 @@ def AllHousingSimpler():
                  
         df['Funding Tester'] = df.apply(lambda x: FundingTester(x['Primary Funding Code'],x['Secondary Funding Codes']), axis = 1) 
          
-              
-         
-         
-         
+        def HousingTabAssigner (PrimaryFunding,SecondaryFunding):
+            UAHPLP = ['3121 Universal Access to Counsel – (UAC)','3122 Universal Access to Counsel – (UAC)','3123 Universal Access to Counsel – (UAC)','3124 Universal Access to Counsel – (UAC)','3125 Universal Access to Counsel – (UAC)','3111 HPLP-Homelessness Prevention Law Project','3112 HPLP-Homelessness Prevention Law Project','3113 HPLP-Homelessness Prevention Law Project','3114 HRA-HPLP-Homelessness Prevention Law Project','3115 HPLP-Homelessness Prevention Law Project']
+            TRC = ['3018 Tenant Rights Coalition (TRC)','3011 TRC FJC Initiative'] 
+            Housing = UAHPLP + TRC
+            SplitSecondaryList = list(set(SecondaryFunding.split(', '))) 
+            if PrimaryFunding in UAHPLP:
+                return "UA HPLP"
+            elif PrimaryFunding in TRC:
+                return "TRC"
+            elif SecondaryFunding == "":
+                return "Other Cases"
+            elif len(SplitSecondaryList) == 1:
+                if SplitSecondaryList[0] in UAHPLP:
+                    return "UA HPLP"
+                elif SplitSecondaryList[0] in TRC:
+                    return "TRC"
+                else:
+                    return "Other Cases"
+            elif UAHPLP in SplitSecondaryList:
+                return "UA HPLP"
+            elif TRC in SplitSecondaryList:
+                return "TRC"
+            else:
+                return "Other Cases"
+        
+        df['Housing Tab Assignment'] = df.apply(lambda x: HousingTabAssigner(x['Primary Funding Code'],x['Secondary Funding Codes']), axis = 1)
+        
          
         
         #Tester Tester 
@@ -641,7 +664,7 @@ def AllHousingSimpler():
         df = df.sort_values(by=['Tester Tester']) 
          
          
-        #Put everything in the right order 
+        #Put everything in the right order **link the second step to this list**
          
         df = df[['Hyperlinked CaseID#', 
         "Assigned Branch/CC", 
@@ -703,7 +726,8 @@ def AllHousingSimpler():
         "Retainer on File", 
         "Case Involves Covid-19", 
         "Legal Problem Code", 
-        "Agency", 
+        "Agency",
+        "Housing Tab Assignment",
         #'Post-3/1 Limited Service Tester' 
          
  
@@ -819,11 +843,7 @@ def AllHousingSimpler():
                                                  'value': 'Date of Birth', 
                                                  'format': medium_problem_format})                                                  
                                                   
-                                                  
-                ws.conditional_format(C2BOFullRange,{'type': 'text', 
-                                                 'criteria': 'containing', 
-                                                 'value': 'Must Have DHCI or PA#', 
-                                                 'format': medium_problem_format})             
+                                                               
             writer.save() 
          
         output_filename = f.filename 
