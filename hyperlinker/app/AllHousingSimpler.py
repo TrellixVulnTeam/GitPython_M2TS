@@ -727,6 +727,7 @@ def AllHousingSimpler():
         "Case Involves Covid-19", 
         "Legal Problem Code", 
         "Agency",
+        "Matter/Case ID#",
         "Housing Tab Assignment",
         #'Post-3/1 Limited Service Tester' 
          
