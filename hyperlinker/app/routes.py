@@ -23,7 +23,7 @@ def index():
     <b>General Purpose:</b>
     <ul type="disc">
     <li><a href="/Hyperlinker">Hyperlinker</a></li>
-    <li><a href="/BoroughSplitter">Borough Splitter</a></li>
+    <li><a href="/AllPurposeSplitter">All Purpose Splitter</a></li>
 
     <li><a href="/AccessLineSplitter">Access Line Splitter</a></li>
     
