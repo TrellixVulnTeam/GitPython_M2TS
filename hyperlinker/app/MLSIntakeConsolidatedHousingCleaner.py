@@ -151,7 +151,7 @@ def MLSIntakeConsolidatedHousingCleaner():
 
         
         #assign casehandlers to Intake Paralegals:
-        df['Intake Paralegal'] = df.apply(lambda x: HousingToolBox.MLSIntakeAssign(x['Primary Advocate']),axis = 1)
+        df['Assigned Paralegal'] = df.apply(lambda x: HousingToolBox.MLSIntakeAssign(x['Primary Advocate'],x['Caseworker Name']),axis = 1)
 
         #sort by case handler
         
@@ -192,14 +192,15 @@ def MLSIntakeConsolidatedHousingCleaner():
         
         "Tester Tester",
         "Assigned Branch/CC",
-        "Intake Paralegal",
+        "Assigned Paralegal",
+        "Caseworker Name",
         "Date Closed"
         ]]      
         
         #Preparing Excel Document
         
         #Split into different tabs
-        allgood_dictionary = dict(tuple(df.groupby('Intake Paralegal')))
+        allgood_dictionary = dict(tuple(df.groupby('Assigned Paralegal')))
         
         def save_xls(dict_df, path):
             writer = pd.ExcelWriter(path, engine = 'xlsxwriter')

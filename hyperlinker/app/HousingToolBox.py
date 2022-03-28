@@ -732,7 +732,8 @@ def NoReleaseRedactForCovid(LevelOfService, PreThreeOne, ToRedact,Release):
             
     return "ZZ No Intake Para Assigned"'''
     
-def MLSIntakeAssign(Casehandler):
+def MLSIntakeAssign(Advocate, Caseworker):
+    #If person who opened (Caseworker) is columnheader, return person
     IPdf = pd.read_excel("app\\referencesheets\\MLS Intake Paralegal Splitter.xlsx")
     #print(IPdf)
     #Evelyn_Casehandlers = list(IPdf['Evelyn_Casehandlers'])
@@ -742,12 +743,17 @@ def MLSIntakeAssign(Casehandler):
     IntakeParalegals = IPdf.to_dict()
     #print("The Intake Paralegals are"+str(IntakeParalegals))
     
+    
     for ColumnHeader in IntakeParalegals:
-        print(IntakeParalegals[ColumnHeader])
+        #print(IntakeParalegals[ColumnHeader])
         #ColumnHeader = list(IPdf[ColumnHeader])
-        print(ColumnHeader)
-        if Casehandler in IntakeParalegals[ColumnHeader].values():
+        #print(ColumnHeader)
+        if Caseworker in IntakeParalegals[ColumnHeader].values():
+            return ColumnHeader
+            
+    for ColumnHeader in IntakeParalegals:
+        if Advocate in IntakeParalegals[ColumnHeader].values():
             #print(id(str(ColumnHeader)))
             return ColumnHeader
             
-    return "ZZ No Intake Para Assigned"
+    return "Stephanie S."
