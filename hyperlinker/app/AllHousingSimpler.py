@@ -196,7 +196,9 @@ def AllHousingSimpler():
          
         #Years in Apartment Can't be 0 (can be -1) **in process, close age problem 
         def YearsClean (Years,Age): 
-            if Years == 0: 
+            if isinstance(Years, int) == False:
+                return str(Years) + ", Answer needs to be integer"
+            elif Years == 0: 
                 return '0, Needs Years In Apartment' 
             elif Years > Age+1: 
                 return str(int(Years)) + ', Needs years not exceeding client age' 
