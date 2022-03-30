@@ -158,12 +158,10 @@ def split_by_borough():
      
      <input type = "text" id="SplitCategory2" name="SplitCategory2">
     <label for ="SplitCategory2"> Type column name here</label><br><br>
-    
     </br>
     
     </form>
-    
-    
+        
     <h3>Instructions:</h3>
     <ul type="disc">
     <li>Browse your computer using the "Browse" button above to find the LegalServer excel document that you want to split into different workbooks and/or tabs.</li> 
@@ -172,7 +170,14 @@ def split_by_borough():
     <li>If you'd like to split the tabs on your workbook, follow the same steps in the Tab Split section</li>    
     <li>Click ‘Split!’ and you should shortly be given a prompt to either open the file directly or save the file to your computer.</li> 
     <li>When you first open the file, all case numbers will display as ‘0’ until you click “Enable Editing” in excel, this will populate the fields.</li> 
-    <li>In order for this tool to work your column header with boroughs in it needs to read as "Assigned Branch/CC" and the borough names must be in standard LegalServer format.</li>
+    </br>
+    </ul>
+    <h3>Limitations:</h3>
+    <ul type="disc">
+    <li>This tool works with raw Legal Server data and will not maintain formatting.</li>
+    <li>For this tool to work, your column header with boroughs in it needs to read as "Assigned Branch/CC" and the borough names must be in standard LegalServer format.</li>
+    <li>Be advised, there is a character limit for the length of a tab name (31 characters) and a tab name cannot include the '/' character.</li>
+    <li>If you're typing/pasting in your own column header, make sure the default option (the one that says "Or write one in below") is chosen on the dropdown menu.</li>
     </ul>
     </br>
     <a href="/">Home</a>
