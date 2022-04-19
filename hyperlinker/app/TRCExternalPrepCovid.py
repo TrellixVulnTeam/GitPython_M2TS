@@ -86,8 +86,27 @@ def TRCExternalPrepCovid():
                 return "Needs Review"
         df['proceeding_level'] = df.apply(lambda x: ProceedingLevel(x['Housing Building Case?'], x['proceeding'], HousingToolBox.evictionproceedings), axis=1)
         
+        def StandardizeYears (YIA):
+            YIA=str(YIA)
+            if YIA == "":
+                return ""
+            elif ',' in YIA:
+                YIA=YIA.replace(',','')
+                return int(YIA)
+            elif int(YIA) <=-1:
+                return .5
+            else:
+                return int(YIA)
+                
+        df['years_in_apt'] = df.apply(lambda x:StandardizeYears(x['Housing Years Living In Apartment']),axis=1)
+            
+        
+        #df['Housing Years Living In Apartment']= df['Housing Years Living In Apartment'].replace(',','',regex=True,inplace=True)
+        #df['Housing Years Living In Apartment']= df['Housing Years Living In Apartment'].astype(str)
+        #df['Housing Years Living In Apartment']= df['Housing Years Living In Apartment'].astype(int)
+        
         #For years in apartment, negative 1 or less = 0.5***
-        df['years_in_apt'] = df['Housing Years Living In Apartment'].apply(lambda x: .5 if x <= -1 else x)
+        #df['years_in_apt'] = df['Housing Years Living In Apartment'].apply(lambda x: .5 if x <= -1 else x)
         
         
         #Case posture on eligibility date (on trial, no stipulation etc.) - transform them into the HRA initials
@@ -144,9 +163,11 @@ def TRCExternalPrepCovid():
         #Sum household in adult column and leave children blank
         #These changes only applied to 3018??
         def HousholdSum (PostTwelveOne, ServiceType,  NumAdults, NumChildren, PrimaryFunding):
+            if NumChildren == "":
+                NumChildren = 0
             if PostTwelveOne == "No":
                 if ServiceType == "Advice Only" and PrimaryFunding != "3011 TRC FJC Initiative":
-                    return NumAdults + NumChildren
+                    return NumAdults + int(NumChildren)
                 else:
                     return NumAdults
             else:
