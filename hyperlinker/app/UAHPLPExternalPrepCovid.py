@@ -94,8 +94,25 @@ def UAHPLPExternalPrepCovid():
                 return ""
         df['proceeding_level'] = df.apply(lambda x: ProceedingLevel(x['Housing Building Case?'], x['proceeding'], HousingToolBox.evictionproceedings), axis=1)
         
+        
+        
+        def StandardizeYears (YIA):
+            YIA=str(YIA)
+            if YIA == "":
+                return ""
+            elif ',' in YIA:
+                YIA=YIA.replace(',','')
+                return int(YIA)
+            elif int(YIA) <=-1:
+                return .5
+            else:
+                return int(YIA)
+                
+        df['years_in_apt'] = df.apply(lambda x:StandardizeYears(x['Housing Years Living In Apartment']),axis=1)
+        
+        
         #For years in apartment, negative 1 or less = 0.5
-        df['years_in_apt'] = df['Housing Years Living In Apartment'].apply(lambda x: .5 if x <= -1 else x)
+        #df['years_in_apt'] = df['Housing Years Living In Apartment'].apply(lambda x: .5 if x <= -1 else x)
         
         
         #Case posture on eligibility date (on trial, no stipulation etc.) - transform them into the HRA initials
@@ -105,6 +122,8 @@ def UAHPLPExternalPrepCovid():
         #Level of Service becomes Service type 
         df['service_type'] = df.apply(lambda x: HousingToolBox.UACServiceType(x['Housing Level of Service'],x['program_name'],x['Close Reason'],x['Legal Problem Code']), axis=1)
         
+        
+        df['Percentage of Poverty'] = df['Percentage of Poverty'].apply(lambda x: 0 if x == '' else x)
         #if below 201, = 'Yes' otherwise 'No'
         df['below_200_FPL'] = df['Percentage of Poverty'].apply(lambda x: "Yes" if x < 200 else "No")
     
@@ -148,6 +167,8 @@ def UAHPLPExternalPrepCovid():
         
         #Sum household in adult column and leave children blank
         def HousholdSum (ServiceType, PostTwelveOne, NumAdults, NumChildren):
+            if NumChildren == "":
+                NumChildren = 0
             if ServiceType == "Advice Only" and PostTwelveOne == "No":
                 return NumAdults + NumChildren
             elif ServiceType == "Brief Legal Assistance" and PostTwelveOne == "No":
