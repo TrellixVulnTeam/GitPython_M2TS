@@ -34,9 +34,26 @@ def upload_UAHPLPCovidClean():
         df['Assigned Branch/CC'] = df.apply(lambda x : DataWizardTools.OfficeAbbreviator(x['Assigned Branch/CC']),axis=1)   
 
 
-        #Has to have an HRA Release
+       
         
-        df['HRA Release Tester'] = df.apply(lambda x: HousingToolBox.HRAReleaseClean(x['HRA Release?'],x['HAL Eligibility Date']), axis=1)
+        #Has to have an HRA Release
+        #add level of service, advice/brief without release and with case index #, NEED release
+        def HRAReleaseClean (HRARelease,EligibilityDate,LoS,IndexNum):
+            if HRARelease == 'Yes':
+                return ''
+            elif LoS == 'Advice' or LoS == 'Brief Service': 
+                if HRARelease == 'No' or HRARelease == '':
+                    if IndexNum != '' and IndexNum.startswith('N') == False and IndexNum.startswith('n') == False:
+                        return 'Needs HRA Release due to index num'
+            
+            if HRARelease == 'No' and EligibilityDate != '':
+                return 'No Release - Remove Elig Date'
+            elif HRARelease == '' and EligibilityDate != '':
+                return 'No Release - Remove Elig Date'
+            else:
+                return 'Needs HRA Release'
+        
+        df['HRA Release Tester'] = df.apply(lambda x: HRAReleaseClean(x['HRA Release?'],x['HAL Eligibility Date'],x['Housing Level of Service'],x['Gen Case Index Number']), axis=1)
         
         #Has to have a Housing Type of Case
         

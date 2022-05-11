@@ -281,11 +281,18 @@ def UAHPLPExternalPrepCovid():
                 return "Keep"
             else:
                 return "Remove"
-        df['Remove Cases?'] = df.apply(lambda x: ReleaseRemove(x['service_type'], x['Post 12/1/21 Elig Date?'], x['HRA Release?']), axis=1)
+        df['Remove post 12-1 Cases?'] = df.apply(lambda x: ReleaseRemove(x['service_type'], x['Post 12/1/21 Elig Date?'], x['HRA Release?']), axis=1)
         
-        df = df[df['Remove Cases?'] != 'Remove']
+        df = df[df['Remove post 12-1 Cases?'] != 'Remove']
         
-        
+        def ReleaseRemoveTwo(ServiceType, CaseNum,Release):
+            if ServiceType == "Advice Only" or ServiceType == "Brief Service":
+                if CaseNum != "" and CaseNum.startswith("n") == False and CaseNum.startswith("N") == False:
+                    if Release == "" or Release == "No":
+                        return "Remove"
+        df['Remove no release yes index cases'] = df.apply(lambda x: ReleaseRemoveTwo(x['service_type'],x['LT_index'],x['HRA Release?']), axis = 1)
+       
+        df = df[df['Remove no release yes index cases'] != 'Remove']
         
         ###Finalizing Report###
         #put columns in correct order
@@ -332,10 +339,11 @@ def UAHPLPExternalPrepCovid():
         #'Pre-3/1/20 Elig Date?',
         'Post 12/1/21 Elig Date?',
         '2020NewProgramAssignment',
-        'Remove Cases?',
+        #'Remove Cases?',
         'Legal Problem Code',
         'BoroughByZip',
-        'Assigned Branch/CC'
+        'Assigned Branch/CC',
+        #'Remove no release yes index cases'
         ]]
         
         

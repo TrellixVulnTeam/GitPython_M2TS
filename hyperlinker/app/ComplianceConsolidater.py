@@ -29,14 +29,14 @@ def ComplianceConsolidater():
         df['Matter/Case ID#'] = df.apply(lambda x : DataWizardTools.RemoveNoCaseID(x['Matter/Case ID#']),axis=1)        
         df = df[df['Matter/Case ID#'] != 'No Case ID']
         
-        #Checkbox determines if it does lsu or all non-LSU
+        #Checkbox determines which unit gets prepared, and offers alternative code for 'year end' compliance reports. 
         if request.form.get('LSU'):
             df = df[df['Assigned Branch/CC'] == "Legal Support Unit"]
         elif request.form.get('QLS'):
             df = df[df['Assigned Branch/CC'] == "Queens Legal Services"]
         elif request.form.get('MLS'):
             df = df[df['Assigned Branch/CC'] == "Manhattan Legal Services"]
-        elif request.form.get('BkLS'):
+        elif request.form.get('BLS'):
             df = df[df['Assigned Branch/CC'] == "Brooklyn Legal Services"]
         elif request.form.get('BxLS'):
             df = df[df['Assigned Branch/CC'] == "Bronx Legal Services"]
@@ -44,7 +44,7 @@ def ComplianceConsolidater():
             df = df[df['Assigned Branch/CC'] == "Staten Island Legal Services"]
         else:
             df = df
-        
+        #year end only looks at closed cases 
         if request.form.get('YearEnd'):
             df = df[df['Date Closed'] != ""]
         
@@ -53,7 +53,7 @@ def ComplianceConsolidater():
         
         #Remove duplicate Case ID #s
         
-        #df = df.drop_duplicates(subset='Hyperlinked Case #', keep = 'first')
+        df = df.drop_duplicates(subset=['Hyperlinked CaseID#'], keep = 'first')
         
         #This is where all the functions happen:
         
@@ -276,24 +276,36 @@ def ComplianceConsolidater():
                 
         df['CSR Agreement Tester'] = df.apply(lambda x : CSRAgreementTester(x['Date Closed'],x['CSR Eligible'],x['Python CSR Tester']),axis=1)
         
+        
+        # can't have zz IOLA outcome
+        
+        def OutcomeTester(Outcome):
+            Outcome = str(Outcome)
+            if 'ZZ-' in Outcome:
+                return 'Needs Review'
+            else: 
+                return ''
+        df['Outcome Tester'] = df.apply(lambda x : OutcomeTester(x['Outcome']),axis = 1)
+        
+        
         #make a tester tester (for year end)
         
         if request.form.get('YearEnd'):
-            def TesterTester(NoAssistanceTester,TwoHundredPercentTester,OneTwentyFivePercentTester,LSCCSRTester,NoAgeTester,UntimelyClosedTester,UntimelyClosedOverriddenTester,CitImmTester,RetainerTester,ClosedBeforeOpenedTester,CSRAgreementTester,CaseStatus):
-                if NoAssistanceTester != "" or TwoHundredPercentTester != "" or OneTwentyFivePercentTester != "" or LSCCSRTester != "" or NoAgeTester != "" or CitImmTester != "" or RetainerTester != "" or ClosedBeforeOpenedTester != "" or CSRAgreementTester != "":
+            def TesterTester(NoAssistanceTester,TwoHundredPercentTester,OneTwentyFivePercentTester,LSCCSRTester,NoAgeTester,UntimelyClosedTester,UntimelyClosedOverriddenTester,CitImmTester,RetainerTester,ClosedBeforeOpenedTester,CSRAgreementTester,CaseStatus,OutcomeTester):
+                if NoAssistanceTester != "" or TwoHundredPercentTester != "" or OneTwentyFivePercentTester != "" or LSCCSRTester != "" or NoAgeTester != "" or CitImmTester != "" or RetainerTester != "" or ClosedBeforeOpenedTester != "" or CSRAgreementTester != "" or OutcomeTester != "":
                     return "Needs Review"
                 else:
                     return ""
-            df['Tester Tester'] = df.apply(lambda x : TesterTester(x['No Legal Assistance Documented Tester'],x['200% of Poverty Tester'],x['125-200% of Poverty Tester'],x['Funding Code 4000 Tester'],x['No Age for Client Tester'],x['Untimely Closed Tester'],x['Untimely Closed Overridden Tester'],x['Citizenship & Immigration Tester'],x['Retainer Tester'],x['Closed Before Opened Tester'],x['CSR Agreement Tester'],x['Case Status']),axis=1)        
+            df['Tester Tester'] = df.apply(lambda x : TesterTester(x['No Legal Assistance Documented Tester'],x['200% of Poverty Tester'],x['125-200% of Poverty Tester'],x['Funding Code 4000 Tester'],x['No Age for Client Tester'],x['Untimely Closed Tester'],x['Untimely Closed Overridden Tester'],x['Citizenship & Immigration Tester'],x['Retainer Tester'],x['Closed Before Opened Tester'],x['CSR Agreement Tester'],x['Case Status'],x['Outcome Tester']),axis=1)        
 
         else:
         #includes active advocate and 90-day tester
-            def TesterTester(NoAssistanceTester,AgeTester,TwoHundredPercentTester,OneTwentyFivePercentTester,LSCCSRTester,NoAgeTester,UntimelyClosedTester,UntimelyClosedOverriddenTester,CitImmTester,ActAdvTester,RetainerTester,ClosedBeforeOpenedTester,CSRAgreementTester,CaseStatus):
-                if NoAssistanceTester != "" or AgeTester != "" or TwoHundredPercentTester != "" or OneTwentyFivePercentTester != "" or LSCCSRTester != "" or NoAgeTester != "" or UntimelyClosedTester != "" or UntimelyClosedOverriddenTester != "" or CitImmTester != "" or ActAdvTester != "" or RetainerTester != "" or ClosedBeforeOpenedTester != "" or CSRAgreementTester != "":
+            def TesterTester(NoAssistanceTester,AgeTester,TwoHundredPercentTester,OneTwentyFivePercentTester,LSCCSRTester,NoAgeTester,UntimelyClosedTester,UntimelyClosedOverriddenTester,CitImmTester,ActAdvTester,RetainerTester,ClosedBeforeOpenedTester,CSRAgreementTester,CaseStatus, OutcomeTester):
+                if NoAssistanceTester != "" or AgeTester != "" or TwoHundredPercentTester != "" or OneTwentyFivePercentTester != "" or LSCCSRTester != "" or NoAgeTester != "" or UntimelyClosedTester != "" or UntimelyClosedOverriddenTester != "" or CitImmTester != "" or ActAdvTester != "" or RetainerTester != "" or ClosedBeforeOpenedTester != "" or CSRAgreementTester != "" or OutcomeTester != "":
                     return "Needs Review"
                 else:
                     return ""
-            df['Tester Tester'] = df.apply(lambda x : TesterTester(x['No Legal Assistance Documented Tester'],x['No Time Entered for 90 Days Tester'],x['200% of Poverty Tester'],x['125-200% of Poverty Tester'],x['Funding Code 4000 Tester'],x['No Age for Client Tester'],x['Untimely Closed Tester'],x['Untimely Closed Overridden Tester'],x['Citizenship & Immigration Tester'],x['Active Advocate Tester'],x['Retainer Tester'],x['Closed Before Opened Tester'],x['CSR Agreement Tester'],x['Case Status']),axis=1)        
+            df['Tester Tester'] = df.apply(lambda x : TesterTester(x['No Legal Assistance Documented Tester'],x['No Time Entered for 90 Days Tester'],x['200% of Poverty Tester'],x['125-200% of Poverty Tester'],x['Funding Code 4000 Tester'],x['No Age for Client Tester'],x['Untimely Closed Tester'],x['Untimely Closed Overridden Tester'],x['Citizenship & Immigration Tester'],x['Active Advocate Tester'],x['Retainer Tester'],x['Closed Before Opened Tester'],x['CSR Agreement Tester'],x['Case Status'],x['Outcome Tester']),axis=1)        
         
         #remove cases that don't need compliance review
         df = df[df['Tester Tester'] != ""]
@@ -320,6 +332,7 @@ def ComplianceConsolidater():
             'Retainer Tester',
             'Closed Before Opened Tester',
             'CSR Agreement Tester',
+            'Outcome Tester',
             'Date Opened',
             'Case Status',
             'Level of Service',
@@ -355,9 +368,12 @@ def ComplianceConsolidater():
             'ConstructAge',
             'Special Legal Problem Code',
             'Tester Tester',
+            'Outcome',
+            
             'Most Recent Note',
             'Serv Max Body']]
-        
+            
+        #not year end version
         else:
             df = df[['Hyperlinked CaseID#',
             'Assigned Branch/CC',
@@ -377,6 +393,7 @@ def ComplianceConsolidater():
             'Retainer Tester',
             'Closed Before Opened Tester',
             'CSR Agreement Tester',
+            'Outcome Tester',
             'Date Opened',
             'Case Status',
             'Level of Service',
@@ -412,6 +429,8 @@ def ComplianceConsolidater():
             'ConstructAge',
             'Special Legal Problem Code',
             'Tester Tester',
+            'Outcome',
+            
             'Most Recent Note',
             'Serv Max Body']]
         
@@ -451,6 +470,8 @@ def ComplianceConsolidater():
         #Choose what to split things by:
         if request.form.get('LSU'):
             df['TabSplitValue'] = df.apply(lambda x : TabSplitter(x['Primary Advocate Name']),axis = 1)
+        elif request.form.get('BLS'):
+            df['TabSplitValue'] = df['Primary Advocate Name']
         else:
             df['TabSplitValue'] = df.apply(lambda x : DataWizardTools.UnitSplitter(x['Legal Problem Code']),axis = 1)
         
@@ -459,7 +480,7 @@ def ComplianceConsolidater():
         
         #Preparing Excel Document
 
-        borough_dictionary = dict(tuple(df.groupby('Assigned Branch/CC')))
+        borough_dictionary = dict(tuple(df.groupby('TabSplitValue')))
 
         def save_xls(dict_df, path):
             writer = pd.ExcelWriter(path, engine = 'xlsxwriter')
@@ -485,9 +506,9 @@ def ComplianceConsolidater():
                 worksheet.autofilter('A1:V1')
                 worksheet.set_column('A:A',15,link_format)
                 worksheet.set_column('C:C',20)
-                worksheet.set_column('D:V',13)
+                worksheet.set_column('D:W',13)
                 worksheet.set_column('B:B',0)
-                worksheet.set_column('W:ZZ',0)
+                worksheet.set_column('X:ZZ',0)
                 if request.form.get('YearEnd'):
                     worksheet.set_column('S:ZZ',0)
                 worksheet.set_row(0,60)
@@ -627,7 +648,16 @@ def ComplianceConsolidater():
                         CSRAgreementText,
                         {'height':70,'width':500})
 
-
+                OutcomeText = 'This case has been assigned an IOLA outcome of "ZZ-Administrative Closing", but has a close reason indicating that services were provided. Please review and correct this inconsistency.'
+                
+                if request.form.get('YearEnd'): 
+                    worksheet.write_comment('O1',
+                        OutcomeText,
+                        {'height':70,'width':500})
+                else:
+                    worksheet.write_comment('S1',
+                        OutcomeText,
+                        {'height':70,'width':500})
 
 
 
@@ -644,8 +674,8 @@ def ComplianceConsolidater():
 
         if request.form.get('MLS'):
             return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = "MLS " + f.filename)
-        elif request.form.get('BkLS'):
-            return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = "BkLS " + f.filename)
+        elif request.form.get('BLS'):
+            return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = "BLS " + f.filename)
         elif request.form.get('BxLS'):
             return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = "BxLS " + f.filename)
         elif request.form.get('SILS'):
@@ -679,8 +709,8 @@ def ComplianceConsolidater():
     <label for="QLS"> QLS Compliance</label><br>
     <input type="checkbox" id="MLS" name="MLS" value="MLS">
     <label for="MLS"> MLS Compliance</label><br>
-    <input type="checkbox" id="BkLS" name="BkLS" value="BkLS">
-    <label for="BkLS"> BkLS Compliance</label><br>
+    <input type="checkbox" id="BLS" name="BLS" value="BLS">
+    <label for="BLS"> BLS Compliance</label><br>
     <input type="checkbox" id="BxLS" name="BxLS" value="BxLS">
     <label for="BxLS"> BxLS Compliance</label><br>
     <input type="checkbox" id="SILS" name="SILS" value="SILS">
