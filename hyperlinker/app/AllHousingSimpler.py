@@ -88,11 +88,11 @@ def AllHousingSimpler():
             UAHPLPFund = ['3121 Universal Access to Counsel – (UAC)','3122 Universal Access to Counsel – (UAC)','3123 Universal Access to Counsel – (UAC)','3124 Universal Access to Counsel – (UAC)','3125 Universal Access to Counsel – (UAC)','3111 HPLP-Homelessness Prevention Law Project','3112 HPLP-Homelessness Prevention Law Project','3113 HPLP-Homelessness Prevention Law Project','3114 HRA-HPLP-Homelessness Prevention Law Project','3115 HPLP-Homelessness Prevention Law Project'] 
             LoSEmpty = ["", "Hold For Review"] 
             if 20210701 > EliDC > 20000101: 
-                return "Remove old EDate Case" 
+                return "Liz to check or remove old EDate Case" 
             elif 20000101 >= EliDC > 0: 
-                return "Review old EDate" 
+                return "Liz to review old EDate" 
             elif TdC < EliDC: 
-                return "Review future EDate" 
+                return "Liz to review future EDate" 
             elif HRARelease == 'Yes' and EligibilityDate != '': 
                 return 'Reportable' 
             elif Pre12 == "Pre 12/1 Eligible Case": 
@@ -135,6 +135,29 @@ def AllHousingSimpler():
                 return HousingLevel 
          
         df['Housing Level of Service'] = df.apply(lambda x: HousingLevelClean(x['Housing Level of Service']), axis=1) 
+        
+        #Close Reason must match Level of Service in some way
+        #Does out of court advocacy need to be to a certain level? Full rep?***
+        '''def CloseReasonClean (Close, LOS, PFC):
+            TRC = ['3018 Tenant Rights Coalition (TRC)','3011 TRC FJC Initiative'] 
+            if Close != "":
+                if LOS == "Advice":
+                    if Close == "A - Counsel and Advice":
+                        return "Advice Fine"
+                    else:
+                        return "Needs alignment of Level of Service & Close Reason"
+                elif LOS == "Brief Service":
+                    if Close == "A - Counsel and Advice" and PFC in TRC:
+                        return "TRC BA, fine"
+                    elif Close == "B - Limited Action (Brief Service)" or Close == "F - Negotiated Settlement w/out Litigation":
+                        return "Brief B or F, Fine"
+                    else:
+                        return "Brief service case needs close reason B or F"
+                else:
+                    return "Other cases untested, Liz to review"
+            else:
+                return "Close is Blank, fine"
+        df['Close Tester'] = df.apply(lambda x:CloseReasonClean(x['Close Reason'],x['Housing Level of Service'],x['Primary Funding Code']), axis=1)'''
          
         #Has to say whether or not it's a building case **Tester column removed 
         def BuildingCaseClean (BuildingCase): 
@@ -193,23 +216,31 @@ def AllHousingSimpler():
             else: 
                 return Subsidy 
         df['Housing Subsidy Type'] = df.apply(lambda x: SubsidyClean(x['Housing Subsidy Type']), axis=1) 
-         
+        
+        df['BDay Construct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['Date of Birth']),axis=1)        
+        
         #Years in Apartment Can't be 0 (can be -1) **in process, close age problem 
-        def YearsClean (Years,Age): 
+        def YearsClean (Years,Age,DOB,TDC,BDC): 
+            
             if isinstance(Years, int) == False:
                 return str(Years) + ", Answer needs to be integer"
+            elif DOB == "":
+                return "Needs Date of Birth"
+            elif TDC - BDC < 180000:
+                return "Needs adult client DOB"
+            elif Years*10000 > TDC-BDC:
+                return str(int(Years)) + ", Needs Years not exceeding client age"
             elif Years == 0: 
                 return '0, Needs Years In Apartment' 
-            elif Years > Age+1: 
-                return str(int(Years)) + ', Needs years not exceeding client age' 
             elif Years > 99: 
                 return str(int(Years)) + ', Needs Valid Number' 
             elif Years < -1: 
-                return str(int(Years)) + ', Unless <1 yr in apt, Needs positive number' 
+                return str(int(Years)) + ', Unless <1 yr in apt, Needs positive number'
             else: 
-                return Years 
-        df['Housing Years Living In Apartment'] = df.apply(lambda x: YearsClean(x['Housing Years Living In Apartment'],x['Age at Intake']), axis=1) 
+                return Years
+        df['Housing Years Living In Apartment'] = df.apply(lambda x: YearsClean(x['Housing Years Living In Apartment'],x['Age at Intake'],x['Date of Birth'],x['TodayConstruct'],x['BDay Construct']), axis=1) 
          
+        #Years > Age+1: return str(int(Years)) + ', Needs years not exceeding client age'
         #Language Can't be Blank or Unknown **in process, Not entered? 
         def LanguageClean (Language): 
             if Language == '' or Language == 'Unknown': 
@@ -224,7 +255,7 @@ def AllHousingSimpler():
         #df['Income Verification Tester'] = df.apply(lambda x: HousingToolBox.IncomeVerificationClean(x['Housing Income Verification'], x['Number of People under 18'], x['Percentage of Poverty'],x['Case Disposition']), axis=1) 
          
         #Test if social security number is correct format (or ignore it if there's a valid PA number) 
-         
+        # if First3 == '000' and Middle2 == '00' and Last4 == '0000': return CaseNum + ' Needs SS#' 
         def SSNumClean (CaseNum,PACit): 
             CaseNum = str(CaseNum) 
             First3 = CaseNum[0:3] 
@@ -232,10 +263,8 @@ def AllHousingSimpler():
             Last4 = CaseNum[7:11] 
             FirstDash = CaseNum[3:4] 
             SecondDash = CaseNum[6:7] 
-             
-            if First3 == '000' and Middle2 == '00' and Last4 == '0000': 
-                return CaseNum + ' Needs SS#' 
-            elif str.isnumeric(First3) == True and str.isnumeric(Middle2) == True and str.isnumeric(Last4) == True and FirstDash == '-' and SecondDash == '-':  
+            
+            if str.isnumeric(First3) == True and str.isnumeric(Middle2) == True and str.isnumeric(Last4) == True and FirstDash == '-' and SecondDash == '-':  
                 return CaseNum 
             elif "citizen" in str(PACit): 
                 return "Has No SSN" 
@@ -445,7 +474,8 @@ def AllHousingSimpler():
          
          
         #Test # of adults (can't be 0) 
-         
+        
+
         def AdultTester (HouseholdAdults,Under18s,BirthDate): 
             if HouseholdAdults == 0 and Under18s == 0: 
                     return "Needs Household Members" 
@@ -488,35 +518,80 @@ def AllHousingSimpler():
             else: 
                 return "" 
         df['Over-18 Tester'] = df.apply(lambda x: AdultTester(x['Number of People 18 and Over'],x['Number of People under 18'],x['Date of Birth']), axis = 1) 
+        
+        def DOBTester (BirthDate, TDC, BDC):
+            if BirthDate == "":
+                return "Needs Client DOB"
+            elif TDC - BDC < 180000:
+                return str(BirthDate) + ", Client needs to be 18+"
+            else:
+                return BirthDate
+                
+        df['Date of Birth'] = df.apply(lambda x: DOBTester(x['Date of Birth'],x['TodayConstruct'],x['BDay Construct']), axis = 1)
+        
+        def Over18Tester (Over, Under):
+            if Over == 0 and Under == 0:
+                return str(Over) + ", Needs Household Members"
+            elif Over == 0 and Under != 0:
+                return str(Over) + ", Needs Over 18 household member"
+            else:
+                return Over
+                
+        df['Number of People 18 and Over'] = df.apply(lambda x: Over18Tester(x['Number of People 18 and Over'],x['Number of People under 18']), axis = 1)       
          
         #date of waiver approval & waiver categories - if there's something in one but not the other, then flag it. **in process, zip code? 
          
-        def WaiverTester (WaiverType,WaiverDate,Poverty,RefSou,Type,LoS,PrimaryFunding): 
-            UAHPLPFund = ['3121 Universal Access to Counsel – (UAC)','3122 Universal Access to Counsel – (UAC)','3123 Universal Access to Counsel – (UAC)','3124 Universal Access to Counsel – (UAC)','3125 Universal Access to Counsel – (UAC)','3111 HPLP-Homelessness Prevention Law Project','3112 HPLP-Homelessness Prevention Law Project','3113 HPLP-Homelessness Prevention Law Project','3114 HRA-HPLP-Homelessness Prevention Law Project','3115 HPLP-Homelessness Prevention Law Project'] 
+        def WaiverTester (WaiverType,WaiverDate,Poverty,RefSou,Type,LoS,PrimaryFunding,EDC): 
+            UAHPLPFund = ['3121 Universal Access to Counsel – (UAC)','3122 Universal Access to Counsel – (UAC)','3123 Universal Access to Counsel – (UAC)','3124 Universal Access to Counsel – (UAC)','3125 Universal Access to Counsel – (UAC)','3111 HPLP-Homelessness Prevention Law Project','3112 HPLP-Homelessness Prevention Law Project','3113 HPLP-Homelessness Prevention Law Project','3114 HRA-HPLP-Homelessness Prevention Law Project','3115 HPLP-Homelessness Prevention Law Project']
+            global HousingFundingCodes
+            HousingFundingCodes= ['3121 Universal Access to Counsel – (UAC)','3122 Universal Access to Counsel – (UAC)','3123 Universal Access to Counsel – (UAC)','3124 Universal Access to Counsel – (UAC)','3125 Universal Access to Counsel – (UAC)','3111 HPLP-Homelessness Prevention Law Project','3112 HPLP-Homelessness Prevention Law Project','3113 HPLP-Homelessness Prevention Law Project','3114 HRA-HPLP-Homelessness Prevention Law Project','3115 HPLP-Homelessness Prevention Law Project','3018 Tenant Rights Coalition (TRC)','3011 TRC FJC Initiative'] 
             if Poverty < 201: 
-                return "Income Eligible" 
-            elif LoS == "Advice": 
-                return "Advice Eligible" 
-            elif LoS == "Brief Service" and PrimaryFunding in UAHPLPFund: 
-                return "Brief UAHPLP Eligible" 
-            elif WaiverType !="" and WaiverDate != "": 
-                return "Already waived in" 
-            elif WaiverType != "" and WaiverDate == "": 
-                if LoS.startswith('Representation') == True and Type in evictiontypes: 
-                    return "Needs income waiver date 09/20/2021" 
-                else: 
-                    return "Needs Waiver Date" 
+                if WaiverType == "" and WaiverDate == "":
+                    return "Income Eligible, <201%"
+                else:
+                    return "Needs waiver fields cleared, income eligible case does not need waiver"
+            elif PrimaryFunding == "3011 TRC FJC Initiative":
+                if WaiverDate == "" and WaiverType == "":
+                    return "Needs waiver type, 'FJC Waiver' and waiver date '11/28/2016'"
+                elif WaiverDate != "11/28/2016": 
+                    return "Needs waiver date '11/28/2016'"
+                elif WaiverType == "":
+                    return "Needs waiver type 'FJC Waver'"
+                else:
+                    return "FJC waiver, fine"
+            elif PrimaryFunding != "3011 TRC FJC Initative" and WaiverType == "FJC Waiver":
+                return "Needs change, only cases referred by FJC (3011) can have FJC waiver"
+            elif WaiverType != "" and WaiverDate != "": 
+                return "Already has waiver"
             elif WaiverDate != "" and WaiverType == "": 
                 return "Needs Waiver Type" 
-            elif PrimaryFunding == "3011 TRC FJC Initiative" and WaiverDate != "11/28/2016": 
-                return "Needs waiver type 'income', dated 11/28/2016" 
-            elif RefSou == "HRA": 
-                return "Needs waiver type 'income' with HRA referral date" 
-            elif LoS.startswith('Representation') == True and Type in evictiontypes: 
-                return "Needs waiver type 'income', dated 09/20/2021" 
+            elif WaiverType != "" and WaiverDate == "":
+                return "Needs Waiver Date"
+            elif PrimaryFunding not in HousingFundingCodes:
+                return "Not housing case, waiver not needed at this time"
+            elif "Needs" in LoS:
+                return "Missing Level of Service, waiver need unknown"
+            elif "Needs" in Type:
+                return "Missing Type of Case, waiver need unknown"
+            elif PrimaryFunding in HousingFundingCodes:
+                if LoS == "Advice":
+                    return "Housing Advice, no waiver needed"
+                elif PrimaryFunding in UAHPLPFund and LoS == "Brief Service":
+                    return "UAHPLP Brief, no waiver needed"
+                elif Type == "Illegal Lockout":
+                    return "Needs update, ILO has categorical income waiver with date '09/20/2021'"
+                elif 20210630 < EDC < 20220318:
+                    if LoS.startswith('Representation') == True and Type in evictiontypes: 
+                        return "Needs update, pre 3/18/22 full rep evic has categorical income waiver w date '09/20/2021'" 
+                    else: 
+                        return "pre 3/18 non Full Rep eviction case, may need waiver requested"
+                elif LoS.startswith('Representation') == True and Type in evictiontypes:
+                    return "if Edate pre 3/18/22, has categorical waiver, otherwise may need waiver requested"
+                else:
+                    return "Possible waiver request needed for non-eviction / non-full rep eviction cases"
             else: 
-                return "Possible waiver request needed" 
-        df['Waiver Tester'] = df.apply(lambda x: WaiverTester(x['Housing TRC HRA Waiver Categories'],x['Housing Date Of Waiver Approval'],x['Percentage of Poverty'],x['Referral Source'],x['Housing Type Of Case'],x['Housing Level of Service'],x['Primary Funding Code']), axis = 1) 
+                return "Possible waiver request needed - Liz to check" 
+        df['Waiver Tester'] = df.apply(lambda x: WaiverTester(x['Housing TRC HRA Waiver Categories'],x['Housing Date Of Waiver Approval'],x['Percentage of Poverty'],x['Referral Source'],x['Housing Type Of Case'],x['Housing Level of Service'],x['Primary Funding Code'],x['EDate Construct']), axis = 1) 
          
         #Test if Poverty Percentage > 1000% **Tester column removed 
          
@@ -532,12 +607,12 @@ def AllHousingSimpler():
         #**in process, FJC?, secondary funding codes answer checked 
         #source of unique 'set' below - https://stackoverflow.com/questions/12897374/get-unique-values-from-a-list-in-python 
         def FundingTester (PrimaryFunding,SecondaryFunding): 
-            HousingFundingCodes= ['3121 Universal Access to Counsel – (UAC)','3122 Universal Access to Counsel – (UAC)','3123 Universal Access to Counsel – (UAC)','3124 Universal Access to Counsel – (UAC)','3125 Universal Access to Counsel – (UAC)','3111 HPLP-Homelessness Prevention Law Project','3112 HPLP-Homelessness Prevention Law Project','3113 HPLP-Homelessness Prevention Law Project','3114 HRA-HPLP-Homelessness Prevention Law Project','3115 HPLP-Homelessness Prevention Law Project','3018 Tenant Rights Coalition (TRC)','3011 TRC FJC Initiative'] 
             GFCodes = ['2157 OCA-City-wide Civil Legal Services Grant','3020 CLS-Civil Legal Services','4000 LSC - Basic Grant','4100 IOLA - General','5221 SSUSA-Single Stop USA'] 
             GFCodesAll = GFCodes + ['5510 CB9 Manhattanville-West Harlem Tenant Advocacy Project'] 
             ManhattanFundingCodes= ['3123 Universal Access to Counsel – (UAC)','3115 HPLP-Homelessness Prevention Law Project'] 
             #WholeUniCodes= HousingFundingCodes + GFCodesAll 
             SplitSecondaryList = list(set(SecondaryFunding.split(', '))) 
+            #AllFundingList = list(SplitSecondaryList+PrimaryFunding)
             #SplitSecondarySet = set(SplitSecondaryList) 
             #SplitSecondaryList = list(SplitSecondarySet) 
             #print(SplitSecondaryList) 
@@ -545,12 +620,21 @@ def AllHousingSimpler():
              
             if SecondaryFunding != "": 
                 if len(SplitSecondaryList) > 1: 
-                    return "Too many funding codes" 
+                    if PrimaryFunding in HousingFundingCodes:
+                        if PrimaryFunding in SplitSecondaryList:
+                            if SplitSecondaryList[0] in GFCodesAll or SplitSecondaryList[1] in GFCodesAll:
+                                return "Regular housing double, likely okay"
+                            else :
+                                return "Needs review. Too many funding codes, housing problem"
+                        else:
+                            return "Needs review. Too many funding codes, 3 different codes"
+                    else:
+                        return "Needs review. Too many funding codes, 3 diff, not prim. housing"
                 elif PrimaryFunding in GFCodesAll and SplitSecondaryList[0] in GFCodesAll: 
                     return "All General, Fine" 
                 elif PrimaryFunding not in HousingFundingCodes: 
                     if SplitSecondaryList[0] in HousingFundingCodes: 
-                        return "HRA Funding code can only be secondary to self" 
+                        return "Needs review, HRA Funding code can only be secondary to self" 
                     else: 
                         return "Targeted" 
                 elif PrimaryFunding in ManhattanFundingCodes and "5510 CB9 Manhattanville-West Harlem Tenant Advocacy Project" in SplitSecondaryList: 
@@ -580,6 +664,7 @@ def AllHousingSimpler():
             TRC = ['3018 Tenant Rights Coalition (TRC)','3011 TRC FJC Initiative'] 
             Housing = UAHPLP + TRC
             SplitSecondaryList = list(set(SecondaryFunding.split(', '))) 
+            #print (SplitSecondaryList)
             if PrimaryFunding in UAHPLP:
                 return "UA HPLP"
             elif PrimaryFunding in TRC:
@@ -593,15 +678,15 @@ def AllHousingSimpler():
                     return "TRC"
                 else:
                     return "Other Cases"
-            elif UAHPLP in SplitSecondaryList:
+            elif SplitSecondaryList[0] in UAHPLP or SplitSecondaryList[1] in UAHPLP:
                 return "UA HPLP"
-            elif TRC in SplitSecondaryList:
+            elif SplitSecondaryList[0] in TRC or SplitSecondaryList[1] in TRC:
                 return "TRC"
             else:
                 return "Other Cases"
         
         df['Housing Tab Assignment'] = df.apply(lambda x: HousingTabAssigner(x['Primary Funding Code'],x['Secondary Funding Codes']), axis = 1)
-        
+       
          
         
         #Tester Tester 
@@ -642,7 +727,7 @@ def AllHousingSimpler():
                 return "Needs Cleanup" 
             elif "Needs" in str(PovertyPercentTester): 
                 return "Needs Cleanup" 
-            elif "Needs" in WaiverTester: 
+            elif "Needs" in str(WaiverTester): 
                 return "Needs Cleanup" 
             elif "Needs" in FundingTester or "secondary" in FundingTester or "many" in FundingTester or "Targeted" in FundingTester: 
                 return "Needs Cleanup" 
@@ -670,8 +755,8 @@ def AllHousingSimpler():
          
         df = df[['Hyperlinked CaseID#', 
         "Assigned Branch/CC", 
-        "Tester Tester", 
-        'Primary Advocate', 
+        #'Tester Tester', 
+        "Primary Advocate", 
         "Date Opened", 
         "Date Closed", 
         "Client First Name", 
@@ -691,6 +776,7 @@ def AllHousingSimpler():
         "Housing Type Of Case", 
         "Housing Level of Service", 
         "Close Reason", 
+        #'Close Tester',
         "Housing Building Case?", 
         "Primary Funding Code", 
         "Secondary Funding Codes", 
@@ -710,9 +796,9 @@ def AllHousingSimpler():
         "Housing Outcome", 
         "Housing Outcome Date", 
         "Assigned Branch/CC", 
-        "Number of People 18 and Over","Number of People under 18","Over-18 Tester", 
-        "Date of Birth", 
-        "Over 62?", 
+        "Number of People 18 and Over","Number of People under 18",
+        #"Over-18 Tester", 
+        "Date of Birth",
         "Percentage of Poverty", 
         "Case Disposition", 
         "Housing Date Of Waiver Approval","Housing TRC HRA Waiver Categories","Waiver Tester", 
@@ -721,6 +807,8 @@ def AllHousingSimpler():
         "Income Types", 
         "Total Annual Income ", 
         "Housing Funding Note", 
+        "Age at Intake",
+        "Over 62?",
         "Total Time For Case", 
         "Service Date", 
         "Caseworker Name", 
@@ -752,6 +840,7 @@ def AllHousingSimpler():
                 regular_format = workbook.add_format({'font_color':'black'}) 
                 problem_format = workbook.add_format({'bg_color':'yellow'}) 
                 bad_problem_format = workbook.add_format({'bg_color':'red'}) 
+                Liz_check_format = workbook.add_format({'bg_color':'#4397EC'}) 
                 medium_problem_format = workbook.add_format({'bg_color':'cyan'}) 
                 ws.set_column('A:A',20,link_format) 
                 ws.set_column('B:B',16) 
@@ -773,6 +862,10 @@ def AllHousingSimpler():
                                                  'criteria': 'containing', 
                                                  'value': "Needs", 
                                                  'format': bad_problem_format}) 
+                ws.conditional_format(C2BOFullRange,{'type': 'text', 
+                                                 'criteria': 'containing', 
+                                                 'value': "Liz to", 
+                                                 'format': Liz_check_format})
                 ws.conditional_format('AA2:AA100000',{'type': 'text', 
                                                  'criteria': 'containing', 
                                                  'value': "Targeted", 
