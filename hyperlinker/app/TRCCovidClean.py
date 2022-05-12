@@ -30,7 +30,7 @@ def upload_TRCCovidClean():
         
         if request.form.get('EastHarlem'):
         
-            Evelyn_Casehandlers = ['Delgadillo, Omar','Heller, Steven E','Latterner, Matt J','Tilyayeva, Rakhil','Almanzar, Yocari']
+            Evelyn_Casehandlers = ['Delgadillo, Omar','Heller, Steven E','Latterner, Matt J','Tilyayeva, Rakhil','Almanzar, Yocari', 'Rockett, Molly C','Gonzalez-Munoz, Rossana G']
             
             def EastHarlemCase(PrimaryAdvocate):
                 if PrimaryAdvocate in Evelyn_Casehandlers:
