@@ -287,6 +287,7 @@ def UAHPLPExternalPrepCovid():
         
         def ReleaseRemoveTwo(ServiceType, CaseNum,Release):
             if ServiceType == "Advice Only" or ServiceType == "Brief Service":
+                CaseNum = str(CaseNum)
                 if CaseNum != "" and CaseNum.startswith("n") == False and CaseNum.startswith("N") == False:
                     if Release == "" or Release == "No":
                         return "Remove"
