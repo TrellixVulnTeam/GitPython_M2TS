@@ -54,7 +54,7 @@ def WaiverMaker():
         df['Provider'] = 'LSNYC'
         
         #Add Contact Person column
-        df['Contact Person'] = ''
+        df['Contact Person'] = '[Name of person preparing request] & Liz Cardenas'
         
         #Add Date of Request column
         df['Date of Request'] = date.today().strftime("%m/%d/%Y")
@@ -184,55 +184,86 @@ def WaiverMaker():
             else:
                 return "No"'''
                 
+        #Puts dates in a format that can be compared (yyyymmdd) 
+        df['EDate Construct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['HAL Eligibility Date']),axis=1) 
+        
+        df['BlanklessTypeofCase']=df['Housing Type Of Case'].fillna('BLANK')
+        
         #Add Already Waived In? column - hra referrals and eviction w court case
-        def WaivedIn(Ref,FPL,CaseType,CaseNum):
+        def WaivedIn(Ref,FPL,CaseType,CaseNum,EDC):
             CaseType = str(CaseType)
             CaseNum = str(CaseNum)
             #CaseNum = CaseNum.lower()
-            if Ref == "HRA" and FPL >= 201:
-                return "HRA Referral"
-            elif FPL < 201:
-                return "No Need"
-            elif CaseType in HousingToolBox.evictiontypes:
-                if CaseNum.startswith('n') == False and CaseNum.startswith('N') == False: 
-                    return "EVC w Court Case"
+            #print (CaseType)
+            #df.fillna('BLANK',inplace = True)   ***       
+            if FPL < 201:
+                #print(FPL)
+                return "No Need, < 201"
+            elif CaseType == "BLANK":
+                return "Unclear, Type of Case missing"
+            elif CaseType == "Illegal Lockout":
+                return "Yes, ILO cases waived in for FY22"
+            elif EDC < 20220318:
+                if Ref == "HRA":
+                    return "Yes, pre 3/18/22, over inc HRA Referral"
+                elif CaseType in HousingToolBox.evictiontypes:
+                    if '000000' not in CaseNum and CaseNum.startswith('n') == False and CaseNum.startswith('N') == False and 'TBD' not in CaseNum and 'Un' not in CaseNum:
+                        return "Yes, pre 3/18/22 EvC likely w Case in court"
+                    else:
+                        return "No, pre 3/18/22, EvC, no case in court, needs waiver"
+                elif EDC >= 20220318 and CaseType in HousingToolBox.evictiontypes:
+                    return "No, post 3/18/22, EvC need waiver"
                 else:
-                    return "No"
+                    return "No, pre 3/18/22 non EvC need waiver"
             else:
-                return "No"
+                return "No, not eligible for categorical waiver post 3/18/22"
                 
-        df['Already Waived In?'] = df.apply(lambda x : WaivedIn(x['Referral Source'],x['Percentage of Poverty'],x['Housing Type Of Case'],x['Gen Case Index Number']),axis=1)
+        df['Categorically Waived In?'] = df.apply(lambda x : WaivedIn(x['Referral Source'],x['Percentage of Poverty'],x['BlanklessTypeofCase'],x['Gen Case Index Number'],x['EDate Construct']),axis=1)
+        
         
         '''CaseType == "Holdover"or"Non-payment"or"Illegal Lockout"or"NYCHA Housing Termination"and'''
         '''and(CaseNum.startswith('N')or CaseNum= == False'''
         '''and CaseType == "Holdover" or CaseType == "Non-payment" or CaseType == "Illegal Lockout" or CaseType == "NYCHA Housing Termination"'''
         
         #Add Eligible for Waiver Request? column
-        def NeedWaiver(WaiverType,Ref,FPL,Waived,NN):
-            if pd.isnull(WaiverType) == False:
-                return WaiverType
+        def NeedWaiver(WaiverType,WaiverDate,Ref,FPL,Waived,NN,EDC):
+            if NN == "99":
+                return "No Client Name"
             elif FPL < 201:
-                return "FPL < 201%"
-            elif Ref == "HRA" and FPL >= 201:
-                return "HRA Referral"
-            elif Waived ==  "EVC w Court Case":
-                return "Categorically Waived In"
-            elif NN == "99":
-                return "No Name"
+                return "No, FPL < 201%"
+            elif pd.isnull(WaiverType) == False and pd.isnull(WaiverDate)==False:
+                return "Has "+WaiverType
+            elif pd.isnull(WaiverType)==False and pd.isnull(WaiverDate)==True:
+                return "Has waiver type, missing waiver date"
+            elif pd.isnull(WaiverType)==True and pd.isnull(WaiverDate)==False:
+                return "Has waiver date, missing waiver type"
+            elif Waived == "Unclear, Type of Case missing":
+                return "Missing Type of Case"
+            elif Waived == "Yes, ILO cases waived in for FY22":
+                return "No, ILOs Categorically Waived In"
+            elif EDC < 20220318:
+                if Ref == "HRA":
+                    return "No, pre 3/18/22 HRA Referral"
+                elif Waived ==  "Yes, pre 3/18/22 EvC likely w Case in court":
+                    return "Categorically Waived In"
+                else:
+                    return "Yes, pre 3/18/22 case, needs waiver"
             else:
-                return "Yes"
+                return "Yes, post 3/18/22 case, needs waiver"
                 
-        df['Eligible for Waiver Request?'] = df.apply(lambda x : NeedWaiver(x['Housing TRC HRA Waiver Categories'],x['Referral Source'],x['Percentage of Poverty'],x['Already Waived In?'],x['First & Last Initials']),axis=1)
+        df['Eligible for Waiver Request?'] = df.apply(lambda x : NeedWaiver(x['Housing TRC HRA Waiver Categories'],x['Housing Date Of Waiver Approval'],x['Referral Source'],x['Percentage of Poverty'],x['Categorically Waived In?'],x['First & Last Initials'],x['EDate Construct']),axis=1)
         
         #Sorting Eligible Cases on top
         df = df.sort_values(by=['Eligible for Waiver Request?'],ascending = False)
         
         
-        #Add Empty column
-        df[''] = ''
+        #Add Empty column***
+        #df[''] = ''
         
-        #REPORTING VERSION Put everything in the right order
-        df = df[['Provider','Contact Person','Date of Request','First & Last Initials','New/Reconsideration?','Income/ZIP Code Waiver?','Program (AHTP/UA/Non-UA/HHP)','Proceeding Type','L&T Number (if applicable)','ZIP Code (XXXXX)','Household Size (#)','Household Annual Income ($XX,XXX)','FPL %','Rent Regulated/NYCHA?','Housing Subsidy?','Individual/Group Case?','Summary of the Request/Other Compelling Factors','Approval?','Date','Notes/Comments','','Hyperlinked Case #','Already Waived In?','Eligible for Waiver Request?']]
+        #Removed columns - 'Housing Type Of Case','Gen Case Index Number',
+        
+        #REPORTING VERSION Put everything in the right order***removed '' after notes columns
+        df = df[['Provider','Contact Person','Date of Request','First & Last Initials','New/Reconsideration?','Income/ZIP Code Waiver?','Program (AHTP/UA/Non-UA/HHP)','Proceeding Type','L&T Number (if applicable)','ZIP Code (XXXXX)','Household Size (#)','Household Annual Income ($XX,XXX)','FPL %','Rent Regulated/NYCHA?','Housing Subsidy?','Individual/Group Case?','Summary of the Request/Other Compelling Factors','Approval?','Date','Notes/Comments','Hyperlinked Case #','Categorically Waived In?','Eligible for Waiver Request?','Referral Source','EDate Construct','Housing TRC HRA Waiver Categories']]
               
         """
         #Remove Rows without Case ID values
@@ -261,21 +292,25 @@ def WaiverMaker():
         problem_format = workbook.add_format({'bg_color':'yellow'})
 
         #assign new format to links column 
-        worksheet.set_column('V:V',11,link_format)
+        worksheet.set_column('U:U',11,link_format)
         
         #Define ranges so problem format doesn't apply forever
+        BRowRange='B4:B'+str(df.shape[0]+3)
         PRowRange='P4:P'+str(df.shape[0]+3)
         print(PRowRange)
         
         #assign problem format to ind/group case column
+        worksheet.conditional_format(BRowRange,{'type': 'cell','criteria': '==','value': '"[Name of person preparing request] & Liz Cardenas"','format': problem_format})
         worksheet.conditional_format(PRowRange,{'type': 'cell','criteria': '==','value': '"please check"','format': problem_format})
                  
         
         #Add format for title cell
         TopCell_format = workbook.add_format({'bold':True,'valign': 'top','align': 'left','font_name':'Arial Narrow','font_size':9})
+        DeleteCell_format = workbook.add_format({'bold':True,'valign': 'top','align': 'left','bg_color' : '#FFFF00','text_wrap':True,'font_name':'Arial Narrow','font_size':9})
         
-        #Add Waiver template header to last column
+        #Add Waiver template header to first column***
         worksheet.write('A1', 'Office of Civil Justice - Housing Income/ZIP Code Waiver Request Template FY2020',TopCell_format)
+        
         
         #Add income waiver blue/gray header format
         header_format = workbook.add_format({'text_wrap':True,'bold':True,'valign': 'top','align': 'center','bg_color' : '#D6DCE4','font_name':'Arial Narrow','font_size':9})
@@ -296,14 +331,17 @@ def WaiverMaker():
         for col_num, value in enumerate(ColNum):
                     worksheet.write(1, col_num, value, numbers_format)
                     
+        #Make Case ID cell yellow
+        worksheet.write('U3', 'Hyperlinked Case # (central will delete columns U:AB before submitting to HRA)',DeleteCell_format)
+                    
         #Add Borders to everything
         border_format=workbook.add_format({'border':1,'align':'left','font_size':10})
-        WaiverRange='A1:X'+str(df.shape[0]+3)
+        WaiverRange='A1:AB'+str(df.shape[0]+3)
         print(WaiverRange)
         worksheet.conditional_format( WaiverRange, { 'type' : 'cell' ,'criteria': '!=','value':'""','format' : border_format} )
         
-        #remove header color from blank column
-        worksheet.write('U3','',border_format)
+        #remove header color from blank column***
+        #worksheet.write('U3','',border_format)
         
         #worksheet.write('A:W',13,header_format)
         #worksheet.set_row(0, None, header_format)
@@ -326,6 +364,8 @@ def WaiverMaker():
     <h3>Instructions:</h3>
     <ul type="disc">
     <li>This tool is meant to be used in conjunction with the LegalServer report called <a href="https://lsnyc.legalserver.org/report/dynamic?load=1507" target="_blank">TRC Raw Case Data Report</a>.</li>
+    </br>
+    <li>This tool is meant to be used on cases with eligibility dates</a>.</li>
     </br>
     <a href="/">Home</a>
     '''
