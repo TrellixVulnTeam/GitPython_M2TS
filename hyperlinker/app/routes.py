@@ -93,6 +93,7 @@ def index():
     <b>Compliance Tools:</b>
     <ul type="disc">
     <li><a href="/ComplianceConsolidater">Compliance Consolidater</a></li>
+    <li><a href="/ALComplianceConsolidater">Access Line Compliance Consolidater</a></li>
     <li><a href="/ComplianceConsolidaterYearEnd">Year End Compliance Consolidater</a></li>
     <li><a href="/CSRDeterminer">Determine CSR Eligibility</a></li>
     <li><a href="/DuplicateFinder">Duplicate Finder</a></li>
