@@ -230,10 +230,19 @@ def CNYCNCleaner():
                 else:
                     return "In contract"
                     
+        #Fill in blank Time Updated with Date Opened
+        def TimeUpFiller (TimeUp, DateO):
+            if TimeUp == "":
+                return DateO
+            else:
+                return TimeUp
+                
+        df['Time Updated'] = df.apply(lambda x: TimeUpFiller(x['Time Updated'],x['Date Opened']),axis=1)
+                    
         #This function takes any case with a time updated after the end of contract date input to cleaning tool and changes the time updated to match the end of contract date
         def DateBackDater (TimeUpdated, TimeUpdatedConstruct):
-            print(type(TimeUpdated))
-            print(type(EndDate))
+            #print(type(TimeUpdated))
+            #print(type(EndDate))
             if TimeUpdatedConstruct == "":
                 return ""
             elif EndDate == "":
@@ -358,6 +367,15 @@ def CNYCNCleaner():
         if request.form.get('remover'):
             df['Unreportable'] = df.apply(lambda x: Unreportables(x['Servicer'],x['ServDate'],x['PrimaryDist'],x['PrimaryLegal']),axis=1)
             df = df[df['Unreportable'] != "Unreportable"]
+            
+            #print(request.form['CaseChecker'])
+            CaseCheckerList = list(request.form['CaseChecker'].split(', '))
+            print(CaseCheckerList)
+            for i in CaseCheckerList:
+                if df ['ClientID'].str.contains(i).any():
+                    print(i + " in dataframe, remover on")
+                else:
+                    print(i + " not in dataframe, remover on")
         
         #Formatting Version
         
@@ -367,12 +385,35 @@ def CNYCNCleaner():
             
             df = df[['FundingSource','ClientID','Staff','IntakeDate','ServDate','Race','Ethnicity','Language','Children','Adults','Seniors','Income','Household','ZIP','County','PrimaryDist','SecondaryDist','Units','PurchaseDate','OrigDate','OrigDate2','OrigAmount','OrigAmount2','OrigTerm','OrigTerm2','LoanOwner','LoanOwner2','IntakePrincipal','IntakePrincipal2','IntakeProd','IntakeProd2','IntakeRate','IntakeRate2','IntakePay','IntakePay2','InterestOnly','InterestOnly2','LoanStatus','LoanStatus2','LPDate','Servicer','LoanNumber','Servicer2','LoanNumber2','Violation','Violation2','ServicerChange','ServicerChange2','Conference#','FirstConference','BadFaith','LegalHr','PrimaryLegal','SecondLegal','PrimarySandy','SecondSandy','ModStatus','ModStatus2','PrimaryOutcome','SecondOutcome','PrimaryOutcome2','SecondaryOutcome2','NewPrincipal','NewPrincipal2','NewTerm','NewTerm2','NewType','NewType2','NewRate','NewRate2','NewPay','NewPay2','PrincipalForgive','PrincipalForgive2','ForbearAmt','ForbearAmt2','SSPrice','SSDate','Forgiven','DILDate','Benefits','NewHousing','CaseClose','Branch&Report']]
             
+            #print(request.form['CaseChecker'])
+            CaseCheckerList = list(request.form['CaseChecker'].split(', '))
+            print(CaseCheckerList)
+            for i in CaseCheckerList:
+                if df['ClientID'].str.contains(i).any():
+                    print(i + " in dataframe, formatter on")
+                else:
+                    print(i + " not in dataframe, formatter on")
+            
         #Cleanup Version
         else:
         
+            df['Unreportable'] = df.apply(lambda x: Unreportables(x['Servicer'],x['ServDate'],x['PrimaryDist'],x['PrimaryLegal']),axis=1)
+        
             df = df[['Case ID#','Caseworker Name','Time Updated','Client First Name','Client Last Name','Type Of Assistance','FPU Prim Src Client Prob','Servicer','FPU Primary Outcome','FPU Secondary Outcome','Loan Modification Status','FPU Mod PITI Payment - 1st','Benefits','Funds Obtained','FundsNum','Assigned Branch/CC','Date Opened','Race (CNYCN)','Number of People 18 and Over','Number of People under 18','Number Of Seniors In Household','Total Annual Income ','Zip Code','County of Residence','FPU Sec Src Client Prob','FPU Num Prop Units','Secondary Assistance Type','Loan Modification Status 2','FPU Secondary Outcome','FPU Mod PITI Payment - 2nd','Debt Discharged In Short Sales','Settlement Amount','Total Saved Due To Rate Reduction','Amount Of Principal Reduction']]
-        
-        
+            
+            #print(request.form['CaseChecker'])
+            CaseCheckerList = list(request.form['CaseChecker'].split(', '))
+            print(CaseCheckerList)
+            for i in CaseCheckerList:
+                if df['Case ID#'].str.contains(i).any():
+                    print(i + " in dataframe, cleanup on")
+                else:
+                    print(i + " not in dataframe, cleanup on")
+                
+            '''if df['Case ID#'].str.contains(CaseChecker).any():
+                print(str(CaseChecker) + " in dataframe")
+            else:   
+                print(str(CaseChecker) + " not in dataframe")'''
         
             
         #define function, with single variable of dictionary created immediately above
@@ -529,13 +570,17 @@ def CNYCNCleaner():
     <input type="checkbox" id="remover" name="remover" value="remover">
     <label for="remover"> Remove Unreportables for Formatted Report</label><br>
     
+    </br>
+     <input type = "text" id="CaseChecker" name="CaseChecker" input style="width:120%" 
+    <label for ="CaseChecker"> <span></span> Type case list</label><br><br>
+    
     
     
     </form>
     <h3>Instructions:</h3>
     <ul type="disc">
-    <li>This should will help prepare cases for CNYCN Reports.</li>
-    <li>This tool is meant to be used in conjunction with the LegalServer report called <a href="https://lsnyc.legalserver.org/report/dynamic?load=2328" target="_blank">HOPP/CNYCN Monthly Interim-Central Team</a>.</li>
+    <li>This tool will help prepare cases for CNYCN Reports.</li>
+    <li>This tool is meant to be used in conjunction with the LegalServer report (DOR) called <a href="https://lsnyc.legalserver.org/report/dynamic?load=2328" target="_blank">HOPP/CNYCN Monthly Interim-Central Team</a>.</li>
     
     </ul>
     </br>
