@@ -443,7 +443,8 @@ def ComplianceConsolidater():
         "McCormick, James H",
         "Morales-Robinson, Ana Y.",
         "Sahai, Chelsea E",
-        "Collins, Lisa"]
+        "Collins, Lisa",
+        "Ruiz-Caceres, Gaby A"]
         
         VeronicaList = ["Cook, Veronica J"]
         EdList = ["Josephson, Edward"]
