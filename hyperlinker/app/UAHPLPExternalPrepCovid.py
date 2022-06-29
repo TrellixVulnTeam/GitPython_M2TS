@@ -1,6 +1,7 @@
 from flask import request, send_from_directory
 from app import app, DataWizardTools, HousingToolBox
 import pandas as pd
+import numpy as np
 
 @app.route("/UAHPLPExternalPrepCovid", methods=['GET', 'POST'])
 def UAHPLPExternalPrepCovid():
@@ -140,6 +141,208 @@ def UAHPLPExternalPrepCovid():
             
         df['referral_source'] = df.apply(lambda x: HousingToolBox.ReferralMap(x['Referral Source']), axis = 1)
         
+        #Differentiate pre- and post- 3/1/20 12/1/21 eligibility date cases          
+        df['DateConstruct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['HAL Eligibility Date']), axis=1)
+        
+        #df['Pre-3/1/20 Elig Date?'] = df.apply(lambda x: HousingToolBox.PreThreeOne(x['DateConstruct']), axis=1)
+        df['Post 12/1/21 Elig Date?'] = df.apply(lambda x: HousingToolBox.PostTwelveOne(x['DateConstruct']), axis=1)
+        
+        #Waiver Section
+        
+        #old CatWaivDate
+        '''EDC = int(EDC)
+            LT = str(LT)
+            if Pov >= 201 and Date == "":
+                if Proceeding == "IL":
+                        return "09/20/2021"
+                elif CaseType != "Brief Legal Assistance" and CaseType != "Advice Only": 
+                    if EDC < 20220318:
+                        if LoS == "Full Rep" and CaseType in HousingToolBox.evictiontypes and LT.startswith("LT") == True:
+                            return "09/20/2021"
+                        elif Ref == "Documented HRA Referral":
+                            return "09/20/2021"
+                        else:
+                            return Date
+                    else:
+                        return Date
+                else:
+                    return Date
+            else:
+                return Date'''
+        
+        df['Housing Date Of Waiver Approval'] = df['Housing Date Of Waiver Approval'].replace(pd.NaT, '')
+        
+        def DateCheck (EligibilityDate):
+            try:
+                EligibilityDate = EligibilityDate.strftime('%m/%d/%Y')
+                return EligibilityDate
+                #print("Converted dates to strings")
+            except:
+                #print("Did not convert dates to strings")
+                return EligibilityDate
+                
+        df['Housing Date Of Waiver Approval'] = df.apply(lambda x: DateCheck(x['Housing Date Of Waiver Approval']), axis=1)
+        
+        df['LS Waiver Type'] = df['Housing TRC HRA Waiver Categories']
+        df['LS Waiver Date'] = df['Housing Date Of Waiver Approval']
+        df['LS Waiver Date'] = df['LS Waiver Date'].replace(pd.NaT, '')
+        #df['LS Waiver Date'].replace("NaT",np.NaN, inplace=True)
+        #df.fillna("", inplace=True)
+        #print(df['LS Waiver Date'])
+        
+        #Apply categorical income waiver date to cases that had categorical waivers dated 9/20/21 (Fy22 to 3/18/22)
+        def CatWaivDate (Pov, EDC, LoS, CaseType, Ref, Date, Proceeding, LT):
+            EDC = int(EDC)
+            LT = str(LT)
+            if LoS == "Advice Only" and Date != "":
+                return Date
+            elif LoS == "Advice Only" and Date == "":
+                return Date
+            elif LoS == "Brief Legal Assistance" and Date != "":
+                return Date
+            elif LoS == "Brief Legal Assistance" and Date == "":
+                return Date
+            elif Date != "":
+                return Date
+            elif Pov >= 201 and Date == "":
+                if Proceeding == "IL":
+                        return "09/20/2021"
+                elif EDC < 20220318:
+                    if LoS == "Full Rep" and CaseType in HousingToolBox.evictiontypes and LT.startswith('LT') == True:
+                        return "09/20/2021"
+                    elif Ref == "Documented HRA Referral":
+                        return "09/20/2021"
+                    elif LoS == "Full Rep" and CaseType in HousingToolBox.evictiontypes and LT != "":
+                        return Date
+                    else:
+                        return Date
+                else:
+                    return Date
+            else:
+                return Date
+                
+        df['waiver_approval_date'] = df.apply(lambda x: CatWaivDate(x['Percentage of Poverty'],x['DateConstruct'],x['service_type'],x['Housing Type Of Case'],x['referral_source'],x['LS Waiver Date'],x['proceeding'],x['LT_index']), axis=1)
+                
+        def CatWaivDateReas (Pov, EDC, LoS, CaseType, Ref, Date, Proceeding, LT):
+            EDC = int(EDC)
+            LT = str(LT)
+            if LoS == "Advice Only" and Date != "":
+                return str(Date) + ", Adv Case w Original LS Date"
+            elif LoS == "Advice Only" and Date == "":
+                return str(Date) + "Adv Case, no date needed"
+            elif LoS == "Brief Legal Assistance" and Date != "":
+                return str(Date) + ", Brief Case w Original LS Date"
+            elif LoS == "Brief Legal Assistance" and Date == "":
+                return str(Date) + "Brief Case, no date needed"
+            elif Date != "":
+                return "Has LS waiver date, " + str(Date)
+            elif Pov >= 201 and Date == "":
+                if Proceeding == "IL":
+                        return "09/20/2021, over income IL case"
+                elif EDC < 20220318:
+                    if LoS == "Full Rep" and CaseType in HousingToolBox.evictiontypes and LT.startswith('LT') == True:
+                        return "09/20/2021, pre 3/18 Full Rep EvC w Crt#"
+                    elif Ref == "Documented HRA Referral":
+                        return "09/20/2021, pre 3/18 non Adv/Brf Doc HRA Ref"
+                    elif LoS == "Full Rep" and CaseType in HousingToolBox.evictiontypes and LT != "":
+                        return "Full Rep EvC, Check Gen Case Index, may have cat. waiver of 09/20/2021"
+                    else:
+                        return str(Date) + "pre 3/18, may need waiver, not categorical"
+                else:
+                    return str(Date) + "post 3/18 case, may need waiver, not categorical"
+            else:
+                return str(Date) + "Pov<201"
+                
+        df['Script waiver date Reason'] = df.apply(lambda x: CatWaivDateReas(x['Percentage of Poverty'],x['DateConstruct'],x['service_type'],x['Housing Type Of Case'],x['referral_source'],x['LS Waiver Date'],x['proceeding'],x['LT_index']), axis=1)
+        
+        def CatWaivTypeReas (Pov, EDC, LoS, CaseType, Ref, Type, Proceeding, LT):
+            EDC = int(EDC)
+            LT = str(LT)
+            if LoS == "Advice Only" and Type != "":
+                return str(Type) + ", Adv Case w Original LS Waiver"
+            elif LoS == "Advice Only" and Type == "":
+                return str(Type) + "Adv Case, no type needed"
+            elif LoS == "Brief Legal Assistance" and Type != "":
+                return str(Type) + ", Brief Case w Original LS Waiver"
+            elif LoS == "Brief Legal Assistance" and Type == "":
+                return str(Type) + "Brief Case, no type needed"
+            elif Type != "":
+                return "Has LS waiver type, " + str(Type)
+            elif Pov >= 201 and Type == "":
+                if Proceeding == "IL":
+                        return "Income Waiver, over income IL case"
+                elif EDC < 20220318:
+                    if LoS == "Full Rep" and CaseType in HousingToolBox.evictiontypes and LT.startswith('LT') == True:
+                        return "Income Waiver, pre 3/18 Full Rep EvC w Crt#"
+                    elif Ref == "Documented HRA Referral":
+                        return "Income Waiver, pre 3/18 non Adv/Brf Doc HRA Ref"
+                    elif LoS == "Full Rep" and CaseType in HousingToolBox.evictiontypes and LT != "":
+                        return "Full Rep EvC, Check Gen Case Index, may have cat. Income Waiver"
+                    else:
+                        return str(Type) + "pre 3/18, may need waiver, not categorical"
+                else:
+                    return str(Type) + "post 3/18 case, may need waiver, not categorical"
+            else:
+                return str(Type) + "Pov<201"
+                
+        df['Script waiver type Reason'] = df.apply(lambda x: CatWaivTypeReas(x['Percentage of Poverty'],x['DateConstruct'],x['service_type'],x['Housing Type Of Case'],x['referral_source'],x['LS Waiver Type'],x['proceeding'],x['LT_index']), axis=1)
+        
+        #Apply categorical income waiver date to cases that had categorical waivers 9/20/21
+        def CatWaivType (Pov, EDC, LoS, CaseType, Ref, Type, Proceeding, LT):
+            EDC = int(EDC)
+            LT = str(LT)
+            if LoS == "Advice Only" and Type != "":
+                return Type
+            elif LoS == "Advice Only" and Type == "":
+                return Type
+            elif LoS == "Brief Legal Assistance" and Type != "":
+                return Type
+            elif LoS == "Brief Legal Assistance" and Type == "":
+                return Type
+            elif Type != "":
+                return Type
+            elif Pov >= 201 and Type == "":
+                if Proceeding == "IL":
+                        return "Income Waiver"
+                elif EDC < 20220318:
+                    if LoS == "Full Rep" and CaseType in HousingToolBox.evictiontypes and LT.startswith('LT') == True:
+                        return "Income Waiver"
+                    elif Ref == "Documented HRA Referral":
+                        return "Income Waiver"
+                    elif LoS == "Full Rep" and CaseType in HousingToolBox.evictiontypes and LT != "":
+                        return Type
+                    else:
+                        return Type
+                else:
+                    return Type
+            else:
+                return Type
+
+        df['waiver'] = df.apply(lambda x: CatWaivType(x['Percentage of Poverty'],x['DateConstruct'],x['service_type'],x['Housing Type Of Case'],x['referral_source'],x['LS Waiver Type'],x['proceeding'],x['LT_index']), axis=1)        
+        
+        #old CatWaivType script
+        ''' EDC = int(EDC)
+            LT = str(LT)
+            if Pov >= 201 and Type == "":
+                if Proceeding == "IL":
+                        return "Income Waiver"
+                elif CaseType != "Brief Legal Assistance" and CaseType != "Advice Only": 
+                    if EDC < 20220318:
+                        if LoS == "Full Rep" and CaseType in HousingToolBox.evictiontypes and LT.startswith('LT') == True:
+                            return "Income Waiver"
+                        elif Ref == "Documented HRA Referral":
+                            return "Income Waiver"
+                        elif LoS == "Full Rep" and CaseType in HousingToolBox.evictiontypes and LT != "":
+                            return Type
+                        else:
+                            return Type
+                    else:
+                        return Type
+                else:
+                    return Type
+            else:
+                return Type'''
+                
         #Housing Outcomes needs mapping for HRA
         df['outcome'] = df.apply(lambda x: HousingToolBox.Outcome(x['Housing Outcome']), axis=1)
         
@@ -150,13 +353,7 @@ def UAHPLPExternalPrepCovid():
 
         df['activities'] = df.apply(lambda x: HousingToolBox.Activities(x['Housing Activity Indicators']), axis=1)
         
-        
-        #Differentiate pre- and post- 3/1/20 12/1/21 eligibility date cases
-                   
-        df['DateConstruct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['HAL Eligibility Date']), axis=1)
-        
-        #df['Pre-3/1/20 Elig Date?'] = df.apply(lambda x: HousingToolBox.PreThreeOne(x['DateConstruct']), axis=1)
-        df['Post 12/1/21 Elig Date?'] = df.apply(lambda x: HousingToolBox.PostTwelveOne(x['DateConstruct']), axis=1)
+
         
         #Map 'Borough Values' based on Zip Code
         
@@ -182,6 +379,8 @@ def UAHPLPExternalPrepCovid():
                 return ""
             elif ServiceType == "Brief Legal Assistance" and PostTwelveOne == "No":
                 return ""
+            elif NumChildren == "":
+                return 0
             else:
                 return NumChildren
         df['num_children'] = df.apply(lambda x: DeleteChildren(x['service_type'], x['Post 12/1/21 Elig Date?'], x['num_children']), axis=1)
@@ -271,6 +470,7 @@ def UAHPLPExternalPrepCovid():
         
         
         #remove non pre-12/1 advice case where HRA Consent is not Yes
+        #Removes Pre 12/1 non Advice/Brief cases w HRA Blank/No AND post 12/1 HRA Blank/No cases
 
         def ReleaseRemove(ServiceType, PostTwelveOne, HRARelease):
             if ServiceType == "Advice Only" and PostTwelveOne == "No":
@@ -285,6 +485,7 @@ def UAHPLPExternalPrepCovid():
         
         df = df[df['Remove post 12-1 Cases?'] != 'Remove']
         
+        #Removes HRA No/Blank Advice/Brief cases w real Gen Case numbers
         def ReleaseRemoveTwo(ServiceType, CaseNum,Release):
             if ServiceType == "Advice Only" or ServiceType == "Brief Service":
                 CaseNum = str(CaseNum)
@@ -313,7 +514,11 @@ def UAHPLPExternalPrepCovid():
         'city',
         'zip',
         'waiver_approval_date',
+        'Script waiver date Reason',
+        'LS Waiver Date',
         'waiver',
+        'Script waiver type Reason',
+        'LS Waiver Type',
         'rent',
         'proceeding',
         'LT_index',
@@ -372,10 +577,21 @@ def UAHPLPExternalPrepCovid():
                 
                 worksheet.freeze_panes(1,0)
                 worksheet.set_column('A:BL',20)
-                worksheet.set_column ('AM:AM',30,link_format)
+                ColShape= int(df.shape[1])
+                #worksheet.set_column ('AM:AM',30,link_format)
+                HLLoc=df.columns.get_loc("Hyperlinked CaseID#")
+                worksheet.set_column (HLLoc,HLLoc,30,link_format)
                 worksheet.conditional_format('C2:BO100000',{'type': 'text',
                                                  'criteria': 'containing',
                                                  'value': 'Needs',
+                                                 'format': problem_format})
+                worksheet.conditional_format(0,0,0,ColShape,{'type': 'text',
+                                                 'criteria': 'containing',
+                                                 'value': 'LS',
+                                                 'format': problem_format})
+                worksheet.conditional_format(0,0,0,ColShape,{'type': 'text',
+                                                 'criteria': 'containing',
+                                                 'value': 'Reason',
                                                  'format': problem_format})
 
             writer.save()
