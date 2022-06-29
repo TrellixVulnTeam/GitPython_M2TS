@@ -283,6 +283,7 @@ def AllHousingSecondStep():
                     C2BOFullRange='C2:BO'+str(tab_dict_df[j].shape[0]+1) 
                     print("BORowRange is "+ str(C2BOFullRange))
                     CILoc = df.columns.get_loc("Hyperlinked CaseID#")
+                    #get dynamic conditional formatting that looks for column header, not column location
                     #print(CILoc)
                     #(first_row, first_col, last_row, last_col)
                     shape = (tab_dict_df[j].shape[0]+1)
