@@ -114,7 +114,7 @@ def TRCExternalPrepCovid():
         
         
         #Level of Service becomes Service type 
-        df['service_type'] = df.apply(lambda x: HousingToolBox.TRCServiceType(x['Housing Level of Service'],x['Legal Problem Code'],x['Legal Problem Code'],x['Referral Source'],x['HRA Release?']), axis=1)
+        df['service_type'] = df.apply(lambda x: HousingToolBox.TRCServiceType(x['Housing Level of Service'],x['Legal Problem Code'],x['Primary Funding Code'],x['Referral Source'],x['HRA Release?']), axis=1)
         
         #if below 201, = 'Yes' otherwise 'No'
         df['below_200_FPL'] = df['Percentage of Poverty'].apply(lambda x: "Yes" if x < 200 else "No")
@@ -142,6 +142,140 @@ def TRCExternalPrepCovid():
 
         df['activities'] = df.apply(lambda x: HousingToolBox.Activities(x['Housing Activity Indicators']), axis=1)
         
+        df['LS Waiver Type'] = df['Housing TRC HRA Waiver Categories']
+        df['LS Waiver Date'] = df['Housing Date Of Waiver Approval']
+        
+        #Apply categorical income waiver date to cases that had categorical waivers dated 9/20/21 (Fy22 to 3/18/22)
+        def CatWaivDate (Pov, EDC, LoS, CaseType, Ref, Date, Proceeding, Prim, LT, Type):
+            EDC = int(EDC)
+            LT = str(LT)
+            if Ref != "Family Justice Center" and "3011" not in Prim and Type == "FJC Waiver":
+                return Date
+            elif LoS == "Advice Only" and Date != "":
+                return Date
+            elif LoS == "Advice Only" and Date == "":
+                return Date 
+            elif Date != "":
+                return Date
+            elif Pov >= 201 and Date == "":
+                if Ref == "Family Justice Center" and "3011" in Prim:
+                    return "11/28/2016"
+                elif Proceeding == "IL":
+                        return "09/20/2021"
+                elif EDC < 20220318:
+                    if LoS == "Full Rep" and CaseType in HousingToolBox.evictiontypes and LT.startswith('LT') == True:
+                        return "09/20/2021"
+                    elif Ref == "Documented HRA Referral":
+                        return "09/20/2021"
+                    elif LoS == "Full Rep" and CaseType in HousingToolBox.evictiontypes and LT != "":
+                        return Date
+                    else:
+                        return Date
+                else:
+                    return Date
+            else:
+                return Date
+                
+        df['waiver_approval_date'] = df.apply(lambda x: CatWaivDate(x['Percentage of Poverty'],x['DateConstruct'],x['service_type'],x['Housing Type Of Case'],x['referral_source'],x['LS Waiver Date'],x['proceeding'],x['Primary Funding Code'],x['LT_index'],x['Housing TRC HRA Waiver Categories']), axis=1)
+        
+        #Apply categorical income waiver date to cases that had categorical waivers dated 9/20/21 (Fy22 to 3/18/22)
+        def CatWaivDateReas (Pov, EDC, LoS, CaseType, Ref, Date, Proceeding, Prim, LT, Type):
+            EDC = int(EDC)
+            LT = str(LT)
+            if Ref != "Family Justice Center" and "3011" not in Prim and Type == "FJC Waiver":
+                return str(Date) + "-Original LS response, no FJC indicators"
+            elif LoS == "Advice Only" and Date != "":
+                return str(Date) + ", Adv Case w Original LS Date"
+            elif LoS == "Advice Only" and Date == "":
+                return str(Date) + "Adv Case, no date needed"
+            elif Date != "":
+                return "Has LS waiver date, " + str(Date)
+            elif Pov >= 201 and Date == "":
+                if Ref == "Family Justice Center" and "3011" in Prim:
+                    return "11/28/2016, over income case w 2 FJC indicators"
+                elif Proceeding == "IL":
+                        return "09/20/2021, over income IL case"
+                elif EDC < 20220318:
+                    if LoS == "Full Rep" and CaseType in HousingToolBox.evictiontypes and LT.startswith('LT') == True:
+                        return "09/20/2021, pre 3/18 Full Rep EvC w Crt#"
+                    elif Ref == "Documented HRA Referral":
+                        return "09/20/2021, pre 3/18 non Adv Doc HRA Ref"
+                    elif LoS == "Full Rep" and CaseType in HousingToolBox.evictiontypes and LT != "":
+                        return "Full Rep EvC, Check Gen Case Index, may have cat. Income date 09/20/2021"
+                    else:
+                        return str(Date) + "pre 3/18, may need waiver, not categorical"
+                else:
+                    return str(Date) + "post 3/18 case, may need waiver, not categorical"
+            else:
+                return str(Date) + "Pov<201"
+                
+        df['Script waiver date Reason'] = df.apply(lambda x: CatWaivDateReas(x['Percentage of Poverty'],x['DateConstruct'],x['service_type'],x['Housing Type Of Case'],x['referral_source'],x['LS Waiver Date'],x['proceeding'],x['Primary Funding Code'],x['LT_index'],x['Housing TRC HRA Waiver Categories']), axis=1)
+        
+        #Apply categorical income waiver type to cases that had categorical waivers dated 9/20/21 (Fy22 to 3/18/22)
+        def CatWaivType (Pov, EDC, LoS, CaseType, Ref, Type, Proceeding, Prim, LT):
+            EDC = int(EDC)
+            LT = str(LT)
+            if Ref != "Family Justice Center" and "3011" not in Prim and Type == "FJC Waiver":
+                return Type
+            elif LoS == "Advice Only" and Type != "":
+                return Type
+            elif LoS == "Advice Only" and Type == "":
+                return Type
+            elif Type != "":
+                return Type
+            elif Pov >= 201 and Type == "":
+                if Ref == "Family Justice Center" and "3011" in Prim:
+                    return "FJC Waiver"
+                elif Proceeding == "IL":
+                        return "Income Waiver"
+                elif EDC < 20220318:
+                    if LoS == "Full Rep" and CaseType in HousingToolBox.evictiontypes and LT.startswith('LT') == True:
+                        return "Income Waiver"
+                    elif Ref == "Documented HRA Referral":
+                        return "Income Waiver"
+                    elif LoS == "Full Rep" and CaseType in HousingToolBox.evictiontypes and LT != "":
+                        return Type
+                    else:
+                        return Type
+                else:
+                    return Type
+            else:
+                return Type
+                
+        df['waiver'] = df.apply(lambda x: CatWaivType(x['Percentage of Poverty'],x['DateConstruct'],x['service_type'],x['Housing Type Of Case'],x['referral_source'],x['LS Waiver Type'],x['proceeding'],x['Primary Funding Code'],x['LT_index']), axis=1)
+        
+        #Apply categorical income waiver type reasoning to cases that had categorical waivers dated 9/20/21 (Fy22 to 3/18/22)
+        def CatWaivTypeReas (Pov, EDC, LoS, CaseType, Ref, Proceeding, Prim, LT, Type):
+            EDC = int(EDC)
+            LT = str(LT)
+            if Ref != "Family Justice Center" and "3011" not in Prim and Type == "FJC Waiver":
+                return str(Type) + "-Original LS response, no FJC indicators"
+            elif LoS == "Advice Only" and Type != "":
+                return str(Type) + ", Adv Case w Original LS waiver type"
+            elif LoS == "Advice Only" and Type == "":
+                return str(Type) + "Adv Case, no waiver needed"
+            elif Type != "":
+                return str(Type) + ", waiver type in LS"
+            elif Pov >= 201 and Type == "":
+                if Ref == "Family Justice Center" and "3011" in Prim:
+                    return "FJC Waiver, over income case w 2 FJC indicators"
+                elif Proceeding == "IL":
+                        return "Income Waiver, over income IL case"
+                elif EDC < 20220318:
+                    if LoS == "Full Rep" and CaseType in HousingToolBox.evictiontypes and LT.startswith('LT') == True:
+                        return "Income Waiver, pre 3/18 Full Rep EvC w Crt#"
+                    elif Ref == "Documented HRA Referral":
+                        return "Income Waiver, pre 3/18 non Adv Doc HRA Ref"
+                    elif LoS == "Full Rep" and CaseType in HousingToolBox.evictiontypes and LT != "":
+                        return "Full Rep EvC, Check Gen Case Index, may have cat. Income Waiver"
+                    else:
+                        return str(Type) + "pre 3/18, may need waiver, not categorical"
+                else:
+                    return str(Type) + "post 3/18 case, may need waiver, not categorical"
+            else:
+                return str(Type) + "Pov<201"
+                
+        df['Script waiver type Reason'] = df.apply(lambda x: CatWaivTypeReas(x['Percentage of Poverty'],x['DateConstruct'],x['service_type'],x['Housing Type Of Case'],x['referral_source'],x['proceeding'],x['Primary Funding Code'],x['LT_index'],x['LS Waiver Type']), axis=1)
         
 
         """
@@ -178,8 +312,12 @@ def TRCExternalPrepCovid():
             if PostTwelveOne == "No":
                 if ServiceType == "Advice Only" and PrimaryFunding != "3011 TRC FJC Initiative":
                     return ""
+                elif NumChildren == "":
+                    return 0
                 else:
                     return NumChildren
+            elif NumChildren == "":
+                return 0
             else:
                 return NumChildren
         df['num_children'] = df.apply(lambda x: DeleteChildren(x['Post 12/1/21 Elig Date?'], x['service_type'], x['num_children'],x['Primary Funding Code']), axis=1)
@@ -294,7 +432,11 @@ def TRCExternalPrepCovid():
         'city',
         'zip',
         'waiver_approval_date',
+        'Script waiver date Reason',
+        'LS Waiver Date',
         'waiver',
+        'Script waiver type Reason',
+        'LS Waiver Type',
         'rent',
         'proceeding',
         'LT_index',
@@ -338,10 +480,23 @@ def TRCExternalPrepCovid():
         problem_format = workbook.add_format({'bg_color':'yellow'})
         worksheet.freeze_panes(1,0)
         worksheet.set_column('A:BL',20)
-        worksheet.set_column ('AN:AN',30,link_format)
+        #(first_row, first_col, last_row, last_col)
+        shape = (df.shape[0]+1)
+        ColShape= int(df.shape[1])
+        HLLoc=df.columns.get_loc("Hyperlinked CaseID#")
+        #worksheet.set_column ('AN:AN',30,link_format)
+        worksheet.set_column (HLLoc,HLLoc,30,link_format)
         worksheet.conditional_format('C2:BO100000',{'type': 'text',
                                                  'criteria': 'containing',
                                                  'value': 'Needs',
+                                                 'format': problem_format})
+        worksheet.conditional_format(0,0,0,ColShape,{'type': 'text',
+                                                 'criteria': 'containing',
+                                                 'value': 'LS',
+                                                 'format': problem_format})
+        worksheet.conditional_format(0,0,0,ColShape,{'type': 'text',
+                                                 'criteria': 'containing',
+                                                 'value': 'Reason',
                                                  'format': problem_format})
         
         writer.save()
