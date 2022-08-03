@@ -356,9 +356,15 @@ jgs \\|//   \\|///  \\\|//\\\|/// \|///  \\\|//  \\|//  \\\|//
                 ws.set_column('B:ZZ',25)
                 ws.autofilter('B1:ZZ1')
                 ws.freeze_panes(1, 2)
+                GKRowRange='G1:K'+str(dict_df[i].shape[0]+1)
+                print(GKRowRange)
 
-                ws.conditional_format('G2:K100000',{'type': 'blanks',
+
+
+                ws.conditional_format(GKRowRange,{'type': 'blanks',
                                                  'format': problem_format})
+                                                 
+                                                 
                 ws.conditional_format('H2:H100000',{'type': 'text',
                                                  'criteria': 'containing',
                                                  'value': 'Hold For Review',
@@ -408,7 +414,7 @@ jgs \\|//   \\|///  \\\|//\\\|/// \|///  \\\|//  \\|//  \\\|//
     </form>
     <h3>Instructions:</h3>
     <ul type="disc">
-    <li>This tool is meant to be used in conjunction with the LegalServer report called <a href="https://lsnyc.legalserver.org/report/dynamic?load=2308" target="_blank">HPLP/UAC Internal Report All Cases</a>.</li>
+    <li>This tool is meant to be used in conjunction with the LegalServer report called <a href="https://lsnyc.legalserver.org/report/dynamic?load=2369" target="_blank">HPLP/UAC Internal Report All Cases</a>.</li>
     
    
     </br>

@@ -4,8 +4,8 @@ import pandas as pd
 from datetime import date
 import numpy
 
-@app.route("/TRCtallyCovid", methods=['GET', 'POST'])
-def upload_TRCtallyCovid():
+@app.route("/TRCtallier", methods=['GET', 'POST'])
+def TRCtallier():
     if request.method == 'POST':
         print(request.files['file'])
         f = request.files['file']
@@ -333,7 +333,7 @@ def upload_TRCtallyCovid():
 
     return '''
     <!doctype html>
-    <title>TRC Tally [Covid]</title>
+    <title>TRC Tally</title>
     <link rel="stylesheet" href="/static/css/main.css">
     <h1>Tally your TRC Cases against Goals:</h1>
     <form action="" method=post enctype=multipart/form-data>
