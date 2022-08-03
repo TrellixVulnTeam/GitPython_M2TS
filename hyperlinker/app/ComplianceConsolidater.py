@@ -444,7 +444,9 @@ def ComplianceConsolidater():
         "Morales-Robinson, Ana Y.",
         "Sahai, Chelsea E",
         "Collins, Lisa",
-        "Ruiz-Caceres, Gaby A"]
+        "Ruiz-Caceres, Gaby A",
+        "Harrington, Elizabeth K",
+        "Guzina, Ana"]
         
         VeronicaList = ["Cook, Veronica J"]
         EdList = ["Josephson, Edward"]
@@ -481,8 +483,28 @@ def ComplianceConsolidater():
         
         #Preparing Excel Document
 
-        borough_dictionary = dict(tuple(df.groupby('TabSplitValue')))
-
+        if request.form.get('MLS'):
+            NoLegalAssistance_df = df[df['No Legal Assistance Documented Tester'] == "Needs Review"]
+            NoTimeEntered_df = df[df['No Time Entered for 90 Days Tester'] == "Needs Review"]
+            TwoHundredPoverty_df = df[df['200% of Poverty Tester'] == "Needs Review"]
+            OneTwentyFivePovertydf = df[df['125-200% of Poverty Tester'] == "Needs Review"]
+            FundingCode4000_df = df[df['Funding Code 4000 Tester'] == "Needs Review"]
+            NoAge_df = df[df['No Age for Client Tester'] == "Needs Review"]
+            UntimelyClosed_df = df[df['Untimely Closed Tester'] == "Needs Review"]
+            UntimelyOverridden_df = df[df['Untimely Closed Overridden Tester'] == "Needs Review"]
+            Citizenship_df = df[df['Citizenship & Immigration Tester'] == "Needs Review"]
+            ActiveAdvocate_df = df[df['Active Advocate Tester'] == "Needs Review"]
+            Retainer_df = df[df['Retainer Tester'] == "Needs Review"]
+            
+        
+            borough_dictionary = {'No Legal Assistance' : NoLegalAssistance_df, 'No Time Entered' : NoTimeEntered_df, '200% Poverty': TwoHundredPoverty_df , '125% Poverty': OneTwentyFivePovertydf , 'Funding Code 4000': FundingCode4000_df , 'No Age': NoAge_df , 'Untimely Closed': UntimelyClosed_df , 'Untimely Overridden': UntimelyOverridden_df , 'Citizenship': Citizenship_df , 'Active Advocate': ActiveAdvocate_df , 'Retainer': Retainer_df} 
+            
+            print(borough_dictionary)
+        else:
+            borough_dictionary = dict(tuple(df.groupby('TabSplitValue')))
+            
+            
+            
         def save_xls(dict_df, path):
             writer = pd.ExcelWriter(path, engine = 'xlsxwriter')
             for i in dict_df:
