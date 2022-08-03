@@ -79,9 +79,8 @@ def upload_TRCCovidClean():
         
         #Has to have an HRA Release (not for pre 12/1/21 advice cases)
         def HRAReleaseClean (HRARelease,EligibilityDate,LevelOfService):
-            if EligibilityDate < 20211201 and LevelOfService == 'Advice':
-                return ''
-            elif HRARelease == 'No' and EligibilityDate != '':
+            
+            if HRARelease == 'No' and EligibilityDate != '':
                 return 'No Release - Remove Elig Date'
             elif HRARelease == '' and EligibilityDate != '':
                 return 'No Release - Remove Elig Date'
@@ -212,41 +211,10 @@ def upload_TRCCovidClean():
             
         df['Outcome Tester'] = df.apply(lambda x: HousingToolBox.TRCOutcomeTesterClean(x['Case Disposition'],x['Housing Outcome'],x['Housing Outcome Date'],x['Housing Level of Service'],x['Housing Type Of Case']), axis = 1)
         
-        #Could you flag when the form of regulation and/or LPC is public housing when the case is neither 3011 or does not have a referral source of Family Justice Center or HRA? also, only for post 9/1/20 eligibility date cases
         
         
-        """
-        def PublicHousingTester(ProblemCode, FormOfRegulation, FundingCode, ReferralSource, EligDate):
-            if EligDate != '':
-                if int(EligDate) >= 20200901:
-                    if ProblemCode.startswith('64') == True or FormOfRegulation.startswith('Public Housing') == True:
-                        if FundingCode.startswith('3011') == True:
-                            return ''
-                        elif ReferralSource == 'HRA' or ReferralSource == 'FJC Housing Intake':
-                            return ''
-                        else:
-                            return 'Needs Review'
-                    else: 
-                        return ''
-                else: 
-                    return ''
-            else: 
-                return ''
-        df['Public Housing Review Tester'] = df.apply(lambda x: PublicHousingTester(x['Legal Problem Code'],x['Housing Form Of Regulation'],x['Primary Funding Code'],x['Referral Source'],x['DateConstruct']),axis = 1)        
         
-        
-        def NonHousingAdviceConverter (ProblemCode, EligConstruct, FundingCode, ReferralSource, HousingLevelOfService):
-            if ProblemCode.startswith('6') == True or ProblemCode.startswith('0') == True or FundingCode.startswith('3011') == True or ReferralSource.startswith('FJC') == True:
-                return HousingLevelOfService
-            elif EligConstruct != '':
-                if EligConstruct < 20201001:
-                    return 'Advice'
-                else:
-                    return HousingLevelOfService
-            else:
-                return HousingLevelOfService
-        df['Housing Level of Service']  = df.apply(lambda x: NonHousingAdviceConverter(x['Legal Problem Code'],x['DateConstruct'],x['Primary Funding Code'],x['Referral Source'],x['Housing Level of Service']),axis = 1)
-        """
+     
         
         #COVID Modifications - make the testers blank if it's an advice only post-3/1 case!
         
@@ -262,39 +230,7 @@ def upload_TRCCovidClean():
         
         df['Non-Housing Case?'] = df.apply(lambda x: NonHousing(x['Legal Problem Code']), axis=1)
 
-        #CovidException testers to erase clean-up requests
         
-        df['PA # Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['DateConstruct'], x['Housing Level of Service'],  x['PA # Tester'],x['Primary Funding Code'], x['HRA Release?']), axis=1)
-        
-        df['SS # Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['DateConstruct'], x['Housing Level of Service'],  x['SS # Tester'],x['Primary Funding Code'], x['HRA Release?']), axis=1)
-        
-        df['Case Number Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['DateConstruct'], x['Housing Level of Service'], x['Case Number Tester'],x['Primary Funding Code'], x['HRA Release?']), axis=1)
-        
-        df['Rent Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['DateConstruct'], x['Housing Level of Service'], x['Rent Tester'],x['Primary Funding Code'], x['HRA Release?']), axis=1)
-        
-        df['Years in Apartment Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['DateConstruct'], x['Housing Level of Service'], x['Years in Apartment Tester'],x['Primary Funding Code'], x['HRA Release?']), axis=1)
-        
-        df['Referral Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['DateConstruct'], x['Housing Level of Service'], x['Referral Tester'],x['Primary Funding Code'], x['HRA Release?']), axis=1)
-        
-        df['Income Verification Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['DateConstruct'], x['Housing Level of Service'], x['Income Verification Tester'],x['Primary Funding Code'], x['HRA Release?']), axis=1)
-        
-        df['Posture Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['DateConstruct'], x['Housing Level of Service'], x['Posture Tester'],x['Primary Funding Code'], x['HRA Release?']), axis=1)
-        
-        df['Unit Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['DateConstruct'], x['Housing Level of Service'], x['Unit Tester'],x['Primary Funding Code'], x['HRA Release?']), axis=1)
-        
-        df['Regulation Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['DateConstruct'], x['Housing Level of Service'], x['Regulation Tester'],x['Primary Funding Code'], x['HRA Release?']), axis=1)
-        
-        df['Subsidy Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['DateConstruct'], x['Housing Level of Service'], x['Subsidy Tester'],x['Primary Funding Code'], x['HRA Release?']), axis=1)
-        
-        df['Outcome Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['DateConstruct'], x['Housing Level of Service'], x['Outcome Tester'],x['Primary Funding Code'], x['HRA Release?']), axis=1)
-        
-        df['Housing Services Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['DateConstruct'], x['Housing Level of Service'], x['Housing Services Tester'],x['Primary Funding Code'], x['HRA Release?']), axis=1)
-        
-        df['Housing Activity Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['DateConstruct'], x['Housing Level of Service'], x['Housing Activity Tester'],x['Primary Funding Code'], x['HRA Release?']), axis=1)
-        
-        df['HRA Release Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['DateConstruct'], x['Housing Level of Service'], x['HRA Release Tester'],x['Primary Funding Code'], x['HRA Release?']), axis=1)
-        
-        df['Building Case Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['DateConstruct'], x['Housing Level of Service'], x['Building Case Tester'],x['Primary Funding Code'], x['HRA Release?']), axis=1)
     
         #Is everything okay with a case? 
 
@@ -372,6 +308,101 @@ def upload_TRCCovidClean():
         'Assigned Branch/CC',
         'TRC Case?'
         ]]      
+        
+        '''
+        ***Graveyard***
+        
+                  _(_)_                          wWWWw   _
+      @@@@       (_)@(_)   vVVVv     _     @@@@  (___) _(_)_
+     @@()@@ wWWWw  (_)\    (___)   _(_)_  @@()@@   Y  (_)@(_)
+      @@@@  (___)     `|/    Y    (_)@(_)  @@@@   \|/   (_)\
+       /      Y       \|    \|/    /(_)    \|      |/      |
+    \ |     \ |/       | / \ | /  \|/       |/    \|      \|/
+jgs \\|//   \\|///  \\\|//\\\|/// \|///  \\\|//  \\|//  \\\|// 
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^        
+        
+        def Fy22HRAReleaseClean (HRARelease,EligibilityDate,LevelOfService):
+            if EligibilityDate < 20211201 and LevelOfService == 'Advice':
+                return ''
+            elif HRARelease == 'No' and EligibilityDate != '':
+                return 'No Release - Remove Elig Date'
+            elif HRARelease == '' and EligibilityDate != '':
+                return 'No Release - Remove Elig Date'
+            elif HRARelease == 'Yes':
+                return ''
+            else:
+                return 'Needs HRA Release'
+        df['HRA Release Tester'] = df.apply(lambda x: HRAReleaseClean(x['HRA Release?'],x['DateConstruct'],x['Housing Level of Service']), axis=1)
+        
+        
+        #Could you flag when the form of regulation and/or LPC is public housing when the case is neither 3011 or does not have a referral source of Family Justice Center or HRA? also, only for post 9/1/20 eligibility date cases
+        
+        def PublicHousingTester(ProblemCode, FormOfRegulation, FundingCode, ReferralSource, EligDate):
+            if EligDate != '':
+                if int(EligDate) >= 20200901:
+                    if ProblemCode.startswith('64') == True or FormOfRegulation.startswith('Public Housing') == True:
+                        if FundingCode.startswith('3011') == True:
+                            return ''
+                        elif ReferralSource == 'HRA' or ReferralSource == 'FJC Housing Intake':
+                            return ''
+                        else:
+                            return 'Needs Review'
+                    else: 
+                        return ''
+                else: 
+                    return ''
+            else: 
+                return ''
+        df['Public Housing Review Tester'] = df.apply(lambda x: PublicHousingTester(x['Legal Problem Code'],x['Housing Form Of Regulation'],x['Primary Funding Code'],x['Referral Source'],x['DateConstruct']),axis = 1)        
+        
+        
+        def NonHousingAdviceConverter (ProblemCode, EligConstruct, FundingCode, ReferralSource, HousingLevelOfService):
+            if ProblemCode.startswith('6') == True or ProblemCode.startswith('0') == True or FundingCode.startswith('3011') == True or ReferralSource.startswith('FJC') == True:
+                return HousingLevelOfService
+            elif EligConstruct != '':
+                if EligConstruct < 20201001:
+                    return 'Advice'
+                else:
+                    return HousingLevelOfService
+            else:
+                return HousingLevelOfService
+        df['Housing Level of Service']  = df.apply(lambda x: NonHousingAdviceConverter(x['Legal Problem Code'],x['DateConstruct'],x['Primary Funding Code'],x['Referral Source'],x['Housing Level of Service']),axis = 1)
+        
+        #CovidException testers to erase clean-up requests
+        
+        df['PA # Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['DateConstruct'], x['Housing Level of Service'],  x['PA # Tester'],x['Primary Funding Code'], x['HRA Release?']), axis=1)
+        
+        df['SS # Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['DateConstruct'], x['Housing Level of Service'],  x['SS # Tester'],x['Primary Funding Code'], x['HRA Release?']), axis=1)
+        
+        df['Case Number Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['DateConstruct'], x['Housing Level of Service'], x['Case Number Tester'],x['Primary Funding Code'], x['HRA Release?']), axis=1)
+        
+        df['Rent Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['DateConstruct'], x['Housing Level of Service'], x['Rent Tester'],x['Primary Funding Code'], x['HRA Release?']), axis=1)
+        
+        df['Years in Apartment Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['DateConstruct'], x['Housing Level of Service'], x['Years in Apartment Tester'],x['Primary Funding Code'], x['HRA Release?']), axis=1)
+        
+        df['Referral Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['DateConstruct'], x['Housing Level of Service'], x['Referral Tester'],x['Primary Funding Code'], x['HRA Release?']), axis=1)
+        
+        df['Income Verification Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['DateConstruct'], x['Housing Level of Service'], x['Income Verification Tester'],x['Primary Funding Code'], x['HRA Release?']), axis=1)
+        
+        df['Posture Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['DateConstruct'], x['Housing Level of Service'], x['Posture Tester'],x['Primary Funding Code'], x['HRA Release?']), axis=1)
+        
+        df['Unit Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['DateConstruct'], x['Housing Level of Service'], x['Unit Tester'],x['Primary Funding Code'], x['HRA Release?']), axis=1)
+        
+        df['Regulation Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['DateConstruct'], x['Housing Level of Service'], x['Regulation Tester'],x['Primary Funding Code'], x['HRA Release?']), axis=1)
+        
+        df['Subsidy Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['DateConstruct'], x['Housing Level of Service'], x['Subsidy Tester'],x['Primary Funding Code'], x['HRA Release?']), axis=1)
+        
+        df['Outcome Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['DateConstruct'], x['Housing Level of Service'], x['Outcome Tester'],x['Primary Funding Code'], x['HRA Release?']), axis=1)
+        
+        df['Housing Services Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['DateConstruct'], x['Housing Level of Service'], x['Housing Services Tester'],x['Primary Funding Code'], x['HRA Release?']), axis=1)
+        
+        df['Housing Activity Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['DateConstruct'], x['Housing Level of Service'], x['Housing Activity Tester'],x['Primary Funding Code'], x['HRA Release?']), axis=1)
+        
+        df['HRA Release Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['DateConstruct'], x['Housing Level of Service'], x['HRA Release Tester'],x['Primary Funding Code'], x['HRA Release?']), axis=1)
+        
+        df['Building Case Tester'] = df.apply(lambda x: HousingToolBox.TRCRedactForCovid(x['DateConstruct'], x['Housing Level of Service'], x['Building Case Tester'],x['Primary Funding Code'], x['HRA Release?']), axis=1)
+        
+        '''
         
         #Preparing Excel Document
         

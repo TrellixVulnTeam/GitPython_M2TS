@@ -61,40 +61,20 @@ def UAHPLPConsolidatedBoroughCleaner():
        
         df['EligDateConstruct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['HAL Eligibility Date']), axis=1)
         
-        df['Post 12/1/21 Elig Date?'] = df.apply(lambda x: HousingToolBox.PostTwelveOne(x['EligDateConstruct']), axis=1)
+        
         
         df['OpenedDateConstruct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['Date Opened']), axis=1)
        
-        #don't need consent form if it's post-covid advice/brief (still need release if we do have the index number)*only applies to pre 12/1 dates now
-        def ReleaseTester(HRARelease,LevelOfService,IndexNum,PostTwelveOne):
-            LevelOfService = str(LevelOfService)
-            IndexNum = str(IndexNum)
-            if PostTwelveOne == "No":
-                if LevelOfService.startswith("Advice") or LevelOfService.startswith("Brief"):
-                    if IndexNum == '' or IndexNum.startswith('N') == True or IndexNum.startswith('n') == True:
-                        return 'Unnecessary due to Limited Service'
-                    else:
-                        return HRARelease
-                else:
-                    return HRARelease
-            else:
-                return HRARelease
-       
-        df['HRA Release?'] = df.apply(lambda x: ReleaseTester(x['HRA Release?'],x["Housing Level of Service"],x['Gen Case Index Number'],x['Post 12/1/21 Elig Date?']),axis = 1)
-       
+
         #PA Tester if theres no dhci, not needed for post-covid advice/brief cases *pre 12/1 cases don't need income verification document
-        def PATester (PANum,DHCI,PostTwelveOne,LevelOfService,EligDate,OpenDate):
-            LevelOfService = str(LevelOfService)
-            if PostTwelveOne == "No" and LevelOfService.startswith("Advice") and EligDate != '':
-                return "Unnecessary due limited service"
-            elif PostTwelveOne == "No" and LevelOfService.startswith("Brief") and EligDate != '':
-                return "Unnecessary due limited service"         
-            elif DHCI == "DHCI Form" and PANum == "":
+        def PATester (PANum,DHCI):
+
+            if DHCI == "DHCI Form" and PANum == "":
                 return "Not Needed due to DHCI"
             else:
                 return PANum
             
-        df['Gen Pub Assist Case Number'] = df.apply(lambda x: PATester(x['Gen Pub Assist Case Number'],x['Housing Income Verification'],x['Post 12/1/21 Elig Date?'],x["Housing Level of Service"],x['EligDateConstruct'],x['OpenedDateConstruct']),axis = 1)
+        df['Gen Pub Assist Case Number'] = df.apply(lambda x: PATester(x['Gen Pub Assist Case Number'],x['Housing Income Verification']),axis = 1)
         
         #Outcome Tester - date no outcome or outcome no date
         
@@ -129,7 +109,7 @@ def UAHPLPConsolidatedBoroughCleaner():
 
         def TesterTester (EligConstruct,HRARelease,HousingLevel,HousingType,EligDate,PANum,Outcome,OutcomeDate,HousingCase):
            
-            if EligConstruct != '' and EligConstruct < 20210701 :
+            if EligConstruct != '' and EligConstruct < 20220701 :
                 return 'Eligibility date from prior contract year'
             elif HRARelease == "" or HRARelease == "No" or HRARelease == " ":
                 return 'Case Needs Attention'
@@ -306,6 +286,51 @@ def UAHPLPConsolidatedBoroughCleaner():
         "Intake User"
         ]]      
         
+        
+        '''
+        Graveyard
+                  _(_)_                          wWWWw   _
+      @@@@       (_)@(_)   vVVVv     _     @@@@  (___) _(_)_
+     @@()@@ wWWWw  (_)\    (___)   _(_)_  @@()@@   Y  (_)@(_)
+      @@@@  (___)     `|/    Y    (_)@(_)  @@@@   \|/   (_)\
+       /      Y       \|    \|/    /(_)    \|      |/      |
+    \ |     \ |/       | / \ | /  \|/       |/    \|      \|/
+jgs \\|//   \\|///  \\\|//\\\|/// \|///  \\\|//  \\|//  \\\|// 
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+        
+        df['Post 12/1/21 Elig Date?'] = df.apply(lambda x: HousingToolBox.PostTwelveOne(x['EligDateConstruct']), axis=1)
+        
+        def FY22ReleaseTester(HRARelease,LevelOfService,IndexNum,PostTwelveOne):
+            LevelOfService = str(LevelOfService)
+            IndexNum = str(IndexNum)
+            if PostTwelveOne == "No":
+                if LevelOfService.startswith("Advice") or LevelOfService.startswith("Brief"):
+                    if IndexNum == '' or IndexNum.startswith('N') == True or IndexNum.startswith('n') == True:
+                        return 'Unnecessary due to Limited Service'
+                    else:
+                        return HRARelease
+                else:
+                    return HRARelease
+            else:
+                return HRARelease
+                
+        df['HRA Release?'] = df.apply(lambda x: ReleaseTester(x['HRA Release?'],x["Housing Level of Service"],x['Gen Case Index Number'],x['Post 12/1/21 Elig Date?']),axis = 1)
+        
+        #PA Tester if theres no dhci, not needed for post-covid advice/brief cases *pre 12/1 cases don't need income verification document
+        def FY22PATester (PANum,DHCI,PostTwelveOne,LevelOfService,EligDate,OpenDate):
+            LevelOfService = str(LevelOfService)
+            if PostTwelveOne == "No" and LevelOfService.startswith("Advice") and EligDate != '':
+                return "Unnecessary due limited service"
+            elif PostTwelveOne == "No" and LevelOfService.startswith("Brief") and EligDate != '':
+                return "Unnecessary due limited service"         
+            elif DHCI == "DHCI Form" and PANum == "":
+                return "Not Needed due to DHCI"
+            else:
+                return PANum
+        
+        '''
         
         
         

@@ -29,7 +29,7 @@ def TRCExternalPrepCovid():
         
         df['DateConstruct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['HAL Eligibility Date']), axis=1)
         
-        df['Post 12/1/21 Elig Date?'] = df.apply(lambda x: HousingToolBox.PostTwelveOne(x['DateConstruct']), axis=1)
+        
         
         ###This is where all the functions happen:###
         
@@ -162,6 +162,189 @@ def TRCExternalPrepCovid():
                     return "11/28/2016"
                 elif Proceeding == "IL":
                         return "09/20/2021"
+                else:
+                    return Date
+            else:
+                return Date
+                
+        df['waiver_approval_date'] = df.apply(lambda x: CatWaivDate(x['Percentage of Poverty'],x['DateConstruct'],x['service_type'],x['Housing Type Of Case'],x['referral_source'],x['LS Waiver Date'],x['proceeding'],x['Primary Funding Code'],x['LT_index'],x['Housing TRC HRA Waiver Categories']), axis=1)
+        
+        
+        
+        
+        #Apply categorical income waiver date to cases that had categorical waivers dated 9/20/21 (Fy22 to 3/18/22)
+        def CatWaivDateReas (Pov, EDC, LoS, CaseType, Ref, Date, Proceeding, Prim, LT, Type):
+            EDC = int(EDC)
+            LT = str(LT)
+            if Ref != "Family Justice Center" and "3011" not in Prim and Type == "FJC Waiver":
+                return str(Date) + "-Original LS response, no FJC indicators"
+            elif LoS == "Advice Only" and Date != "":
+                return str(Date) + ", Adv Case w Original LS Date"
+            elif LoS == "Advice Only" and Date == "":
+                return str(Date) + "Adv Case, no date needed"
+            elif Date != "":
+                return "Has LS waiver date, " + str(Date)
+            elif Pov >= 201 and Date == "":
+                if Ref == "Family Justice Center" and "3011" in Prim:
+                    return "11/28/2016, over income case w 2 FJC indicators"
+                elif Proceeding == "IL":
+                        return "09/20/2021, over income IL case"
+                else:
+                    return str(Date) + "post 3/18 case, may need waiver, not categorical"
+            else:
+                return str(Date) + "Pov<201"
+                
+        df['Script waiver date Reason'] = df.apply(lambda x: CatWaivDateReas(x['Percentage of Poverty'],x['DateConstruct'],x['service_type'],x['Housing Type Of Case'],x['referral_source'],x['LS Waiver Date'],x['proceeding'],x['Primary Funding Code'],x['LT_index'],x['Housing TRC HRA Waiver Categories']), axis=1)
+        
+        #Apply categorical income waiver type to cases that had categorical waivers dated 9/20/21 (Fy22 to 3/18/22)
+        def CatWaivType (Pov, EDC, LoS, CaseType, Ref, Type, Proceeding, Prim, LT):
+            EDC = int(EDC)
+            LT = str(LT)
+            if Ref != "Family Justice Center" and "3011" not in Prim and Type == "FJC Waiver":
+                return Type
+            elif LoS == "Advice Only" and Type != "":
+                return Type
+            elif LoS == "Advice Only" and Type == "":
+                return Type
+            elif Type != "":
+                return Type
+            elif Pov >= 201 and Type == "":
+                if Ref == "Family Justice Center" and "3011" in Prim:
+                    return "FJC Waiver"
+                elif Proceeding == "IL":
+                        return "Income Waiver"
+                else:
+                    return Type
+            else:
+                return Type
+                
+        df['waiver'] = df.apply(lambda x: CatWaivType(x['Percentage of Poverty'],x['DateConstruct'],x['service_type'],x['Housing Type Of Case'],x['referral_source'],x['LS Waiver Type'],x['proceeding'],x['Primary Funding Code'],x['LT_index']), axis=1)
+        
+        #Apply categorical income waiver type reasoning to cases that had categorical waivers dated 9/20/21 (Fy22 to 3/18/22)
+        def CatWaivTypeReas (Pov, EDC, LoS, CaseType, Ref, Proceeding, Prim, LT, Type):
+            EDC = int(EDC)
+            LT = str(LT)
+            if Ref != "Family Justice Center" and "3011" not in Prim and Type == "FJC Waiver":
+                return str(Type) + "-Original LS response, no FJC indicators"
+            elif LoS == "Advice Only" and Type != "":
+                return str(Type) + ", Adv Case w Original LS waiver type"
+            elif LoS == "Advice Only" and Type == "":
+                return str(Type) + "Adv Case, no waiver needed"
+            elif Type != "":
+                return str(Type) + ", waiver type in LS"
+            elif Pov >= 201 and Type == "":
+                if Ref == "Family Justice Center" and "3011" in Prim:
+                    return "FJC Waiver, over income case w 2 FJC indicators"
+                elif Proceeding == "IL":
+                        return "Income Waiver, over income IL case"
+                else:
+                    return str(Type) + "post 3/18 case, may need waiver, not categorical"
+            else:
+                return str(Type) + "Pov<201"
+                
+        df['Script waiver type Reason'] = df.apply(lambda x: CatWaivTypeReas(x['Percentage of Poverty'],x['DateConstruct'],x['service_type'],x['Housing Type Of Case'],x['referral_source'],x['proceeding'],x['Primary Funding Code'],x['LT_index'],x['LS Waiver Type']), axis=1)
+        
+        
+        
+        
+        def DeleteChildren (NumChildren):
+
+            if NumChildren == "":
+                return 0
+            else:
+                return NumChildren
+        df['num_children'] = df.apply(lambda x: DeleteChildren(x['num_children']), axis=1)
+        
+
+        df['DOB'] = df['Date of Birth']
+        
+        
+        
+        ###Finalizing Report###
+        #put columns in correct order
+        
+        df = df[['id',
+        'program_name',
+        'first_name',
+        'last_name',
+        'SSN',
+        'PA_number',
+        'DOB',
+        'num_adults',
+        'num_children',
+        'street_number',
+        'Street',
+        'Unit',
+        'city',
+        'zip',
+        'waiver_approval_date',
+        'Script waiver date Reason',
+        'LS Waiver Date',
+        'waiver',
+        'Script waiver type Reason',
+        'LS Waiver Type',
+        'rent',
+        'proceeding',
+        'LT_index',
+        'proceeding_level',
+        'years_in_apt',
+        'language',
+        'referral_source',
+        'income',
+        'eligibility_date',
+        'DHCI',
+        'posture',
+        'service_type',
+        'below_200_FPL',
+        'units_in_bldg',
+        'subsidy_type',
+        'housing_type',
+        'outcome_date',
+        'outcome',
+        'services_rendered',
+        'activities',
+        'HRA Release?',
+        'Percentage of Poverty',
+        'Primary Advocate',
+        'Hyperlinked CaseID#',
+        'Legal Problem Code',
+        #'Non-Housing Case Tester',
+        'Primary Funding Code'
+        ]]
+        
+        
+        
+
+        """
+        Graveyard
+                  _(_)_                          wWWWw   _
+      @@@@       (_)@(_)   vVVVv     _     @@@@  (___) _(_)_
+     @@()@@ wWWWw  (_)\    (___)   _(_)_  @@()@@   Y  (_)@(_)
+      @@@@  (___)     `|/    Y    (_)@(_)  @@@@   \|/   (_)\
+       /      Y       \|    \|/    /(_)    \|      |/      |
+    \ |     \ |/       | / \ | /  \|/       |/    \|      \|/
+jgs \\|//   \\|///  \\\|//\\\|/// \|///  \\\|//  \\|//  \\\|// 
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^        
+        
+        df['Post 12/1/21 Elig Date?'] = df.apply(lambda x: HousingToolBox.PostTwelveOne(x['DateConstruct']), axis=1)
+        
+        #Apply categorical income waiver date to cases that had categorical waivers dated 9/20/21 (Fy22 to 3/18/22)
+        def FY22CatWaivDate (Pov, EDC, LoS, CaseType, Ref, Date, Proceeding, Prim, LT, Type):
+            EDC = int(EDC)
+            LT = str(LT)
+            if Ref != "Family Justice Center" and "3011" not in Prim and Type == "FJC Waiver":
+                return Date
+            elif LoS == "Advice Only" and Date != "":
+                return Date
+            elif LoS == "Advice Only" and Date == "":
+                return Date 
+            elif Date != "":
+                return Date
+            elif Pov >= 201 and Date == "":
+                if Ref == "Family Justice Center" and "3011" in Prim:
+                    return "11/28/2016"
+                elif Proceeding == "IL":
+                        return "09/20/2021"
                 elif EDC < 20220318:
                     if LoS == "Full Rep" and CaseType in HousingToolBox.evictiontypes and LT.startswith('LT') == True:
                         return "09/20/2021"
@@ -175,11 +358,9 @@ def TRCExternalPrepCovid():
                     return Date
             else:
                 return Date
-                
-        df['waiver_approval_date'] = df.apply(lambda x: CatWaivDate(x['Percentage of Poverty'],x['DateConstruct'],x['service_type'],x['Housing Type Of Case'],x['referral_source'],x['LS Waiver Date'],x['proceeding'],x['Primary Funding Code'],x['LT_index'],x['Housing TRC HRA Waiver Categories']), axis=1)
         
         #Apply categorical income waiver date to cases that had categorical waivers dated 9/20/21 (Fy22 to 3/18/22)
-        def CatWaivDateReas (Pov, EDC, LoS, CaseType, Ref, Date, Proceeding, Prim, LT, Type):
+        def FY22CatWaivDateReas (Pov, EDC, LoS, CaseType, Ref, Date, Proceeding, Prim, LT, Type):
             EDC = int(EDC)
             LT = str(LT)
             if Ref != "Family Justice Center" and "3011" not in Prim and Type == "FJC Waiver":
@@ -208,11 +389,8 @@ def TRCExternalPrepCovid():
                     return str(Date) + "post 3/18 case, may need waiver, not categorical"
             else:
                 return str(Date) + "Pov<201"
-                
-        df['Script waiver date Reason'] = df.apply(lambda x: CatWaivDateReas(x['Percentage of Poverty'],x['DateConstruct'],x['service_type'],x['Housing Type Of Case'],x['referral_source'],x['LS Waiver Date'],x['proceeding'],x['Primary Funding Code'],x['LT_index'],x['Housing TRC HRA Waiver Categories']), axis=1)
         
-        #Apply categorical income waiver type to cases that had categorical waivers dated 9/20/21 (Fy22 to 3/18/22)
-        def CatWaivType (Pov, EDC, LoS, CaseType, Ref, Type, Proceeding, Prim, LT):
+        def FY22CatWaivType (Pov, EDC, LoS, CaseType, Ref, Type, Proceeding, Prim, LT):
             EDC = int(EDC)
             LT = str(LT)
             if Ref != "Family Justice Center" and "3011" not in Prim and Type == "FJC Waiver":
@@ -241,11 +419,8 @@ def TRCExternalPrepCovid():
                     return Type
             else:
                 return Type
-                
-        df['waiver'] = df.apply(lambda x: CatWaivType(x['Percentage of Poverty'],x['DateConstruct'],x['service_type'],x['Housing Type Of Case'],x['referral_source'],x['LS Waiver Type'],x['proceeding'],x['Primary Funding Code'],x['LT_index']), axis=1)
         
-        #Apply categorical income waiver type reasoning to cases that had categorical waivers dated 9/20/21 (Fy22 to 3/18/22)
-        def CatWaivTypeReas (Pov, EDC, LoS, CaseType, Ref, Proceeding, Prim, LT, Type):
+        def FY22CatWaivTypeReas (Pov, EDC, LoS, CaseType, Ref, Proceeding, Prim, LT, Type):
             EDC = int(EDC)
             LT = str(LT)
             if Ref != "Family Justice Center" and "3011" not in Prim and Type == "FJC Waiver":
@@ -274,11 +449,7 @@ def TRCExternalPrepCovid():
                     return str(Type) + "post 3/18 case, may need waiver, not categorical"
             else:
                 return str(Type) + "Pov<201"
-                
-        df['Script waiver type Reason'] = df.apply(lambda x: CatWaivTypeReas(x['Percentage of Poverty'],x['DateConstruct'],x['service_type'],x['Housing Type Of Case'],x['referral_source'],x['proceeding'],x['Primary Funding Code'],x['LT_index'],x['LS Waiver Type']), axis=1)
-        
 
-        """
         #Flag cases that don't have housing-based legal problem codes for Kim's review, after 9/30
         
         def NonHousing (LegalProblemCode):
@@ -288,15 +459,8 @@ def TRCExternalPrepCovid():
                 return 'Needs Review'
     
         df['Non-Housing Case Tester'] = df.apply(lambda x: NonHousing(x['Legal Problem Code']), axis=1)
-        """
-      
         
-        ##different guidelines for post 3/1/20 eligibility dates
-        ##If case is advice and has a post-3/1 eligibility date
-        
-        #Sum household in adult column and leave children blank
-        #These changes only applied to 3018??
-        def HousholdSum (PostTwelveOne, ServiceType,  NumAdults, NumChildren, PrimaryFunding):
+        def FY22HousholdSum (PostTwelveOne, ServiceType,  NumAdults, NumChildren, PrimaryFunding):
             if NumChildren == "":
                 NumChildren = 0
             if PostTwelveOne == "No":
@@ -308,7 +472,7 @@ def TRCExternalPrepCovid():
                 return NumAdults
         df['num_adults'] = df.apply(lambda x: HousholdSum(x['Post 12/1/21 Elig Date?'], x['service_type'], x['num_adults'], x['num_children'],x['Primary Funding Code']), axis=1)
         
-        def DeleteChildren (PostTwelveOne, ServiceType, NumChildren, PrimaryFunding):
+         def FY22DeleteChildren (PostTwelveOne, ServiceType, NumChildren, PrimaryFunding):
             if PostTwelveOne == "No":
                 if ServiceType == "Advice Only" and PrimaryFunding != "3011 TRC FJC Initiative":
                     return ""
@@ -323,7 +487,7 @@ def TRCExternalPrepCovid():
         df['num_children'] = df.apply(lambda x: DeleteChildren(x['Post 12/1/21 Elig Date?'], x['service_type'], x['num_children'],x['Primary Funding Code']), axis=1)
         
         #Only have to report birth year 
-        def RedactBirthday(PostTwelveOne,ServiceType,DOB,PrimaryFunding):
+        def FY22RedactBirthday(PostTwelveOne,ServiceType,DOB,PrimaryFunding):
             if PostTwelveOne == "No":
                 if ServiceType == "Advice Only" and PrimaryFunding != "3011 TRC FJC Initiative":
                     return DOB[6:]
@@ -332,6 +496,7 @@ def TRCExternalPrepCovid():
             else:
                 return DOB
         df['DOB'] = df.apply(lambda x: RedactBirthday(x['Post 12/1/21 Elig Date?'], x['service_type'], x['Date of Birth'],x['Primary Funding Code']), axis=1)
+        
         
         def RedactLT(PostTwelveOne, ServiceType, ToRedact, PrimaryFunding, ProblemCode, Consent):
             if PostTwelveOne == "No":
@@ -413,58 +578,8 @@ def TRCExternalPrepCovid():
         df['services_rendered'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['services_rendered'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?'], x['Referral Source']), axis=1)
            
         df['activities'] = df.apply(lambda x: RedactAnything(x['Post 12/1/21 Elig Date?'], x['service_type'], x['activities'], x['Primary Funding Code'],x['Legal Problem Code'],x['HRA Release?'], x['Referral Source']), axis=1)
-        
-        ###Finalizing Report###
-        #put columns in correct order
-        
-        df = df[['id',
-        'program_name',
-        'first_name',
-        'last_name',
-        'SSN',
-        'PA_number',
-        'DOB',
-        'num_adults',
-        'num_children',
-        'street_number',
-        'Street',
-        'Unit',
-        'city',
-        'zip',
-        'waiver_approval_date',
-        'Script waiver date Reason',
-        'LS Waiver Date',
-        'waiver',
-        'Script waiver type Reason',
-        'LS Waiver Type',
-        'rent',
-        'proceeding',
-        'LT_index',
-        'proceeding_level',
-        'years_in_apt',
-        'language',
-        'referral_source',
-        'income',
-        'eligibility_date',
-        'DHCI',
-        'posture',
-        'service_type',
-        'below_200_FPL',
-        'units_in_bldg',
-        'subsidy_type',
-        'housing_type',
-        'outcome_date',
-        'outcome',
-        'services_rendered',
-        'activities',
-        'HRA Release?',
-        'Percentage of Poverty',
-        'Primary Advocate',
-        'Hyperlinked CaseID#',
-        'Legal Problem Code',
-        #'Non-Housing Case Tester',
-        'Primary Funding Code'
-        ]]
+        """
+      
         
         #bounce worksheets back to excel
         output_filename = f.filename     
