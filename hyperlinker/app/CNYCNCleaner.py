@@ -27,15 +27,19 @@ def CNYCNCleaner():
         CNYCNContractDate = request.form['CNYCNdate']
         #Turn CNYCN date into integer
         CNYCNContractDate =  DataWizardTools.DateMaker(CNYCNContractDate)
-        #Take date from input field on cleaning tool
-        EndDate = request.form['EndDate']
+        #Take end date from input field on cleaning tool
+        HOPPEndDate = request.form['HOPPEndDate']
+        CNYCNEndDate = request.form['CNYCNEndDate']
         #Turn End Date into an integer
-        EndDateConstruct = DataWizardTools.DateMaker(EndDate)
+        HEndDateConstruct = DataWizardTools.DateMaker(HOPPEndDate)
+        CEndDateConstruct = DataWizardTools.DateMaker(CNYCNEndDate)
         #Return date to a string in CNYCN appropriate format
-        EndDate = datetime.strptime(EndDate, '%Y-%m-%d').strftime('%m/%d/%Y') 
+        HOPPEndDate = datetime.strptime(HOPPEndDate, '%Y-%m-%d').strftime('%m/%d/%Y')
+        CNYCNEndDate = datetime.strptime(CNYCNEndDate, '%Y-%m-%d').strftime('%m/%d/%Y') 
         print(HOPPContractDate)
         print(CNYCNContractDate)
-        print(EndDate)
+        print(HOPPEndDate)
+        print(CNYCNEndDate)
         
         
         #adds blank dataframe
@@ -240,24 +244,37 @@ def CNYCNCleaner():
         df['Time Updated'] = df.apply(lambda x: TimeUpFiller(x['Time Updated'],x['Date Opened']),axis=1)
                     
         #This function takes any case with a time updated after the end of contract date input to cleaning tool and changes the time updated to match the end of contract date
-        def DateBackDater (TimeUpdated, TimeUpdatedConstruct):
+        def DateBackDater (TimeUpdated, TimeUpdatedConstruct, FundingSource):
             #print(type(TimeUpdated))
             #print(type(EndDate))
             if TimeUpdatedConstruct == "":
                 return ""
-            elif EndDate == "":
-                return TimeUpdated
-            elif EndDateConstruct < TimeUpdatedConstruct:
-                return EndDate
+            elif FundingSource == 'HOPP':
+                if HOPPEndDate == "":
+                    return TimeUpdated
+                elif HEndDateConstruct < TimeUpdatedConstruct:
+                    return HOPPEndDate
+                else:
+                    return TimeUpdated
+            elif FundingSource != 'HOPP':
+                if CNYCNEndDate == "":
+                    return TimeUpdated
+                elif CEndDateConstruct < TimeUpdatedConstruct:
+                    return CNYCNEndDate
+                else:
+                    return TimeUpdated
             else:
                 return TimeUpdated
                 
         
-        df['Time Updated Construct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['Time Updated']),axis = 1)        
-        df['Time Updated'] = df.apply(lambda x: DateBackDater(x['Time Updated'],x['Time Updated Construct']), axis = 1)
-                      
-        
         df['FundingSource'] = df.apply(lambda x: FundingSourceNamer(x['FundsNum'],x['Secondary Funding Codes']),axis = 1)
+        df['Time Updated Construct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['Time Updated']),axis = 1) 
+        print("Time updated Old")
+        print(df['Time Updated'])
+        df['Time Updated'] = df.apply(lambda x: DateBackDater(x['Time Updated'],x['Time Updated Construct'],x['FundingSource']), axis = 1)
+        print("Time updated New")
+        print(df['Time Updated'])
+                      
         df['Staff'] = df['Caseworker Name']
         df['IntakeDate'] = df.apply(lambda x: DateTexter(x['Date Opened']),axis = 1)
         df['ServDate'] = df.apply(lambda x: DateTexter(x['Time Updated']),axis = 1)
@@ -344,6 +361,8 @@ def CNYCNCleaner():
         #Use the (integer) dates and the funding source to determine if each case is in the contract
         df['In Contract?'] = df.apply(lambda x: OldCaseDeleter(x['FundingSource'],x['Date Closed Construct']),axis = 1)
         df['Active Cases'] = df.apply(lambda x: OldCaseDeleter(x['FundingSource'],x['Time Updated Construct']),axis = 1)
+        print(df['In Contract?'])
+        print(df['Active Cases'])
 
         #Putting everything in the right order
         df = df.sort_values(by=['Caseworker Name'])
@@ -553,13 +572,18 @@ def CNYCNCleaner():
     
     </br>
     
+    <input type = "date" id="HOPPEndDate" name="HOPPEndDate">
+    <label for = "HOPPEndDate"> choose HOPP reporting period end date! </label>
+    
+    </br>
+    
     <input type = "date" id="CNYCNdate" name="CNYCNdate">
     <label for = "CNYCNdate"> choose CNYCN contract start date! </label>
     
     </br>
     
-    <input type = "date" id="EndDate" name="EndDate">
-    <label for = "EndDate"> choose reporting period end date! </label>
+    <input type = "date" id="CNYCNEndDate" name="CNYCNEndDate">
+    <label for = "CNYCNEndDate"> choose CNYCN reporting period end date! </label>
     
     </br>
     </br>
