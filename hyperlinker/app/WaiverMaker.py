@@ -202,6 +202,73 @@ def WaiverMaker():
             elif CaseType == "BLANK":
                 return "Unclear, Type of Case missing"
             elif CaseType == "Illegal Lockout":
+                return "Yes, ILO cases waived in"
+            else:
+                return "No, not eligible for categorical waiver"
+                
+        df['Categorically Waived In?'] = df.apply(lambda x : WaivedIn(x['Referral Source'],x['Percentage of Poverty'],x['BlanklessTypeofCase'],x['Gen Case Index Number'],x['EDate Construct']),axis=1)
+        
+        
+        '''CaseType == "Holdover"or"Non-payment"or"Illegal Lockout"or"NYCHA Housing Termination"and'''
+        '''and(CaseNum.startswith('N')or CaseNum= == False'''
+        '''and CaseType == "Holdover" or CaseType == "Non-payment" or CaseType == "Illegal Lockout" or CaseType == "NYCHA Housing Termination"'''
+        
+        #Add Eligible for Waiver Request? column
+        def NeedWaiver(WaiverType,WaiverDate,Ref,FPL,Waived,NN,EDC):
+            if NN == "99":
+                return "No Client Name"
+            elif FPL < 201:
+                return "No, FPL < 201%"
+            elif pd.isnull(WaiverType) == False and pd.isnull(WaiverDate)==False:
+                return "Has "+WaiverType
+            elif pd.isnull(WaiverType)==False and pd.isnull(WaiverDate)==True:
+                return "Has waiver type in LS, missing waiver date"
+            elif pd.isnull(WaiverType)==True and pd.isnull(WaiverDate)==False:
+                return "Has waiver date in LS, missing waiver type"
+            elif Waived == "Unclear, Type of Case missing":
+                return "Unclear, missing Type of Case"
+            elif Waived == "Yes, ILO cases waived in":
+                return "No, ILOs Categorically Waived In"
+            else:
+                return "Case may need waiver"
+                
+        df['Eligible for Waiver Request?'] = df.apply(lambda x : NeedWaiver(x['Housing TRC HRA Waiver Categories'],x['Housing Date Of Waiver Approval'],x['Referral Source'],x['Percentage of Poverty'],x['Categorically Waived In?'],x['First & Last Initials'],x['EDate Construct']),axis=1)
+        
+        #Sorting Eligible Cases on top
+        df = df.sort_values(by=['Eligible for Waiver Request?'],ascending = False)
+        
+        
+        #Add Empty column***
+        #df[''] = ''
+        
+        #Removed columns - 'Housing Type Of Case','Gen Case Index Number',
+        
+        #REPORTING VERSION Put everything in the right order***removed '' after notes columns
+        df = df[['Provider','Contact Person','Date of Request','First & Last Initials','New/Reconsideration?','Income/ZIP Code Waiver?','Program (AHTP/UA/Non-UA/HHP)','Proceeding Type','L&T Number (if applicable)','ZIP Code (XXXXX)','Household Size (#)','Household Annual Income ($XX,XXX)','FPL %','Rent Regulated/NYCHA?','Housing Subsidy?','Individual/Group Case?','Summary of the Request/Other Compelling Factors','Approval?','Date','Notes/Comments','Hyperlinked Case #','Categorically Waived In?','Eligible for Waiver Request?','Referral Source','EDate Construct','Housing TRC HRA Waiver Categories','Housing Date Of Waiver Approval']]
+              
+        """
+        #Remove Rows without Case ID values
+        df.fillna('',inplace = True)
+        df['Matter/Case ID#'] = df.apply(lambda x : DataWizardTools.RemoveNoCaseID(x['Matter/Case ID#']),axis=1)        
+        
+        
+        #Create Hyperlinks
+        df['Hyperlinked CaseID#'] = df.apply(lambda x : DataWizardTools.Hyperlinker(x['Matter/Case ID#']),axis=1)    
+        """
+        #FY22 Graveyard
+        #Add Already Waived In? column - hra referrals and eviction w court case, after blanklesstypeofcase
+        '''def FY22WaivedIn(Ref,FPL,CaseType,CaseNum,EDC):
+            CaseType = str(CaseType)
+            CaseNum = str(CaseNum)
+            #CaseNum = CaseNum.lower()
+            #print (CaseType)
+            #df.fillna('BLANK',inplace = True)   ***       
+            if FPL < 201:
+                #print(FPL)
+                return "No Need, < 201"
+            elif CaseType == "BLANK":
+                return "Unclear, Type of Case missing"
+            elif CaseType == "Illegal Lockout":
                 return "Yes, ILO cases waived in for FY22"
             elif EDC < 20220318:
                 if Ref == "HRA":
@@ -218,15 +285,10 @@ def WaiverMaker():
             else:
                 return "No, not eligible for categorical waiver post 3/18/22"
                 
-        df['Categorically Waived In?'] = df.apply(lambda x : WaivedIn(x['Referral Source'],x['Percentage of Poverty'],x['BlanklessTypeofCase'],x['Gen Case Index Number'],x['EDate Construct']),axis=1)
+        df['Categorically Waived In?'] = df.apply(lambda x : FY22WaivedIn(x['Referral Source'],x['Percentage of Poverty'],x['BlanklessTypeofCase'],x['Gen Case Index Number'],x['EDate Construct']),axis=1)'''
         
-        
-        '''CaseType == "Holdover"or"Non-payment"or"Illegal Lockout"or"NYCHA Housing Termination"and'''
-        '''and(CaseNum.startswith('N')or CaseNum= == False'''
-        '''and CaseType == "Holdover" or CaseType == "Non-payment" or CaseType == "Illegal Lockout" or CaseType == "NYCHA Housing Termination"'''
-        
-        #Add Eligible for Waiver Request? column
-        def NeedWaiver(WaiverType,WaiverDate,Ref,FPL,Waived,NN,EDC):
+        #Add Eligible for Waiver Request? column-after categorically waived in
+        '''def FY22NeedWaiver(WaiverType,WaiverDate,Ref,FPL,Waived,NN,EDC):
             if NN == "99":
                 return "No Client Name"
             elif FPL < 201:
@@ -251,29 +313,7 @@ def WaiverMaker():
             else:
                 return "Yes, post 3/18/22 case, needs waiver"
                 
-        df['Eligible for Waiver Request?'] = df.apply(lambda x : NeedWaiver(x['Housing TRC HRA Waiver Categories'],x['Housing Date Of Waiver Approval'],x['Referral Source'],x['Percentage of Poverty'],x['Categorically Waived In?'],x['First & Last Initials'],x['EDate Construct']),axis=1)
-        
-        #Sorting Eligible Cases on top
-        df = df.sort_values(by=['Eligible for Waiver Request?'],ascending = False)
-        
-        
-        #Add Empty column***
-        #df[''] = ''
-        
-        #Removed columns - 'Housing Type Of Case','Gen Case Index Number',
-        
-        #REPORTING VERSION Put everything in the right order***removed '' after notes columns
-        df = df[['Provider','Contact Person','Date of Request','First & Last Initials','New/Reconsideration?','Income/ZIP Code Waiver?','Program (AHTP/UA/Non-UA/HHP)','Proceeding Type','L&T Number (if applicable)','ZIP Code (XXXXX)','Household Size (#)','Household Annual Income ($XX,XXX)','FPL %','Rent Regulated/NYCHA?','Housing Subsidy?','Individual/Group Case?','Summary of the Request/Other Compelling Factors','Approval?','Date','Notes/Comments','Hyperlinked Case #','Categorically Waived In?','Eligible for Waiver Request?','Referral Source','EDate Construct','Housing TRC HRA Waiver Categories']]
-              
-        """
-        #Remove Rows without Case ID values
-        df.fillna('',inplace = True)
-        df['Matter/Case ID#'] = df.apply(lambda x : DataWizardTools.RemoveNoCaseID(x['Matter/Case ID#']),axis=1)        
-        
-        
-        #Create Hyperlinks
-        df['Hyperlinked CaseID#'] = df.apply(lambda x : DataWizardTools.Hyperlinker(x['Matter/Case ID#']),axis=1)    
-        """
+        df['Eligible for Waiver Request?'] = df.apply(lambda x : FY22NeedWaiver(x['Housing TRC HRA Waiver Categories'],x['Housing Date Of Waiver Approval'],x['Referral Source'],x['Percentage of Poverty'],x['Categorically Waived In?'],x['First & Last Initials'],x['EDate Construct']),axis=1)'''
         
         #bounce worksheets back to excel
         output_filename = f.filename     
@@ -332,7 +372,7 @@ def WaiverMaker():
                     worksheet.write(1, col_num, value, numbers_format)
                     
         #Make Case ID cell yellow
-        worksheet.write('U3', 'Hyperlinked Case # (central will delete columns U:AB before submitting to HRA)',DeleteCell_format)
+        worksheet.write('U3', 'Hyperlinked Case # (central will delete columns U to the end before submitting to HRA)',DeleteCell_format)
                     
         #Add Borders to everything
         border_format=workbook.add_format({'border':1,'align':'left','font_size':10})
