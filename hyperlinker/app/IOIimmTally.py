@@ -222,7 +222,7 @@ def upload_IOIimmTally():
         df['Year_of_Birth'] = df['Date of Birth'].str[-4:]
         
         #Unique Client ID#
-        df['Unique Client ID#'] = df['First_Initial'] + df['Last_Initial'] + df['Year_of_Birth']       
+        df['Unique Client ID#'] = df['Client Last Name'] + df['Client First Name'] + df['Date of Birth']       
         
         #Deliverable Categories
         
@@ -545,6 +545,8 @@ def upload_IOIimmTally():
               
         #REPORTING VERSION Put everything in the right order
         df = df[['Hyperlinked Case #','Office','Primary Advocate','Client Name','Special Legal Problem Code','Level of Service','Needs DHCI?','Exclude due to Income?','Needs Substantial Activity?','Country of Origin','Outcome To Report','Modified Deliverable Tally','Reportable?']]
+        
+        #,'HRA Case Coding','Deliverable Tally','Age at Intake','Unique Client ID#'
                    
         #Removed - 'Unique_ID','Last_Initial','First_Initial','Year_of_Birth','Gender','Country of Origin','Borough','Zip Code','Language','Household_Size','Number_of_Children','Annual_Income','Income_Eligible','Waiver_Type','Waiver_Approval_Date','Eligibility_Date','Referral_Source','Service_Type_Code','Proceeding_Type_Code','Outcome','Outcome_Date','Seized_at_Border','Group','Prior_Enrollment_FY','Pro_Bono','Special Legal Problem Code','HRA Level of Service','HRA Case Coding','IOI FY22 Substantial Activity 2022','IOI Date Substantial Activity Performed 2022','IOI Was client apprehended at border? (IOI 2&3)','Deliverable Tally',
         
@@ -815,7 +817,7 @@ def upload_IOIimmTally():
     </form>
     <h3>Instructions:</h3>
     <ul type="disc">
-    <li>This tool is meant to be used in conjunction with the LegalServer report called <a href="https://lsnyc.legalserver.org/report/dynamic?load=1918" target="_blank">"Grants Management IOI 2 (3459) Report"</a>.</li>
+    <li>This tool is meant to be used in conjunction with the LegalServer report (DO) called <a href="https://lsnyc.legalserver.org/report/dynamic?load=1918" target="_blank">"Grants Management IOI 2 (3459) Report"</a>.</li>
     <li>Browse your computer using the field above to find the LegalServer excel document that you want to process for IOI.</li> 
     <li>Once you have identified this file, click ‘IOI-ify!’ and you should shortly be given a prompt to either open the file directly or save the file to your computer.</li> 
     <li>When you first open the file, all case numbers will display as ‘0’ until you click “Enable Editing” in excel, this will populate the fields.</li> </ul>
