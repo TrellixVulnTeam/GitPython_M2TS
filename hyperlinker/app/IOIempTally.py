@@ -26,7 +26,7 @@ def upload_IOIempTally():
             howmanymonths = today.month - 7
         else:
             howmanymonths = today.month + 12 - 7
-        
+        #howmanymonths = 12
         print(howmanymonths)
        
         #Cleaning
