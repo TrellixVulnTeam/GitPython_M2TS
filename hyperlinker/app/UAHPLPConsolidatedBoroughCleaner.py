@@ -283,7 +283,8 @@ def UAHPLPConsolidatedBoroughCleaner():
         "Tester Tester",
         "Assigned Branch/CC",
         "Assigned Paralegal",
-        "Intake User"
+        "Intake User",
+        "Percentage of Poverty"
         ]]      
         
         
