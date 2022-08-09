@@ -120,9 +120,13 @@ def SubsidyClean (Subsidy):
 
 #Years in Apartment Can't be 0 (can be -1)
 def YearsClean (Years):
-    if isinstance(Years, int) == False:
+    try:
+        Years = int(Years)
+    except: 
         return "Answer needs to be integer"
-    elif Years == 0:
+    #if isinstance(Years, int) == False:
+    #    return "Answer needs to be integer"
+    if Years == 0:
         return 'Needs Years In Apartment'
     elif Years < -1 or Years > 99:
         return 'Needs Valid Number'
