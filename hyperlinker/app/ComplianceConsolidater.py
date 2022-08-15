@@ -473,7 +473,7 @@ def ComplianceConsolidater():
         #Choose what to split things by:
         if request.form.get('LSU'):
             df['TabSplitValue'] = df.apply(lambda x : TabSplitter(x['Primary Advocate Name']),axis = 1)
-        elif request.form.get('BLS'):
+        elif request.form.get('BLSbyAdvocate'):
             df['TabSplitValue'] = df['Primary Advocate Name']
         else:
             df['TabSplitValue'] = df.apply(lambda x : DataWizardTools.UnitSplitter(x['Legal Problem Code']),axis = 1)
@@ -483,7 +483,7 @@ def ComplianceConsolidater():
         
         #Preparing Excel Document
 
-        if request.form.get('MLS'):
+        if request.form.get('MLSByTester'):
             NoLegalAssistance_df = df[df['No Legal Assistance Documented Tester'] == "Needs Review"]
             NoTimeEntered_df = df[df['No Time Entered for 90 Days Tester'] == "Needs Review"]
             TwoHundredPoverty_df = df[df['200% of Poverty Tester'] == "Needs Review"]
@@ -697,8 +697,12 @@ def ComplianceConsolidater():
 
         if request.form.get('MLS'):
             return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = "MLS " + f.filename)
+        elif request.form.get('MLSByTester'):
+            return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = "MLS by Tester" + f.filename)
         elif request.form.get('BLS'):
             return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = "BLS " + f.filename)
+        elif request.form.get('BLSbyAdvocate'):
+            return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = "BLS by Advocate" + f.filename)
         elif request.form.get('BxLS'):
             return send_from_directory('sheets',output_filename, as_attachment = True, attachment_filename = "BxLS " + f.filename)
         elif request.form.get('SILS'):
@@ -734,6 +738,10 @@ def ComplianceConsolidater():
     <label for="MLS"> MLS Compliance</label><br>
     <input type="checkbox" id="BLS" name="BLS" value="BLS">
     <label for="BLS"> BLS Compliance</label><br>
+    <input type="checkbox" id="MLSByTester" name="MLSByTester" value="MLSByTester">
+    <label for="MLSByTester"> MLS Compliance by Tester</label><br>
+    <input type="checkbox" id="BLSbyAdvocate" name="BLSbyAdvocate" value="BLSbyAdvocate">
+    <label for="BLSbyAdvocate"> BLS Compliance by Advocate</label><br>
     <input type="checkbox" id="BxLS" name="BxLS" value="BxLS">
     <label for="BxLS"> BxLS Compliance</label><br>
     <input type="checkbox" id="SILS" name="SILS" value="SILS">
