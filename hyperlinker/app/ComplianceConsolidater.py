@@ -38,6 +38,10 @@ def ComplianceConsolidater():
             df = df[df['Assigned Branch/CC'] == "Manhattan Legal Services"]
         elif request.form.get('BLS'):
             df = df[df['Assigned Branch/CC'] == "Brooklyn Legal Services"]
+        elif request.form.get('MLSByTester'):
+            df = df[df['Assigned Branch/CC'] == "Manhattan Legal Services"]
+        elif request.form.get('BLSbyAdvocate'):
+            df = df[df['Assigned Branch/CC'] == "Brooklyn Legal Services"]
         elif request.form.get('BxLS'):
             df = df[df['Assigned Branch/CC'] == "Bronx Legal Services"]
         elif request.form.get('SILS'):
