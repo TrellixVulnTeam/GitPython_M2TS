@@ -54,6 +54,8 @@ def index():
     <li><a href="/AllHousingSimpler">All Housing Report Tester</a></li>
     <li><a href="/AllHousingSecondStep">All Housing Second Step</a></li>
     
+    <li><a href="/OCJEnhanced">OCJ Enhanced Reporting Requirements</a></li>
+    
     
     </ul>
 
