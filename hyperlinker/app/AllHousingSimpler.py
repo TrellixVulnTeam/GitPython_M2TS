@@ -55,6 +55,7 @@ def AllHousingSimpler():
         df['TodayConstruct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['Today']), axis=1) 
          
         def ReleaseAndEligTester(HRARelease,EligibilityDate, EliDC, TdC, LoS, Close, PrimaryFunding): 
+            print("unreportable generating")
             UAHPLPFund = ['3121 Universal Access to Counsel – (UAC)','3122 Universal Access to Counsel – (UAC)','3123 Universal Access to Counsel – (UAC)','3124 Universal Access to Counsel – (UAC)','3125 Universal Access to Counsel – (UAC)','3111 HPLP-Homelessness Prevention Law Project','3112 HPLP-Homelessness Prevention Law Project','3113 HPLP-Homelessness Prevention Law Project','3114 HRA-HPLP-Homelessness Prevention Law Project','3115 HPLP-Homelessness Prevention Law Project'] 
             LoSEmpty = ["", "Hold For Review"] 
             if 20220701 > EliDC > 20000101: 
@@ -91,7 +92,7 @@ def AllHousingSimpler():
             if HousingLevel == '': 
                 return 'Needs Level of Service'
             elif HousingLevel == 'Hold For Review':
-                return 'Needs Updated Level of Service'
+                return 'HfR Needs Updated Level of Service'
             else: 
                 return HousingLevel 
          
@@ -112,6 +113,8 @@ def AllHousingSimpler():
         def ReferralClean (Referral,FundingSource): 
             if Referral == '': 
                 return 'Needs Referral Source' 
+            elif Referral == 'Returning Client':
+                return Referral
             elif FundingSource == '3011 TRC FJC Initiative' and Referral != 'FJC Housing Intake': 
                 return "Says '" + Referral + "'," + ' Needs to be FJC if funded 3011'
             elif FundingSource != '3011 TRC FJC Initiative' and Referral == 'FJC Housing Intake':
@@ -156,17 +159,19 @@ def AllHousingSimpler():
         
         #Years in Apartment Can't be 0 (can be -1) **in process, close age problem 
         def YearsClean (Years,Age,DOB,TDC,BDC): 
-            
-            if isinstance(Years, int) == False:
+            try:
+                Years = int(Years)
+            except:
                 return str(Years) + ", Answer needs to be integer"
+            #if isinstance(Years, int) == False:
+            if Years == 0: 
+                return '0, Needs Years In Apartment'
             elif DOB == "":
                 return str(Years) + ", Needs client Date of Birth"
             elif TDC - BDC < 180000:
                 return str(Years) + ", Needs adult client DOB"
             elif Years*10000 > 20230630-BDC:
                 return str(int(Years)) + ", Needs Years not exceeding client age"
-            elif Years == 0: 
-                return '0, Needs Years In Apartment' 
             elif Years > 99: 
                 return str(int(Years)) + ', Needs Valid Number' 
             elif Years < -1: 
@@ -203,7 +208,7 @@ def AllHousingSimpler():
             elif "citizen" in str(PACit): 
                 return "Has No SSN" 
             else: 
-                return "Needs SS#" 
+                return "Needs SS# answer" 
                  
         df['Social Security #'] = df.apply(lambda x: SSNumClean(x['Social Security #'],x['Gen Pub Assist Case Number']), axis=1) 
          
@@ -297,6 +302,7 @@ def AllHousingSimpler():
         #Test Housing Activity Indicator - can't be blank for cases that are full rep state or full rep federal(housing level of service) and eviction cases(housing type of case: non-payment holdover illegal lockout or nycha housing termination) **Tester column removed 
          
         def ActivityTesterClean(HousingActivity,Level,Type): 
+            print("Big 4 generating")
             if Level == 'Representation - State Court' or Level == 'Representation - Admin. Agency' or Level == 'Representation - Federal Court': 
                 if Type in evictiontypes and HousingActivity == '': 
                     return 'Needs Activity Indicator' 
@@ -421,6 +427,7 @@ def AllHousingSimpler():
         #date of waiver approval & waiver categories - if there's something in one but not the other, then flag it. **in process, zip code? 
          
         def WaiverTester (WaiverType,WaiverDate,Poverty,RefSou,Type,LoS,PrimaryFunding,EDC): 
+            print("waivers generating")
             UAHPLPFund = ['3121 Universal Access to Counsel – (UAC)','3122 Universal Access to Counsel – (UAC)','3123 Universal Access to Counsel – (UAC)','3124 Universal Access to Counsel – (UAC)','3125 Universal Access to Counsel – (UAC)','3111 HPLP-Homelessness Prevention Law Project','3112 HPLP-Homelessness Prevention Law Project','3113 HPLP-Homelessness Prevention Law Project','3114 HRA-HPLP-Homelessness Prevention Law Project','3115 HPLP-Homelessness Prevention Law Project']
             global HousingFundingCodes
             HousingFundingCodes= ['3121 Universal Access to Counsel – (UAC)','3122 Universal Access to Counsel – (UAC)','3123 Universal Access to Counsel – (UAC)','3124 Universal Access to Counsel – (UAC)','3125 Universal Access to Counsel – (UAC)','3111 HPLP-Homelessness Prevention Law Project','3112 HPLP-Homelessness Prevention Law Project','3113 HPLP-Homelessness Prevention Law Project','3114 HRA-HPLP-Homelessness Prevention Law Project','3115 HPLP-Homelessness Prevention Law Project','3018 Tenant Rights Coalition (TRC)','3011 TRC FJC Initiative'] 
@@ -428,7 +435,7 @@ def AllHousingSimpler():
                 if WaiverType == "" and WaiverDate == "":
                     return "Income Eligible, <201%"
                 else:
-                    return "Waiver fields can be cleared, income eligible case does not need waiver"
+                    return "Income eligible case does not need waiver"
             elif PrimaryFunding == "3011 TRC FJC Initiative":
                 if WaiverDate == "" and WaiverType == "":
                     return "Needs waiver type, 'FJC Waiver' and waiver date '11/28/2016'"
@@ -437,9 +444,9 @@ def AllHousingSimpler():
                 elif WaiverType != "FJC Waiver":
                     return "Needs waiver type 'FJC Waver' if funded 3011"
                 else:
-                    return "FJC waiver, fine"
+                    return "FJC waiver, okay"
             elif PrimaryFunding != "3011 TRC FJC Initative" and WaiverType == "FJC Waiver":
-                return "Needs change, only cases referred by FJC (3011) can have FJC waiver"
+                return "Needs change, only cases referred by FJC+funded 3011 can have FJC waiver"
             elif WaiverType != "" and WaiverDate != "": 
                 return "Already has waiver"
             elif WaiverDate != "" and WaiverType == "": 
@@ -447,7 +454,7 @@ def AllHousingSimpler():
             elif WaiverType != "" and WaiverDate == "":
                 return "Needs Waiver Date"
             elif PrimaryFunding not in HousingFundingCodes:
-                return "Not housing case, waiver not needed at this time"
+                return "Not housing funded case, waiver not needed at this time"
             elif "Needs" in LoS:
                 return "Missing Level of Service, waiver need unknown"
             elif "Needs" in Type:
@@ -479,6 +486,7 @@ def AllHousingSimpler():
         #**in process, FJC?, secondary funding codes answer checked 
         #source of unique 'set' below - https://stackoverflow.com/questions/12897374/get-unique-values-from-a-list-in-python 
         def FundingTester (PrimaryFunding,SecondaryFunding): 
+            print("Fund testing commences")
             GFCodes = ['2157 OCA-City-wide Civil Legal Services Grant','3020 CLS-Civil Legal Services','4000 LSC - Basic Grant','4100 IOLA - General','5221 SSUSA-Single Stop USA'] 
             GFCodesAll = GFCodes + ['5510 CB9 Manhattanville-West Harlem Tenant Advocacy Project'] 
             ManhattanFundingCodes= ['3123 Universal Access to Counsel – (UAC)','3115 HPLP-Homelessness Prevention Law Project'] 
@@ -495,7 +503,7 @@ def AllHousingSimpler():
                     if PrimaryFunding in HousingFundingCodes:
                         if PrimaryFunding in SplitSecondaryList:
                             if SplitSecondaryList[0] in GFCodesAll or SplitSecondaryList[1] in GFCodesAll:
-                                return "Regular housing double, likely okay"
+                                return "Regular housing double, okay"
                             else :
                                 return "Needs review. Too many funding codes, housing problem"
                         else:
@@ -503,26 +511,27 @@ def AllHousingSimpler():
                     else:
                         return "Needs review. Too many funding codes, 3 diff, not prim. housing"
                 elif PrimaryFunding in GFCodesAll and SplitSecondaryList[0] in GFCodesAll: 
-                    return "All General, Fine" 
+                    return "All General, okay" 
                 elif PrimaryFunding not in HousingFundingCodes: 
                     if SplitSecondaryList[0] in HousingFundingCodes: 
                         return "Needs review, HRA Funding code can only be secondary to self" 
                     else: 
                         return "Targeted" 
                 elif PrimaryFunding in ManhattanFundingCodes and "5510 CB9 Manhattanville-West Harlem Tenant Advocacy Project" in SplitSecondaryList: 
-                    return "Manhattan Fine" 
+                    return "Manhattan only, okay" 
                 elif PrimaryFunding in HousingFundingCodes and SplitSecondaryList[0] in GFCodes: 
-                    return "General 2nd Fine" 
+                    return "General 2ndary, okay" 
                 elif PrimaryFunding in HousingFundingCodes and PrimaryFunding != SplitSecondaryList[0] and SplitSecondaryList[0] in HousingFundingCodes: 
                     return "Needs Funding Code Review" 
                 elif PrimaryFunding not in SecondaryFunding and SecondaryFunding not in GFCodes: 
                     return "Needs Secondary Funding Code Review" 
                 elif PrimaryFunding == SplitSecondaryList[0]: 
-                    return "Same code, Fine" 
+                    return "Same code, okay" 
                 else: 
                     return "Something is Wrong" 
             else: 
-                return "Primary only, Fine" 
+                return "Primary only, okay" 
+                
             '''elif SecondaryFunding not in HousingFundingCodes and SecondaryFunding not in GFCodes: 
                 return "Needs Funding Code Review" 
             else: 
@@ -530,8 +539,38 @@ def AllHousingSimpler():
              
                  
         df['Funding Tester'] = df.apply(lambda x: FundingTester(x['Primary Funding Code'],x['Secondary Funding Codes']), axis = 1) 
+        
+        def ERAPTester (Type,Involved,Stayed,Active):
+            print("ERAP testing")
+            if "Needs" in Type:
+                return "ERAP needs unclear, missing type of case"
+            elif Type == "No Case" or Type == "Non-Litigation Advocacy":
+                if Stayed == "Yes":
+                    return "Type of case indicates no court case, Stayed answer needs review"
+            elif Involved == "No":
+                if Stayed == "Yes" or Active == "Yes":
+                    return "'ERAP involved case?' answer conflicts w another answer, needs change"
+                else:
+                    return ""
+            elif Involved == "Yes" and Stayed == "":
+                return "Needs 'Stayed ERAP Case?' answer"
+            elif Stayed == "Yes" and Active == "":
+                return "Needs 'Is stayed ERAP case active?' answer"
+            elif Stayed == "No":
+                if Active == "Yes":
+                    return "'Stayed ERAP Case?' and 'Is stayed ERAP case active?' answers conflict, needs change"
+                else:
+                    return ""
+            elif Type == "Non-payment" or Type == "Holdover":
+                if Involved == "":
+                    return "Needs 'ERAP involved Case?' answer"
+            else:
+                return ""
+                
+        df['ERAP Tester'] = df.apply(lambda x: ERAPTester(x['Housing Type Of Case'],x['ERAP Involved Case?'],x['Stayed ERAP Case?'],x['Is stayed ERAP case active?']), axis = 1)
          
         def HousingTabAssigner (PrimaryFunding,SecondaryFunding):
+            print("Almost done, assigning tabs")
             UAHPLP = ['3121 Universal Access to Counsel – (UAC)','3122 Universal Access to Counsel – (UAC)','3123 Universal Access to Counsel – (UAC)','3124 Universal Access to Counsel – (UAC)','3125 Universal Access to Counsel – (UAC)','3111 HPLP-Homelessness Prevention Law Project','3112 HPLP-Homelessness Prevention Law Project','3113 HPLP-Homelessness Prevention Law Project','3114 HRA-HPLP-Homelessness Prevention Law Project','3115 HPLP-Homelessness Prevention Law Project']
             TRC = ['3018 Tenant Rights Coalition (TRC)','3011 TRC FJC Initiative'] 
             Housing = UAHPLP + TRC
@@ -662,6 +701,11 @@ def AllHousingSimpler():
         "Housing Form Of Regulation", 
         "Housing Subsidy Type", 
         "Housing Years Living In Apartment", 
+        "ERAP Involved Case?",
+        "Stayed ERAP Case?",
+        "Is stayed ERAP case active?",
+        #"Paid ERAP Matter restored to Active Court Calendar?",
+        "ERAP Tester",
         "Language", 
         "Housing Activity Indicators", 
         "Housing Services Rendered to Client", 
@@ -995,6 +1039,7 @@ def AllHousingSimpler():
         allgood_dictionary = dict(tuple(df.groupby('Agency'))) 
          
         def save_xls(dict_df, path): 
+            print("Formatting and saving")
             writer = pd.ExcelWriter(path, engine = 'xlsxwriter') 
             for i in dict_df: 
                 dict_df[i].to_excel(writer, i, index = False) 
@@ -1044,11 +1089,15 @@ def AllHousingSimpler():
                                                  'format': problem_format}) 
                 ws.conditional_format('C1:BO1',{'type': 'text', 
                                                  'criteria': 'containing', 
-                                                 'value': 'Social', 
+                                                 'value': 'Assist', 
                                                  'format': medium_problem_format}) 
                 ws.conditional_format('C1:BO1',{'type': 'text', 
                                                  'criteria': 'containing', 
                                                  'value': 'Index', 
+                                                 'format': medium_problem_format})  
+                ws.conditional_format('C1:BO1',{'type': 'text', 
+                                                 'criteria': 'containing', 
+                                                 'value': 'Unreportable', 
                                                  'format': medium_problem_format})                                                 
                                                   
                                                                
