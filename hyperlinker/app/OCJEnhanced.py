@@ -65,8 +65,8 @@ def OCJEnhanced():
             'Harshberger, Sae',
             'He, Ricky',
             'Mercedes, Jannelys J',
-            'Orsini, Mary K',
-            'Price, Adriana J',
+            #'Orsini, Mary K',
+            #'Price, Adriana J',
             'Rana, Neil',
             'Risener, Jennifer A',
             'Rockett, Molly C',
@@ -78,6 +78,7 @@ def OCJEnhanced():
             'Sun, Dao',
             'Surface, Ben L',
             'Tenorio Bocangel, Maricella',
+            'Leinbach, August J',
             )
             df = df.loc[df['Primary Advocate'].isin(MLS_Advocates)]
             
