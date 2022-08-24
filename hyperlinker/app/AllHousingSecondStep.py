@@ -38,7 +38,7 @@ def AllHousingSecondStep():
          
         df = df.sort_values(by=['Primary Advocate']) 
         df = df.sort_values(by=['Assigned Branch/CC']) 
-        df = df.sort_values(by=['Tester Tester']) 
+        #df = df.sort_values(by=['Tester Tester']) 
          
          
         #Rename second Branch column
