@@ -740,6 +740,34 @@ def AllHousingSimpler():
  
         ]]       
          
+        #ERAP Answers reference
+        """def ERAPTester (Type,Involved,Stayed,Active):
+            print("ERAP testing")
+            if "Needs" in Type:
+                return "ERAP needs unclear, missing type of case"
+            elif Type == "No Case" or Type == "Non-Litigation Advocacy":
+                if Stayed == "Yes":
+                    return "Type of case indicates no court case, Stayed answer needs review"
+            elif Involved == "No":
+                if Stayed == "Yes" or Active == "Yes":
+                    return "'ERAP involved case?' answer conflicts w another answer, needs change"
+                else:
+                    return "No ERAP involved conflict***"
+            elif Involved == "Yes" and Stayed == "":
+                return "Needs 'Stayed ERAP Case?' answer"
+            elif Stayed == "Yes" and Active == "":
+                return "Needs 'Is stayed ERAP case active?' answer"
+            elif Stayed == "No":
+                if Active == "Yes":
+                    return "'Stayed ERAP Case?' and 'Is stayed ERAP case active?' answers conflict, needs change"
+                else:
+                    return "No Stayed conflict***"
+            elif Type == "Non-payment" or Type == "Holdover":
+                if Involved == "":
+                    return "Needs 'ERAP involved Case?' answer"
+
+            else:
+                return "Not necessary or Involved and stayed is yes, Active has answer***" """
         #FY22 Graveyard
         
         #Old Tab Assigner (not expansive) - was between level types and agency, prev commented out
