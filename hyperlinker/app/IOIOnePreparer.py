@@ -62,9 +62,9 @@ def upload_IOIOnePreparer():
         def CaseinContract (DOC,SDC):
             if SDC == "":
                 SDC = 0          
-            if 20210701 <= DOC <= 20220630:
+            if 20220701 <= DOC <= 20230630:
                 return "Yes"
-            elif 20210701 <= SDC <= 20220630:
+            elif 20220701 <= SDC <= 20230630:
                 return "Yes"
         
         df['In Contract Year?'] = df.apply(lambda x: CaseinContract(x['Date Opened Construct'],x['Service Date Construct']),axis=1)
@@ -87,13 +87,13 @@ def upload_IOIOnePreparer():
         def EnrollmentQuarterAssigner (Bool, DOC):
             if Bool == True:
                 return "None"
-            elif 20210701 <= DOC <= 20210930:
+            elif 20220701 <= DOC <= 20220930:
                 return "Q1"
-            elif 20211001 <= DOC <= 20211231:
+            elif 20221001 <= DOC <= 20221231:
                 return "Q2"
-            elif 20220101 <= DOC <= 20220331:
+            elif 20230101 <= DOC <= 20230331:
                 return "Q3"
-            elif 20220401 <= DOC <= 20220630:
+            elif 20230401 <= DOC <= 20230630:
                 return "Q4"
             else:
                 return " Q1 Rollover"
@@ -121,13 +121,13 @@ def upload_IOIOnePreparer():
                     x+=1 
             return x
             
-        df['Q1 Outcomes'] = df.apply(lambda x: OutcomeQuarterAssigner(x['IOI Primary Outcome Date Construct'],x['IOI Secondary Outcome Date Construct'],x['IOI Tertiary Outcome Date Construct'],20210701,20210930,x['IOI Outcomes'],x['IOI Secondary Outcomes'],x['IOI Tertiary Outcomes']),axis=1)
+        df['Q1 Outcomes'] = df.apply(lambda x: OutcomeQuarterAssigner(x['IOI Primary Outcome Date Construct'],x['IOI Secondary Outcome Date Construct'],x['IOI Tertiary Outcome Date Construct'],20220701,20220930,x['IOI Outcomes'],x['IOI Secondary Outcomes'],x['IOI Tertiary Outcomes']),axis=1)
         
-        df['Q2 Outcomes'] = df.apply(lambda x: OutcomeQuarterAssigner(x['IOI Primary Outcome Date Construct'],x['IOI Secondary Outcome Date Construct'],x['IOI Tertiary Outcome Date Construct'],20211001,20211231,x['IOI Outcomes'],x['IOI Secondary Outcomes'],x['IOI Tertiary Outcomes']),axis=1)
+        df['Q2 Outcomes'] = df.apply(lambda x: OutcomeQuarterAssigner(x['IOI Primary Outcome Date Construct'],x['IOI Secondary Outcome Date Construct'],x['IOI Tertiary Outcome Date Construct'],20221001,20221231,x['IOI Outcomes'],x['IOI Secondary Outcomes'],x['IOI Tertiary Outcomes']),axis=1)
         
-        df['Q3 Outcomes'] = df.apply(lambda x: OutcomeQuarterAssigner(x['IOI Primary Outcome Date Construct'],x['IOI Secondary Outcome Date Construct'],x['IOI Tertiary Outcome Date Construct'],20220101,20220331,x['IOI Outcomes'],x['IOI Secondary Outcomes'],x['IOI Tertiary Outcomes']),axis=1)
+        df['Q3 Outcomes'] = df.apply(lambda x: OutcomeQuarterAssigner(x['IOI Primary Outcome Date Construct'],x['IOI Secondary Outcome Date Construct'],x['IOI Tertiary Outcome Date Construct'],20230101,20230331,x['IOI Outcomes'],x['IOI Secondary Outcomes'],x['IOI Tertiary Outcomes']),axis=1)
         
-        df['Q4 Outcomes'] = df.apply(lambda x: OutcomeQuarterAssigner(x['IOI Primary Outcome Date Construct'],x['IOI Secondary Outcome Date Construct'],x['IOI Tertiary Outcome Date Construct'],20220401,20220630,x['IOI Outcomes'],x['IOI Secondary Outcomes'],x['IOI Tertiary Outcomes']),axis=1)
+        df['Q4 Outcomes'] = df.apply(lambda x: OutcomeQuarterAssigner(x['IOI Primary Outcome Date Construct'],x['IOI Secondary Outcome Date Construct'],x['IOI Tertiary Outcome Date Construct'],20230401,20230630,x['IOI Outcomes'],x['IOI Secondary Outcomes'],x['IOI Tertiary Outcomes']),axis=1)
             
 
         df = df[['Hyperlinked CaseID#','bool_series','U Complete Client Name','Contract Enrollment Quarter','Assigned Branch/CC','Primary Assignment','Client Last Name','Client First Name','Complete Client Name','Race','Date of Birth','Date Opened','Date Opened Construct','In Contract Year?','Service Date','Q1 Outcomes','Q2 Outcomes','Q3 Outcomes','Q4 Outcomes','IOI Outcome Date','IOI Outcomes','IOI Secondary Outcome Date','IOI Secondary Outcomes','IOI Tertiary Outcome Date','IOI Tertiary Outcomes']]

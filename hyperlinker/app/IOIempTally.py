@@ -83,18 +83,18 @@ def upload_IOIempTally():
                 return Effective_Date
             else:
                 return Date_Opened
-        df['Eligibility_Date'] = df.apply(lambda x : Eligibility_Date(x['HRA IOI Employment Law HRA Date Substantial Activity Performed 2022'],x['IOI HRA Effective Date (optional) (IOI 2)'],x['Date Opened']), axis = 1)
+        df['Eligibility_Date'] = df.apply(lambda x : Eligibility_Date(x['HRA IOI Employment Law HRA Date Substantial Activity Performed 2023'],x['IOI HRA Effective Date (optional) (IOI 2)'],x['Date Opened']), axis = 1)
         
         
         
         df['Open Construct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['Date Opened']),axis = 1)
         
-        #DateMaker Substantial Activity FY22
-        df['Subs Construct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['HRA IOI Employment Law HRA Date Substantial Activity Performed 2022']),axis = 1)
+        #DateMaker Substantial Activity FY23
+        df['Subs Construct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['HRA IOI Employment Law HRA Date Substantial Activity Performed 2023']),axis = 1)
                 
-        #Substantial Activity for Rollover FY22?
+        #Substantial Activity for Rollover FY23?
 
-        df['Needs Substantial Activity?'] = df.apply(lambda x: EmploymentToolBox.Needs_Rollover(x['Open Construct'],x['HRA IOI Employment Law HRA Substantial Activity 2022'],x['Subs Construct'],x['Matter/Case ID#']), axis=1)
+        df['Needs Substantial Activity?'] = df.apply(lambda x: EmploymentToolBox.Needs_Rollover(x['Open Construct'],x['HRA IOI Employment Law HRA Substantial Activity 2023'],x['Subs Construct'],x['Matter/Case ID#']), axis=1)
                      
         #Reportable?
         
@@ -256,7 +256,7 @@ def upload_IOIempTally():
         city_pivot['Proportional Percentage']=city_pivot['Units of Service']/city_pivot['Proportional Goal']        
         
         #REPORTING VERSION Put everything in the right order
-        df = df[['Hyperlinked Case #','Office','Primary Advocate','Client Name','Level of Service','Legal Problem Code','Special Legal Problem Code','HRA_Case_Coding','Exclude due to Income?','Needs DHCI?','Needs Substantial Activity?','HRA IOI Employment Law HRA Date Substantial Activity Performed 2022','HRA IOI Employment Law HRA Substantial Activity 2022','Units of Service','Reportable?']]
+        df = df[['Hyperlinked Case #','Office','Primary Advocate','Client Name','Level of Service','Legal Problem Code','Special Legal Problem Code','HRA_Case_Coding','Exclude due to Income?','Needs DHCI?','Needs Substantial Activity?','HRA IOI Employment Law HRA Date Substantial Activity Performed 2023','HRA IOI Employment Law HRA Substantial Activity 2023','Units of Service','Reportable?']]
         city_pivot = city_pivot[['Office','Units of Service','Annual Goal','Annual Percentage','Proportional Goal','Proportional Percentage']]
         
         
@@ -370,7 +370,7 @@ def upload_IOIempTally():
                                                  'format': problem_format})
                 worksheet.conditional_format('K1:K100000',{'type': 'cell',
                                                  'criteria': '==',
-                                                 'value': '"Needs Substantial Activity in FY22"',
+                                                 'value': '"Needs Substantial Activity in FY23"',
                                                  'format': problem_format})
                                                  
             #add chart to the spreadsheet
