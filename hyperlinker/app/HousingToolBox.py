@@ -2,50 +2,21 @@
 import pandas as pd
 
 #List of proceeding types that constitute an eviction case
+#UAPLPCleaner, UAHPLPExternalPreparer, TRCExternalPreparer
 evictionproceedings = ['HO','NP','IL','TT']
+
 #Housing Type of Case Eviction-Types:
+#WaiverMaker, UAHPLPExternalPreparer, TRCExternalPreparer, copied in AllHousing and AllHousingSimpler, below
 evictiontypes = ['Holdover','Non-payment','Illegal Lockout','NYCHA Housing Termination']
+
 #Highest Level of Service Reps
+#copied in AllHousing and AllHousingSimpler
 leveltypes = ['Representation - State Court','Representation - Federal Court']
 
-
 #Functions to Help with TRC/UAHPLP Cleanup
-
-
-def NonHousingTester (ProblemCode, EligConstruct):
-    if EligConstruct != '':
-        if ProblemCode.startswith('6') != True and EligConstruct > 20200930:
-            return 'Needs Review'
-        else:
-            return ''
-    else:
-        return ''
-
-#Has to have an HRA Release
-def HRAReleaseClean (HRARelease,EligibilityDate):
-    if HRARelease == 'No' and EligibilityDate != '':
-        return 'No Release - Remove Elig Date'
-    elif HRARelease == '' and EligibilityDate != '':
-        return 'No Release - Remove Elig Date'
-    elif HRARelease == 'Yes':
-        return ''
-    else:
-        return 'Needs HRA Release'
-        
-def ReleaseAndEligTester(HRARelease,EligibilityDate):
-    if HRARelease == 'Yes' and EligibilityDate != '':
-        return ''
-    elif HRARelease == 'Yes' and EligibilityDate == '':
-        return "Needs Eligibility Date"
-    elif HRARelease == 'No' or HRARelease == '':
-        if EligibilityDate != '':
-            return "Needs HRA Release"
-        else:   
-            return 'Needs Elig & Release'
-    else:
-        return 'Needs Elig & Release'
-
+    
 #Has to have a Housing Type of Case
+#AllHousing, AllHousingSimpler,TRCCleaner,UAHPLPCleaner
 def HousingTypeClean (HousingType):
     if HousingType == '':
         return 'Needs Housing Type of Case'
@@ -53,17 +24,15 @@ def HousingTypeClean (HousingType):
         return ''
  
 #Has to have a Housing Level of Service - and if DHCR case has to be admin proceeding or rep - admin agency. 
-#TRCCovidClean
-#...and? 
+#TRCCovidClean, AllHousing, AllHousingSimpler, UAHPLPCleaner, TRCCleaner
 def HousingLevelClean (HousingLevel,HousingType):
     if HousingLevel == '':
         return 'Needs Level of Service'
     else:
         return '' 
 
-
 #Has to say whether or not it's a building case        
-#TRCCovidClean
+#TRCCovidClean, AllHousing, TRCCleaner, UAHPLPCleaner, copied and specific AllHousingSimpler
 #...and?
 def BuildingCaseClean (BuildingCase):
     if BuildingCase == '':
@@ -73,7 +42,8 @@ def BuildingCaseClean (BuildingCase):
     else:
         return ''
   
-#Referral Source Can't Be Blank        
+#Referral Source Can't Be Blank    
+#AllHousing, TRCCleaner, UAHPLPCleaner, copied and specific AllHousingSimpler
 def ReferralClean (Referral,FundingSource):
     if Referral == '':
         return 'Needs Referral Source'
@@ -83,15 +53,16 @@ def ReferralClean (Referral,FundingSource):
         return ''
 
 #rent can't be 0
+#AllHousing, AllHousingSimpler, TRCCleaner, UAHPLPCleaner
 def RentClean (Rent):
     if Rent == 0:
         return 'Needs Rent Amount'
     else:
         return ''
 
-#number of units in building can't be 0 or written with letters        
+#number of units in building can't be 0 or written with letters  
+#TRCCleaner, UAHPLPCleaner, copied and specific in AllHousing, AllHousingSimpler
 def UnitsClean (Units):
-    
     if Units == 0:
         return 'Needs Units'
     Units = str(Units)
@@ -102,23 +73,24 @@ def UnitsClean (Units):
     else:
         return ''
         
-#Housing form of regulation can't be blank      
+#Housing form of regulation can't be blank   
+#AllHousing, AllHousingSimpler, TRCCleaner, UAHPLPCleaner
 def RegulationClean (Regulation):
     if Regulation == '':
         return 'Needs Form of Regulation'
     else:
         return ''
 
-
 #Housing subsidy can't be blank (can be none)
+#AllHousing, TRCCleaner, UAHPLPCleaner, copied and specific in AllHousingSimpler
 def SubsidyClean (Subsidy):
     if Subsidy == '':
         return 'Needs Type of Subsidy'
     else:
         return ''
 
-
 #Years in Apartment Can't be 0 (can be -1)
+#AllHousing, TRCCleaner, UAHPLPCleaner, copied and specific in AllHousingSimpler
 def YearsClean (Years):
     try:
         Years = int(Years)
@@ -134,7 +106,7 @@ def YearsClean (Years):
         return ''
 
 #Language Can't be Blank
-        
+#AllHousing, TRCCleaner, UAHPLPCleaner, copied and specific in AllHousingSimpler
 def LanguageClean (Language):
     if Language == '' or Language == 'Unknown':
         return 'Needs Language'
@@ -142,7 +114,7 @@ def LanguageClean (Language):
         return ''
 
 #Housing Posture of Case can't be blank if there is an eligibility date
-        
+#TRCCleaner, UAHPLPCleaner, copied and specific in AllHousing, AllHousingSimpler
 def PostureClean (Posture,EligibilityDate,Type,Level):
     if Type in evictiontypes:
         if Level.startswith("Rep") == True:
@@ -157,6 +129,7 @@ def PostureClean (Posture,EligibilityDate,Type,Level):
         return ''
 
 #TRC Housing Income Verification can't be blank or none and other stuff with kids and poverty level and you just give up if it's closed
+#AllHousing, AllHousingSimpler, TRCCleaner, UAHPLPCleaner
 def IncomeVerificationClean (IncomeVerification, Children, PovertyPercent, Disposition, LevelOfService):
     if LevelOfService == 'Advice':
         return ''
@@ -172,6 +145,7 @@ def IncomeVerificationClean (IncomeVerification, Children, PovertyPercent, Dispo
         return ''
         
 #UAC Housing Income Verification can't be blank or none and other stuff with kids and poverty level and you just give up if it's closed (after 6 months)
+#UAHPLPCleaner
 def UACIncomeVerificationClean (IncomeVerification, Children, PovertyPercent, Disposition, DateClosed,TodayDate):
     if Children > 0 and PovertyPercent <= 200.99 and IncomeVerification == '':
         return 'Must Have DHCI or PA#'
@@ -195,6 +169,7 @@ def UACIncomeVerificationClean (IncomeVerification, Children, PovertyPercent, Di
         return ''
 
 #PA Tester (need to be correct format as well)
+#UAHPLPCleaner, copied and specific in AllHousing,TRCCleaner,AllHousingSimpler
 def PATesterClean (PANumber):
                 
     PANumber = str(PANumber)
@@ -219,6 +194,7 @@ def PATesterClean (PANumber):
         return 'Needs Correct PA # Format'
 
 #Test if case number is correct format (don't need one if it's brief, advice, or out-of-court)
+#TRCCleaner, UAHPLPCleaner, copied in AllHousing, AllHousingSimpler
 def CaseNumClean (CaseNum,Level):
     CaseNum = str(CaseNum)
     First3 = CaseNum[0:3]
@@ -249,6 +225,7 @@ def CaseNumClean (CaseNum,Level):
         return "Needs Correct Case # Format"
 
 #Test if social security number is correct format (or ignore it if there's a valid PA number)
+#UAHPLPCleaner, copied and specific in AllHousing, AllHousingSimpler, TRCCleaner, 
 def SSNumClean (CaseNum, PANumber):
     CaseNum = str(CaseNum)
     First3 = CaseNum[0:3]
@@ -274,18 +251,16 @@ def SSNumClean (CaseNum, PANumber):
     else:
         return "Needs Correct SS # Format"
 
-        
 #Test Housing Activity Indicator - can't be blank for closed cases that are full rep state or full rep federal(housing level of service) and eviction cases(housing type of case: non-payment holdover illegal lockout nycha housing termination)    
-
+#TRCCleaner,UAHPLPCleaner, copied and specific in AllHousing, AllHousingSimpler  
 def ActivityTesterClean(HousingActivity,Disposition,Level,Type):
     if Disposition == 'Closed' and Level in leveltypes and Type in evictiontypes and HousingActivity == '':
         return 'Needs Activity Indicator'
     else:
         return ''
 
-
 #Test Housing Services Rendered - can't be blank for closed cases that are full rep state or full rep federal(housing level of service)
-        
+#TRCCleaner, UAHPLPCleaner, copied and specific in AllHousing, AllHousingSimpler
 def ServicesTesterClean(HousingServices,Disposition,Level,Type):
     if Disposition == 'Closed' and Level in leveltypes and HousingServices == '':
         return 'Needs Services Rendered'
@@ -297,7 +272,7 @@ def ServicesTesterClean(HousingServices,Disposition,Level,Type):
         return ''
 
 #Outcome Tester - needs outcome and date for closed  eviction cases that are full rep at state or federal level (not admin)
-        
+#TRCCleaner
 def TRCOutcomeTesterClean (Disposition,Outcome,OutcomeDate,Level,Type):
     if Disposition == 'Closed' and Level in leveltypes and Type in evictiontypes and Outcome == '' and OutcomeDate == '':
         return 'Needs Outcome & Date'
@@ -308,10 +283,8 @@ def TRCOutcomeTesterClean (Disposition,Outcome,OutcomeDate,Level,Type):
     else:
         return ''
 
-
-
 #Outcome Tester - IF CLOSED OR IF OVER 6 Months Old (since eligiblity date) needs outcome and date for eviction cases that are full rep at state or federal level (not admin)
-        
+#UAHPLPCleaner
 def UAHPLPOutcomeTesterClean (Disposition,Outcome,OutcomeDate,Level,Type,EligDate,TodayDate):
     if EligDate == "":
         return ""
@@ -345,63 +318,10 @@ def UAHPLPOutcomeTesterClean (Disposition,Outcome,OutcomeDate,Level,Type,EligDat
     else:
         return ''
 
-
 #Functions to be used in TRC/UAHPLP Housing Report Prep 
-
-#Translation based on HRA Specs
-def TRCProceedingType(TypeOfCase,LegalProblemCode,LevelOfService,EligDate):
-    if EligDate < 20201001 and LegalProblemCode.startswith("0") == True:
-        return "CON"
-    elif EligDate < 20201001 and LegalProblemCode.startswith("3") == True:
-        return "FAM"
-    elif EligDate < 20201001 and LegalProblemCode.startswith("5") == True:
-        return "HEA"
-    elif EligDate < 20201001 and LegalProblemCode.startswith("7") == True:
-        return "BEN"
-    elif TypeOfCase == "HP Action":
-        return "HP"
-    elif TypeOfCase == "Affirmative Litigation Supreme":
-        return "OS"
-    elif TypeOfCase == "Holdover":
-        return "HO"
-    elif TypeOfCase == "No Case" or TypeOfCase == "Non-Litigation Advocacy" or TypeOfCase == "Tenant Rights"  or TypeOfCase == "Rent Strike":
-        return "OO"
-    elif TypeOfCase == "Non-payment":
-        return "NP"
-    elif TypeOfCase == "Section 8 Administrative Proceeding" or TypeOfCase == "Sec. 8 Termination" or TypeOfCase == "Section 8 Grievance" or TypeOfCase == "Section 8 HQS" or TypeOfCase == "Section 8 other" or TypeOfCase == "Section 8 share":
-        return "S8"
-    elif TypeOfCase == "Illegal Lockout":
-        return "IL"
-    elif TypeOfCase == "NYCHA Termination of Tenancy" or TypeOfCase == "NYCHA Housing Termination":
-        return "TT"
-    elif TypeOfCase == "Dispositive Eviction Appeal":
-        return "EA"
-    elif TypeOfCase == "Ejectment Action":
-        return "EJ"
-    elif TypeOfCase == "DHCR Administrative Action" or TypeOfCase == "DHCR Proceeding":
-        return "DA"
-    elif TypeOfCase == "7A Proceeding":
-        return "7A"
-    elif TypeOfCase == "Article 78":
-        return "78"
-    elif TypeOfCase == "Affirmative Litigation Federal" or TypeOfCase == "Appeal Federal":
-        return "FC"
-    elif TypeOfCase == "HRA Fair Hearing" or TypeOfCase == "Human Rights Complaint" or TypeOfCase == "Mitchell-Lama RFM"or TypeOfCase == "Mitchell-Lama Termination"or TypeOfCase == "NYCHA Housing Grievance"or TypeOfCase == "NYCHA RFM"or TypeOfCase == "Other Administrative Proceeding" or TypeOfCase == "PA Issue: City FEPS/SEPS" or TypeOfCase == "PA Issue: Budgeting" or TypeOfCase == "PA Issue: FEPS" or TypeOfCase == "PA Issue: LINC" or TypeOfCase == "PA Issue: Other" or TypeOfCase == "PA Issue: RAU" or TypeOfCase == "PA Issue: Underpayment" or TypeOfCase == "SCRIE/DRIE" or TypeOfCase == "Certificate of No Harassment Case":
-        return "OA"
-    elif TypeOfCase == "Affirmative Litigation Supreme" or TypeOfCase == "Public Nuisance" or TypeOfCase == "Appeal Supreme" or TypeOfCase == "Other Civil Court":
-        return "OS"
-    elif TypeOfCase == "Appeal-Appellate Division" or TypeOfCase == "Appeal-Appellate Term":
-        return "EA"
-    elif TypeOfCase == "Illegal Lockout":
-        return "IL"
-    elif TypeOfCase == "":
-        return "OO"
-    else:
-        return "Needs Review"
- 
+#UAHPLPCleaner, UAHPLPExternalPreparer
 def UACProceedingType(TypeOfCase,LegalProblemCode,CloseReason,LevelOfService):
     
-
     if LegalProblemCode.startswith("0") == True:
         return "CON"
     elif LegalProblemCode.startswith("3") == True:
@@ -451,40 +371,61 @@ def UACProceedingType(TypeOfCase,LegalProblemCode,CloseReason,LevelOfService):
         return "OO"
     else:
         return ""
-
  
+#Translation based on HRA Specs
+#TRCExternalPreparer
+def TRCProceedingType(TypeOfCase,LegalProblemCode,LevelOfService,EligDate):
+    if EligDate < 20201001 and LegalProblemCode.startswith("0") == True:
+        return "CON"
+    elif EligDate < 20201001 and LegalProblemCode.startswith("3") == True:
+        return "FAM"
+    elif EligDate < 20201001 and LegalProblemCode.startswith("5") == True:
+        return "HEA"
+    elif EligDate < 20201001 and LegalProblemCode.startswith("7") == True:
+        return "BEN"
+    elif TypeOfCase == "HP Action":
+        return "HP"
+    elif TypeOfCase == "Affirmative Litigation Supreme":
+        return "OS"
+    elif TypeOfCase == "Holdover":
+        return "HO"
+    elif TypeOfCase == "No Case" or TypeOfCase == "Non-Litigation Advocacy" or TypeOfCase == "Tenant Rights"  or TypeOfCase == "Rent Strike":
+        return "OO"
+    elif TypeOfCase == "Non-payment":
+        return "NP"
+    elif TypeOfCase == "Section 8 Administrative Proceeding" or TypeOfCase == "Sec. 8 Termination" or TypeOfCase == "Section 8 Grievance" or TypeOfCase == "Section 8 HQS" or TypeOfCase == "Section 8 other" or TypeOfCase == "Section 8 share":
+        return "S8"
+    elif TypeOfCase == "Illegal Lockout":
+        return "IL"
+    elif TypeOfCase == "NYCHA Termination of Tenancy" or TypeOfCase == "NYCHA Housing Termination":
+        return "TT"
+    elif TypeOfCase == "Dispositive Eviction Appeal":
+        return "EA"
+    elif TypeOfCase == "Ejectment Action":
+        return "EJ"
+    elif TypeOfCase == "DHCR Administrative Action" or TypeOfCase == "DHCR Proceeding":
+        return "DA"
+    elif TypeOfCase == "7A Proceeding":
+        return "7A"
+    elif TypeOfCase == "Article 78":
+        return "78"
+    elif TypeOfCase == "Affirmative Litigation Federal" or TypeOfCase == "Appeal Federal":
+        return "FC"
+    elif TypeOfCase == "HRA Fair Hearing" or TypeOfCase == "Human Rights Complaint" or TypeOfCase == "Mitchell-Lama RFM"or TypeOfCase == "Mitchell-Lama Termination"or TypeOfCase == "NYCHA Housing Grievance"or TypeOfCase == "NYCHA RFM"or TypeOfCase == "Other Administrative Proceeding" or TypeOfCase == "PA Issue: City FEPS/SEPS" or TypeOfCase == "PA Issue: Budgeting" or TypeOfCase == "PA Issue: FEPS" or TypeOfCase == "PA Issue: LINC" or TypeOfCase == "PA Issue: Other" or TypeOfCase == "PA Issue: RAU" or TypeOfCase == "PA Issue: Underpayment" or TypeOfCase == "SCRIE/DRIE" or TypeOfCase == "Certificate of No Harassment Case":
+        return "OA"
+    elif TypeOfCase == "Affirmative Litigation Supreme" or TypeOfCase == "Public Nuisance" or TypeOfCase == "Appeal Supreme" or TypeOfCase == "Other Civil Court":
+        return "OS"
+    elif TypeOfCase == "Appeal-Appellate Division" or TypeOfCase == "Appeal-Appellate Term":
+        return "EA"
+    elif TypeOfCase == "Illegal Lockout":
+        return "IL"
+    elif TypeOfCase == "":
+        return "OO"
+    else:
+        return "Needs Review"
 
-
-#List of UAC (RTC) Zip Codes:
-UACZipCodes = ['11207','11216','11221','11225','11226','10453','10457','10462','10467','10468','10025','10026','10027','10029','10031','10034','10302','10303','10310','10314','11373','11385','11433','11434','11691']
-
-#Case posture on eligibility date (on trial, no stipulation etc.) - transform them into the HRA initials
-def PostureOnEligibility(Posture):
-    splitpostureeligibilitylist = Posture.split( ", ")
-    recombinedposturelist = list()
-    for x in splitpostureeligibilitylist:
-        if x == "No Stipulation; No Judgment":
-            x = "NSNJ"
-            recombinedposturelist.append(x)
-        elif x == "On for Trial":
-            x = "OFT"
-            recombinedposturelist.append(x)
-        elif x == "Post-Stipulation":
-            x = "PSNJ"
-            recombinedposturelist.append(x)
-        elif x == "Tenant in Possession-Judgment Due to Default":
-            x = "PJD"
-            recombinedposturelist.append(x)
-        elif x == "Tenant in Possession-Judgment Due to Other":
-            x = "PJO"
-            recombinedposturelist.append(x)
-        elif x == "Tenant Out of Possession":
-            x = "PJP"
-            recombinedposturelist.append(x)
- 
-    return "; ".join(recombinedposturelist)
- 
 #TRC Level of Service becomes Service type - lots of level of service in LS, mapped to Advice Only, Pre-Lit Strategies (brief service, out of court advocacy, hold for review), and Full Rep (mapping to be confirmed)
+#TRCExternalPreparer
 def TRCServiceType(LevelOfService,LegalProblemCode,FundingCode, Referral, HRARelease):
     if LevelOfService == "Advice":
         return "Advice Only"
@@ -498,6 +439,7 @@ def TRCServiceType(LevelOfService,LegalProblemCode,FundingCode, Referral, HRARel
         return "Full Rep"
 
 #UAC Service Type: 
+#UAHPLPCleaner,UAHPLPExternalPreparer
 def UACServiceType(LevelOfService,UAorNonUA,CloseReason,LegalProblemCode):
     if CloseReason.startswith(("A","B")) == True:
         if UAorNonUA == "UA":
@@ -522,6 +464,7 @@ def UACServiceType(LevelOfService,UAorNonUA,CloseReason,LegalProblemCode):
         return "Full Rep"
  
 #Housing Regulation Type: mapping down - we have way more categories, rent regulated, market rate, or other (mapping to be confirmed). can't be blank     
+#UAHPLPExternalPreparer, TRCExternalPreparer
 def HousingType(HousingType):
     if HousingType == "Low Income Tax Credit" or HousingType == "Tenant-interim-lease" or HousingType == "Mitchell-Lama" or HousingType == "Rent Stabilized" or HousingType == "Rent Controlled" or HousingType == "Project-based Sec. 8" or HousingType == "Other Subsidized Housing" or HousingType == "Supportive Housing":
         return "Rent-Regulated"
@@ -532,7 +475,8 @@ def HousingType(HousingType):
     elif HousingType == "Public Housing" or HousingType == "Public Housing/NYCHA" or HousingType == "NYCHA/NYCHA":
         return "NYCHA"
         
-#Referrals need to be one of their specific categories        
+#Referrals need to be one of their specific categories  
+#UAHPLPExternalPreparer, TRCExternalPreparer      
 def ReferralMap(ReferralSource):
 
     if ReferralSource == "HRA ELS Part F Brooklyn" or ReferralSource == "HRA ELS (Assigned Counsel)" or ReferralSource == "HRA" or ReferralSource == "Documented Documented HRA Referral Referral":
@@ -550,7 +494,8 @@ def ReferralMap(ReferralSource):
     elif ReferralSource == "3-1-1" or ReferralSource == "ADP Hotline" or ReferralSource == "Community Organization" or ReferralSource == "Elected Official" or ReferralSource == "Foreclosure" or ReferralSource == "Friends/Family" or ReferralSource == "Home base" or ReferralSource == "In-House" or ReferralSource == "Other City Agency" or ReferralSource == "Outreach" or ReferralSource == "Returning Client" or ReferralSource == "School" or ReferralSource == "Self-referred" or ReferralSource == "Word of mouth" or ReferralSource == "Legal Services" or ReferralSource == "Other" or ReferralSource == "":
         return "Other"
         
-#Housing Outcomes needs mapping for HRA   
+#Housing Outcomes needs mapping for HRA  
+#UAHPLPExternalPreparer,TRCExternalPreparer 
 def Outcome(HousingOutcome):
     if HousingOutcome == "Client Allowed to Remain in Residence":
         return "Remain"
@@ -562,6 +507,7 @@ def Outcome(HousingOutcome):
         return "Withdrew"
         
 #Outcome related things that need mapping
+#UAHPLPExternalPreparer,TRCExternalPreparer
 def ServicesRendered(ServicesRendered):
     splitserviceslist = ServicesRendered.split(", ")
     recombinedserviceslist = list()
@@ -601,6 +547,7 @@ def ServicesRendered(ServicesRendered):
     return "; ".join(recombinedserviceslist)
         
 #Mapped to what HRA wants - some of the options are in LegalServer,
+#UAHPLPExternalPreparer,TRCExternalPreparer
 def Activities(Activity):
     splitactivitieslist = Activity.split(", ")
     recombinedactivitieslist = list()  
@@ -622,7 +569,8 @@ def Activities(Activity):
         recombinedactivitieslist.append(x)
     return "; ".join(recombinedactivitieslist)
         
-#Subsidy type - if it's not in the HRA list, it has to be 'none' (other is not valid) - they want a smaller list than we record. (mapping to be confirmed)        
+#Subsidy type - if it's not in the HRA list, it has to be 'none' (other is not valid) - they want a smaller list than we record. (mapping to be confirmed)      
+#UAHPLPExternalPreparer,TRCExternalPreparer  
 def SubsidyType(SubsidyType):
     splitsubsidytypelist = SubsidyType.split(", ")
     recombinedsubsidytypelist = list()
@@ -640,104 +588,68 @@ def SubsidyType(SubsidyType):
     else:
         return "; ".join(recombinedsubsidytypelist)
 
-#Does Client have an eligibility date prior to March 1st, 2020?
-def PreThreeOne(EligibilityDate):
-    if isinstance(EligibilityDate, int) == False:
-        return "No"
-    elif EligibilityDate < 20200301:
-        return "Yes"
-    elif EligibilityDate >= 20200301:
-        return "No"
-        
-#Does Client have an eligibility date after Dec 1st, 2021?
-def PostTwelveOne(EligibilityDate):
-    if isinstance(EligibilityDate, int) == False:
-        return "Undetermined"
-    elif EligibilityDate > 20211201:
-        return "Yes"
-    elif EligibilityDate <= 20211130:
-        return "No"
+#Case posture on eligibility date (on trial, no stipulation etc.) - transform them into the HRA initials
+#UAHPLPExternalPreparer, TRCExternalPreparer
+def PostureOnEligibility(Posture):
 
-def NeedsRedactingTester(LevelOfService, PreThreeOne,FundingCodeSorter):
-    if LevelOfService.startswith("Advice") == True and PreThreeOne == "No":
-        return "Needs Redacting"
-    elif LevelOfService.startswith("Brief") == True and PreThreeOne == "No" and FundingCodeSorter == "UAHPLP":
-        return "Needs Redacting"
+    splitpostureeligibilitylist = Posture.split( ", ")
+    recombinedposturelist = list()
+    for x in splitpostureeligibilitylist:
+        if x == "No Stipulation; No Judgment":
+            x = "NSNJ"
+            recombinedposturelist.append(x)
+        elif x == "On for Trial":
+            x = "OFT"
+            recombinedposturelist.append(x)
+        elif x == "Post-Stipulation":
+            x = "PSNJ"
+            recombinedposturelist.append(x)
+        elif x == "Tenant in Possession-Judgment Due to Default":
+            x = "PJD"
+            recombinedposturelist.append(x)
+        elif x == "Tenant in Possession-Judgment Due to Other":
+            x = "PJO"
+            recombinedposturelist.append(x)
+        elif x == "Tenant Out of Possession":
+            x = "PJP"
+            recombinedposturelist.append(x)
+ 
+    return "; ".join(recombinedposturelist)
+
+#ERAP tester
+#UAHPLPCLeaner, UAHPLPConsolidatedBoroughCleaner (not AllHousingSimpler-sim but different
+def ERAPTester (Type,Involved,Stayed,Active):
+    print("ERAP testing")
+    if Type == "":
+        return "ERAP needs unclear, missing type of case"
+    elif Type == "No Case" or Type == "Non-Litigation Advocacy":
+        if Stayed == "Yes":
+            return "Type of case indicates no court case, 'Stayed' answer needs review"
+        else:
+            return "ERAP answers okay"
+    elif Involved == "No":
+        if Stayed == "Yes" or Active == "Yes":
+            return "'ERAP involved case?' answer conflicts w another answer, needs change"
+        else:
+            return "ERAP answers okay"
+    elif Involved == "Yes" and Stayed == "":
+        return "Needs 'Stayed ERAP Case?' answer"
+    elif Stayed == "Yes" and Active == "":
+        return "Needs 'Is stayed ERAP case active?' answer"
+    elif Stayed == "No":
+        if Active == "Yes":
+            return "'Stayed ERAP Case?' and 'Is stayed ERAP case active?' answers conflict, needs change"
+        else:
+            return "ERAP answers okay"
+    elif Type == "Non-payment" or Type == "Holdover":
+        if Involved == "":
+            return "Needs 'ERAP involved Case?' answer"
+        else:
+            return "ERAP answers okay"
     else:
-        return ""
-        
-      
-def TRCRedactForCovid(Edate, LevelOfService, ToRedact, PrimaryFunding, HRARelease):
-            LevelOfService = str(LevelOfService)
-            if Edate >= 20211201:
-                return ToRedact
-            elif LevelOfService.startswith("Advice") == True and ToRedact != "":
-                if PrimaryFunding == "3011 TRC FJC Initiative" and HRARelease == "Yes":
-                    return ToRedact
-                else:
-                    return ""
-            else:   
-                return ToRedact
-                
-def AllHousingRedactForCovid(LevelOfService, PreThreeOne, ToRedact,FundingCodeSorter):
-            LevelOfService = str(LevelOfService)
-            if LevelOfService.startswith("Advice") == True and PreThreeOne == "No" and ToRedact != "":
-                return ""
-            elif LevelOfService.startswith("Brief") == True and PreThreeOne == "No" and ToRedact != "" and FundingCodeSorter == "UAHPLP":
-                return ""
-            else:   
-                return ToRedact
-      
-def RedactForCovid(LevelOfService, PreThreeOne, ToRedact):
-            LevelOfService = str(LevelOfService)
-            if LevelOfService.startswith("Advice") == True and PreThreeOne == "No" and ToRedact != "":
-                return ""
-            elif LevelOfService.startswith("Brief") == True and PreThreeOne == "No" and ToRedact != "":
-                return ""
-            else:   
-                return ToRedact
-            
-        
-def NoReleaseRedactForCovid(LevelOfService, PreThreeOne, ToRedact,Release):
-            
-            LevelOfService = str(LevelOfService)
-            if Release == "Yes":
-                return ToRedact
-            elif LevelOfService.startswith("Advice") == True and PreThreeOne == "No" and ToRedact != "":
-                return ""
-            elif LevelOfService.startswith("Brief") == True and PreThreeOne == "No" and ToRedact != "":
-                return ""
-            else:   
-                return ToRedact
-            
-      
-#assign casehandlers to Intake Paralegals:
+        return "ERAP answers okay"
 
-
-#Evelyn_Casehandlers = ['Delgadillo, Omar','Heller, Steven E','Latterner, Matt J','Robles-Castillo, Camila J','Tilyayeva, Rakhil','Almanzar, Yocari', 'Vergeli, Evelyn']
-#Diana_V_Casehandlers = ['Abbas, Sayeda','Evers, Erin C.','Hao, Lindsay','He, Ricky','Sharma, Sagar','Spencer, Eleanor G','Wilkes, Nicole','Allen, Sharette','Ortiz, Matthew B','Sun, Dao','Risener, Jennifer A','Evers, Erin C.','Surface, Ben L','Velasquez, Diana']
-#Diana_G_Casehandlers = ['Frierson, Jerome C','Saxton, Jonathan G','Orsini, Mary K','Allen, Sharette','Duffy-Greaves, Kevin','Freeman, Daniel A','Gokhale, Aparna S','Gonzalez, Matias','Gonzalez, Matias G','Labossiere, Samantha J.','Shah, Ami Mahendra', 'Garcia, Diana']
-#Keiannis_Casehandlers = ['Almanzar, Milagros','Briggs, John M','Dittakavi, Archana','Gonzalez-Munoz, Rossana G','Honan, Thomas J','James, Lelia','Kelly, Kitanya','Mottley, Darlene','Yamasaki, Emily Woo J','McCune, Mary','Vogltanz, Amy K', 'Garcia, Keiannis']
-#Dennis_Casehandlers = ['Braudy, Erica','Kulig, Jessica M','Mercedes, Jannelys J','Harshberger, Sae','Black, Rosalind','Basu, Shantonu J', 'Sanchez, Dennis']
-#Rosa_Casehandlers = ['Acron, Denise D','Anunkor, Ifeoma O','Reyes, Nicole V','Vega, Rita', 'Acosta, Rosa F']
-
-'''def MLSIntakeAssign(Casehandler):
-    IPdf = pd.read_excel("app\\referencesheets\\MLS Intake Paralegal Splitter.xlsx")
-    #print(IPdf)
-    #Evelyn_Casehandlers = list(IPdf['Evelyn_Casehandlers'])
-    #print(Evelyn_Casehandlers)
-    #for loop can iterate over a list
-    IntakeParalegals = list(IPdf.columns.values)
-    print("The Intake Paralegals are"+str(IntakeParalegals))
-    for ColumnHeader in IntakeParalegals:
-        ColumnHeader = list(IPdf[ColumnHeader])
-        print(ColumnHeader)
-        if Casehandler in ColumnHeader:
-            #print(id(str(ColumnHeader)))
-            return ColumnHeader[0]
-            
-    return "ZZ No Intake Para Assigned"'''
-    
+#MLSIntakeConsolidatedHousingCleaner    
 def MLSIntakeAssign(Advocate, Caseworker):
     #If person who opened (Caseworker) is columnheader, return person
     IPdf = pd.read_excel("app\\referencesheets\\MLS Intake Paralegal Splitter.xlsx")
@@ -763,3 +675,152 @@ def MLSIntakeAssign(Advocate, Caseworker):
             return ColumnHeader
             
     return "Stephanie S."
+
+#assign casehandlers to Intake Paralegals:
+
+#Evelyn_Casehandlers = ['Delgadillo, Omar','Heller, Steven E','Latterner, Matt J','Robles-Castillo, Camila J','Tilyayeva, Rakhil','Almanzar, Yocari', 'Vergeli, Evelyn']
+#Diana_V_Casehandlers = ['Abbas, Sayeda','Evers, Erin C.','Hao, Lindsay','He, Ricky','Sharma, Sagar','Spencer, Eleanor G','Wilkes, Nicole','Allen, Sharette','Ortiz, Matthew B','Sun, Dao','Risener, Jennifer A','Evers, Erin C.','Surface, Ben L','Velasquez, Diana']
+#Diana_G_Casehandlers = ['Frierson, Jerome C','Saxton, Jonathan G','Orsini, Mary K','Allen, Sharette','Duffy-Greaves, Kevin','Freeman, Daniel A','Gokhale, Aparna S','Gonzalez, Matias','Gonzalez, Matias G','Labossiere, Samantha J.','Shah, Ami Mahendra', 'Garcia, Diana']
+#Keiannis_Casehandlers = ['Almanzar, Milagros','Briggs, John M','Dittakavi, Archana','Gonzalez-Munoz, Rossana G','Honan, Thomas J','James, Lelia','Kelly, Kitanya','Mottley, Darlene','Yamasaki, Emily Woo J','McCune, Mary','Vogltanz, Amy K', 'Garcia, Keiannis']
+#Dennis_Casehandlers = ['Braudy, Erica','Kulig, Jessica M','Mercedes, Jannelys J','Harshberger, Sae','Black, Rosalind','Basu, Shantonu J', 'Sanchez, Dennis']
+#Rosa_Casehandlers = ['Acron, Denise D','Anunkor, Ifeoma O','Reyes, Nicole V','Vega, Rita', 'Acosta, Rosa F']
+
+'''def MLSIntakeAssign(Casehandler):
+    IPdf = pd.read_excel("app\\referencesheets\\MLS Intake Paralegal Splitter.xlsx")
+    #print(IPdf)
+    #Evelyn_Casehandlers = list(IPdf['Evelyn_Casehandlers'])
+    #print(Evelyn_Casehandlers)
+    #for loop can iterate over a list
+    IntakeParalegals = list(IPdf.columns.values)
+    print("The Intake Paralegals are"+str(IntakeParalegals))
+    for ColumnHeader in IntakeParalegals:
+        ColumnHeader = list(IPdf[ColumnHeader])
+        print(ColumnHeader)
+        if Casehandler in ColumnHeader:
+            #print(id(str(ColumnHeader)))
+            return ColumnHeader[0]
+            
+    return "ZZ No Intake Para Assigned"'''
+#Graveyard________________________________________       ______________________        ______________________
+
+#Has to have an HRA Release
+#copied and more specific in TRCCleaner and UAHPLPCleaner
+def HRAReleaseClean (HRARelease,EligibilityDate):
+    if HRARelease == 'No' and EligibilityDate != '':
+        return 'No Release - Remove Elig Date'
+    elif HRARelease == '' and EligibilityDate != '':
+        return 'No Release - Remove Elig Date'
+    elif HRARelease == 'Yes':
+        return ''
+    else:
+        return 'Needs HRA Release'
+
+#NonHousing Tester - nowhere
+def NonHousingTester (ProblemCode, EligConstruct):
+    if EligConstruct != '':
+        if ProblemCode.startswith('6') != True and EligConstruct > 20200930:
+            return 'Needs Review'
+        else:
+            return ''
+    else:
+        return ''
+          
+#List of UAC (RTC) Zip Codes - nowhere:
+UACZipCodes = ['11207','11216','11221','11225','11226','10453','10457','10462','10467','10468','10025','10026','10027','10029','10031','10034','10302','10303','10310','10314','11373','11385','11433','11434','11691']
+
+#AllHousing, copied and specific in AllHousingSimpler
+def ReleaseAndEligTester(HRARelease,EligibilityDate):
+
+    if HRARelease == 'Yes' and EligibilityDate != '':
+        return ''
+    elif HRARelease == 'Yes' and EligibilityDate == '':
+        return "Needs Eligibility Date"
+    elif HRARelease == 'No' or HRARelease == '':
+        if EligibilityDate != '':
+            return "Needs HRA Release"
+        else:   
+            return 'Needs Elig & Release'
+    else:
+        return 'Needs Elig & Release'
+
+#Does Client have an eligibility date prior to March 1st, 2020?
+#TRCTallier, UAHPLPExternalPreparer, copied and specific in AllHousing
+def PreThreeOne(EligibilityDate):
+
+    if isinstance(EligibilityDate, int) == False:
+        return "No"
+    elif EligibilityDate < 20200301:
+        return "Yes"
+    elif EligibilityDate >= 20200301:
+        return "No"
+
+#Does Client have an eligibility date after Dec 1st, 2021?
+#MLSIntakeConsolidatedHousingCleaner, UAHPLPCleaner,UAHPLPConsolidatedBoroughCleaner, UAHPLPExternalPreparer, TRCExternalPreparer
+def PostTwelveOne(EligibilityDate):
+
+    if isinstance(EligibilityDate, int) == False:
+        return "Undetermined"
+    elif EligibilityDate > 20211201:
+        return "Yes"
+    elif EligibilityDate <= 20211130:
+        return "No"
+
+#Needs Redacting
+#copied and specific in AllHousing
+def NeedsRedactingTester(LevelOfService, PreThreeOne,FundingCodeSorter):
+    if LevelOfService.startswith("Advice") == True and PreThreeOne == "No":
+        return "Needs Redacting"
+    elif LevelOfService.startswith("Brief") == True and PreThreeOne == "No" and FundingCodeSorter == "UAHPLP":
+        return "Needs Redacting"
+    else:
+        return ""
+        
+#TRC Redact for Covid
+#TRCCleaner
+def TRCRedactForCovid(Edate, LevelOfService, ToRedact, PrimaryFunding, HRARelease):
+            LevelOfService = str(LevelOfService)
+            if Edate >= 20211201:
+                return ToRedact
+            elif LevelOfService.startswith("Advice") == True and ToRedact != "":
+                if PrimaryFunding == "3011 TRC FJC Initiative" and HRARelease == "Yes":
+                    return ToRedact
+                else:
+                    return ""
+            else:   
+                return ToRedact
+                
+#All Housing Redact for Covid
+#copied and specific in AllHousing          
+def AllHousingRedactForCovid(LevelOfService, PreThreeOne, ToRedact,FundingCodeSorter):
+            LevelOfService = str(LevelOfService)
+            if LevelOfService.startswith("Advice") == True and PreThreeOne == "No" and ToRedact != "":
+                return ""
+            elif LevelOfService.startswith("Brief") == True and PreThreeOne == "No" and ToRedact != "" and FundingCodeSorter == "UAHPLP":
+                return ""
+            else:   
+                return ToRedact
+                
+#Redact for Covid
+#UAHPLPCleaner, UAHPLPExternalPreparer
+def RedactForCovid(LevelOfService, PreThreeOne, ToRedact):
+            LevelOfService = str(LevelOfService)
+            if LevelOfService.startswith("Advice") == True and PreThreeOne == "No" and ToRedact != "":
+                return ""
+            elif LevelOfService.startswith("Brief") == True and PreThreeOne == "No" and ToRedact != "":
+                return ""
+            else:   
+                return ToRedact
+                
+#No Release Redact for Covid 
+#UAHPLPCleaner,UAHPLPExternalPreparer     
+def NoReleaseRedactForCovid(LevelOfService, PreThreeOne, ToRedact,Release):
+            
+            LevelOfService = str(LevelOfService)
+            if Release == "Yes":
+                return ToRedact
+            elif LevelOfService.startswith("Advice") == True and PreThreeOne == "No" and ToRedact != "":
+                return ""
+            elif LevelOfService.startswith("Brief") == True and PreThreeOne == "No" and ToRedact != "":
+                return ""
+            else:   
+                return ToRedact
