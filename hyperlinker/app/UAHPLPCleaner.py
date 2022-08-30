@@ -138,10 +138,7 @@ def UAHPLPCleaner():
         #Differentiate pre- and post- 3/1/20 eligibility date cases
            
         df['DateConstruct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['HAL Eligibility Date']), axis=1)
-        
-        
        
-        
         
         #CovidException testers to erase clean-up requests
         #need to know program name and service type, 
@@ -159,19 +156,20 @@ def UAHPLPCleaner():
         df['program_name'] = df.apply(lambda x: UAorNonUA(x['proceeding'],x['Zip Code']), axis=1)
         #Level of Service becomes Service type 
         df['service_type'] = df.apply(lambda x: HousingToolBox.UACServiceType(x['Housing Level of Service'],x['program_name'],x['Close Reason'],x['Legal Problem Code']), axis=1)
-
-         
+        
+        #ERAP Testing, moved to housing toolbox
+        df['ERAP Tester'] = df.apply(lambda x: HousingToolBox.ERAPTester(x['Housing Type Of Case'],x['ERAP Involved Case?'],x['Stayed ERAP Case?'],x['Is stayed ERAP case active?']), axis = 1)
         
     
         #Is everything okay with a case? 
 
-        def TesterTester (ReleaseTester,TypeTester,LevelTester,BuildingTester,ReferralTester,RentTester,UnitTester,RegulationTester,SubsidyTester,YearsTester,LanguageTester,PostureTester,IncomeVerification,PATester,CaseNumberTester,SSTester,ActivityTester,ServicesTester,OutcomeTester,EligibilityDate):
-            if ReleaseTester == '' and TypeTester == '' and LevelTester == '' and BuildingTester == '' and ReferralTester == '' and RentTester == '' and UnitTester == '' and RegulationTester == '' and SubsidyTester == '' and YearsTester == '' and LanguageTester == '' and PostureTester == '' and IncomeVerification == '' and PATester == '' and CaseNumberTester == '' and SSTester == '' and ActivityTester == '' and ServicesTester == '' and OutcomeTester == '' and EligibilityDate != '':
+        def TesterTester (ReleaseTester,TypeTester,LevelTester,BuildingTester,ReferralTester,RentTester,UnitTester,RegulationTester,SubsidyTester,YearsTester,LanguageTester,PostureTester,IncomeVerification,PATester,CaseNumberTester,SSTester,ActivityTester,ServicesTester,OutcomeTester,EligibilityDate,ERAPTester):
+            if ReleaseTester == '' and TypeTester == '' and LevelTester == '' and BuildingTester == '' and ReferralTester == '' and RentTester == '' and UnitTester == '' and RegulationTester == '' and SubsidyTester == '' and YearsTester == '' and LanguageTester == '' and PostureTester == '' and IncomeVerification == '' and PATester == '' and CaseNumberTester == '' and SSTester == '' and ActivityTester == '' and ServicesTester == '' and OutcomeTester == '' and EligibilityDate != '' and ERAPTester == 'ERAP answers okay':
                 return 'No Cleanup Necessary'
             else:
                 return 'Case Needs Attention'
             
-        df['Tester Tester'] = df.apply(lambda x: TesterTester(x['HRA Release Tester'],x['Housing Type Tester'],x['Housing Level Tester'],x['Building Case Tester'],x['Referral Tester'],x['Rent Tester'],x['Unit Tester'],x[ 'Regulation Tester'],x['Subsidy Tester'],x['Years in Apartment Tester'],x['Language Tester'],x['Posture Tester'],x['Income Verification Tester'],x['PA # Tester'],x['Case Number Tester'],x['SS # Tester'],x['Housing Activity Tester'],x['Housing Services Tester'],x['Outcome Tester'],x['HAL Eligibility Date']),axis=1)
+        df['Tester Tester'] = df.apply(lambda x: TesterTester(x['HRA Release Tester'],x['Housing Type Tester'],x['Housing Level Tester'],x['Building Case Tester'],x['Referral Tester'],x['Rent Tester'],x['Unit Tester'],x[ 'Regulation Tester'],x['Subsidy Tester'],x['Years in Apartment Tester'],x['Language Tester'],x['Posture Tester'],x['Income Verification Tester'],x['PA # Tester'],x['Case Number Tester'],x['SS # Tester'],x['Housing Activity Tester'],x['Housing Services Tester'],x['Outcome Tester'],x['HAL Eligibility Date'],x['ERAP Tester']),axis=1)
         
 
         #sort by case handler
@@ -210,6 +208,7 @@ def UAHPLPCleaner():
         "Housing Activity Indicators",'Housing Activity Tester',
         "Housing Services Rendered to Client",'Housing Services Tester',
         "Housing Outcome",'Outcome Tester',"Housing Outcome Date",
+        "ERAP Involved Case?","Stayed ERAP Case?","Is stayed ERAP case active?","ERAP Tester",
         "Number of People under 18",
         "Number of People 18 and Over",
         "Percentage of Poverty",

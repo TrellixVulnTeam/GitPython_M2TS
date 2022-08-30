@@ -103,11 +103,14 @@ def UAHPLPConsolidatedBoroughCleaner():
                 return 'Non-Housing Case, Please Review'
                 
         df['Housing Case?'] = df.apply(lambda x: NonHousingCase(x['Legal Problem Code']),axis = 1)
+        
+        #ERAP Testing
+        df['ERAP Tester'] = df.apply(lambda x: HousingToolBox.ERAPTester(x['Housing Type Of Case'],x['ERAP Involved Case?'],x['Stayed ERAP Case?'],x['Is stayed ERAP case active?']), axis = 1)
             
     
         #Is everything okay with a case? Also remove if Eligdate is from prior year
 
-        def TesterTester (EligConstruct,HRARelease,HousingLevel,HousingType,EligDate,PANum,Outcome,OutcomeDate,HousingCase):
+        def TesterTester (EligConstruct,HRARelease,HousingLevel,HousingType,EligDate,PANum,Outcome,OutcomeDate,ERAP,HousingCase):
            
             if EligConstruct != '' and EligConstruct < 20220701 :
                 return 'Eligibility date from prior contract year'
@@ -123,12 +126,14 @@ def UAHPLPConsolidatedBoroughCleaner():
                 return 'Case Needs Attention'
             elif Outcome == 'Needs Outcome' or OutcomeDate == 'Needs Outcome Date':
                 return 'Case Needs Attention'
+            elif 'Needs' in ERAP or 'needs' in ERAP:
+                return 'Case Needs Attention'
             elif HousingCase == 'Non-Housing Case, Please Review':
                 return 'Case Needs Attention'
             else:
                 return 'No Cleanup Necessary'
             
-        df['Tester Tester'] = df.apply(lambda x: TesterTester(x['EligDateConstruct'],x['HRA Release?'],x['Housing Level of Service'],x['Housing Type Of Case'],x['HAL Eligibility Date'],x['Gen Pub Assist Case Number'],x['Housing Outcome'],x['Housing Outcome Date'],x['Housing Case?']),axis=1)
+        df['Tester Tester'] = df.apply(lambda x: TesterTester(x['EligDateConstruct'],x['HRA Release?'],x['Housing Level of Service'],x['Housing Type Of Case'],x['HAL Eligibility Date'],x['Gen Pub Assist Case Number'],x['Housing Outcome'],x['Housing Outcome Date'],x['ERAP Tester'],x['Housing Case?']),axis=1)
         
         
         #Delete if everything's okay **
@@ -279,6 +284,10 @@ def UAHPLPConsolidatedBoroughCleaner():
         "Housing Outcome",
         "Housing Outcome Date",
         "Housing Case?",
+        "ERAP Involved Case?",
+        "Stayed ERAP Case?",
+        "Is stayed ERAP case active?",
+        "ERAP Tester",
         "Gen Case Index Number", 
         "Tester Tester",
         "Assigned Branch/CC",
@@ -359,13 +368,14 @@ jgs \\|//   \\|///  \\\|//\\\|/// \|///  \\\|//  \\|//  \\\|//
                 ws.freeze_panes(1, 2)
                 GKRowRange='G1:K'+str(dict_df[i].shape[0]+1)
                 print(GKRowRange)
-
+                #get dynamic conditional formatting that looks for column header, not column location
+                #(first_row, first_col, last_row, last_col)
+                shape = (dict_df[i].shape[0]+1)
+                ERAPLoc=df.columns.get_loc("ERAP Tester")
 
 
                 ws.conditional_format(GKRowRange,{'type': 'blanks',
-                                                 'format': problem_format})
-                                                 
-                                                 
+                                                 'format': problem_format})                                                 
                 ws.conditional_format('H2:H100000',{'type': 'text',
                                                  'criteria': 'containing',
                                                  'value': 'Hold For Review',
@@ -381,6 +391,14 @@ jgs \\|//   \\|///  \\\|//\\\|/// \|///  \\\|//  \\|//  \\\|//
                 ws.conditional_format('O2:O100000',{'type': 'text',
                                                  'criteria': 'containing',
                                                  'value': 'Review',
+                                                 'format': problem_format})
+                ws.conditional_format(0,ERAPLoc,shape,ERAPLoc,{'type': 'text',
+                                                 'criteria': 'containing',
+                                                 'value': 'Needs',
+                                                 'format': problem_format})
+                ws.conditional_format(0,ERAPLoc,shape,ERAPLoc,{'type': 'text',
+                                                 'criteria': 'containing',
+                                                 'value': 'needs',
                                                  'format': problem_format})
             writer.save()
         
