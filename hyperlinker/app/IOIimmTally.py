@@ -90,6 +90,8 @@ def upload_IOIimmTally():
         
         df['Date of Substantial Activity'] = df['Custom IOI Date substantial Activity Performed']
         
+        df['Case Disposition'] = df['Case Disposition']
+        
         #Income Waiver
         
         def Income_Exclude(IncomePct,Waiver,Referral):   
@@ -113,16 +115,16 @@ def upload_IOIimmTally():
                 return Effective_Date
             else:
                 return Date_Opened
-        df['Eligibility_Date'] = df.apply(lambda x : Eligibility_Date(x['IOI Date Substantial Activity Performed 2022'],x['IOI HRA Effective Date (optional) (IOI 2)'],x['Date Opened']), axis = 1)
+        df['Eligibility_Date'] = df.apply(lambda x : Eligibility_Date(x['IOI Date Substantial Activity Performed 2023'],x['IOI HRA Effective Date (optional) (IOI 2)'],x['Date Opened']), axis = 1)
         
         #Manipulable Dates               
         
         
         df['Open Construct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['Eligibility_Date']),axis = 1)
         
-        df['Subs Month'] = df['IOI Date Substantial Activity Performed 2022'].apply(lambda x: str(x)[5:7])
-        df['Subs Day'] = df['IOI Date Substantial Activity Performed 2022'].apply(lambda x: str(x)[8:])
-        df['Subs Year'] = df['IOI Date Substantial Activity Performed 2022'].apply(lambda x: str(x)[:4])
+        df['Subs Month'] = df['IOI Date Substantial Activity Performed 2023'].apply(lambda x: str(x)[5:7])
+        df['Subs Day'] = df['IOI Date Substantial Activity Performed 2023'].apply(lambda x: str(x)[8:])
+        df['Subs Year'] = df['IOI Date Substantial Activity Performed 2023'].apply(lambda x: str(x)[:4])
         df['Subs Construct'] = df['Subs Year'] + df['Subs Month'] + df['Subs Day']
         df['Subs Construct'] = df.apply(lambda x : x['Subs Construct'] if x['Subs Construct'] != '' else 0, axis = 1)
         
@@ -158,13 +160,13 @@ def upload_IOIimmTally():
         
         
         #Needs Substantial Activity to Rollover into FY'20
-        
-              
          
-         #Needs Substantial Activity to Rollover into FY'22
+        #Needs Substantial Activity to Rollover into FY'22
+        
+        #Needs Substantial Activity to Rollover into FY'23
        
         
-        df['Needs Substantial Activity?'] = df.apply(lambda x: ImmigrationToolBox.Needs_Rollover(x['Open Construct'],x['IOI FY22 Substantial Activity 2022'],x['Subs Construct'],x['Matter/Case ID#']), axis=1)  
+        df['Needs Substantial Activity?'] = df.apply(lambda x: ImmigrationToolBox.Needs_Rollover(x['Open Construct'],x['IOI FY23 Immigration Substantial Activity 2023'],x['Subs Construct'],x['Matter/Case ID#']), axis=1)  
         
 
 
@@ -271,13 +273,78 @@ def upload_IOIimmTally():
             else:
                 return ModifiedTally
         df['Modified Deliverable Tally'] = df.apply(lambda x: fillBlanks(x['Modified Deliverable Tally'],x['Deliverable Tally']),axis=1)
-
-        #Reportable?
         
-        df['Reportable?'] = df.apply(lambda x: ImmigrationToolBox.ReportableTester(x['Exclude due to Income?'],x['Needs DHCI?'],x['Needs Substantial Activity?'],x['Deliverable Tally']),axis=1)
+        #Reportable? - cases that have no more cleanup needs
+        
+        df['Case Clean?'] = df.apply(lambda x: ImmigrationToolBox.ReportableTester(x['Exclude due to Income?'],x['Needs DHCI?'],x['Needs Substantial Activity?'],x['Deliverable Tally']),axis=1)
+        print("Just did reportable")        
+        
+        dfNO = df[df['Case Clean?'] == 'No']
+        dfNO['Brief Eliminator'] = 'Not Reportable'
+        dfREP = df[df['Case Clean?'] == 'Reportable']
+        
+        #Function to calculate # of reportable cases based on case types per client
+        #changes made here must be made to IMM Quarterly as well
+        dfs2 = dfREP.groupby('Unique Client ID#',sort = False)
+        #print("this is dfs2")
+        #print(dfs2)
+        tdf2 = pd.DataFrame()
+        for x, y in dfs2:
+            #print(x)
+            #print(y)
+            DelTalList=list(y['Deliverable Tally'])
+            #print("DelTalList is " + str(DelTalList))
+            BriefOriginalList=['Brief']
+            #print("BriefOriginalList is " + str(BriefOriginalList))
+            AddlBriefList=['Additional Brief']
+            #print("DuplicateList is " + str(SingleDuplicateList))
+            NewAddlBriefList= (y['Deliverable Tally'].shape[0]-1)*AddlBriefList
+            #print("NewDuplicateList is " + str(NewDuplicateList))
+            SingleExtraList=['Extra Case']
+            RemoveExtraList = (y['Deliverable Tally'].shape[0]-1)*SingleExtraList
+            y = y.sort_values(by=['Exclude due to Income?','Needs DHCI?','Needs Substantial Activity?','Deliverable Tally'])
+            if "Brief" in set(DelTalList) and len(set(DelTalList))==1:
+                #df['Brief Only Eliminator'] = 
+                #print("Brief Only Eliminator list is" + str(df['Brief Only Eliminator']))
+                y['Brief Eliminator'] = BriefOriginalList + NewAddlBriefList
+            elif "Brief" in set(DelTalList) and "Needs Cleanup" in set(DelTalList) and len(set(DelTalList))==2:
+                y['Brief Eliminator'] = BriefOriginalList + RemoveExtraList
+            else:
+                def BriefEliminator (DelTal):
+                    DelTalList=list(y['Deliverable Tally'])
+                    #print("DelTalList is " + str(DelTalList))
+                    if "Brief" not in DelTalList:
+                        return DelTal
+                        #df['Brief Eliminator']= df['Brief Eliminator'].drop_duplicates(keep = 'first')
+                    elif "Brief" in set(DelTalList) and len(set(DelTalList))>1:
+                        if DelTal == "Brief":
+                            return "Extra Case"
+                        else:
+                            return DelTal
+                    else:
+                        return "something is wrong"
+                        
+                y['Brief Eliminator'] = df.apply(lambda b: BriefEliminator(b['Deliverable Tally']),axis=1)
+                
+                #print(y['Brief Eliminator'])
+
+            tdf2 = tdf2.append(y)
+        df = tdf2.append(dfNO)
+
+        df.fillna('',inplace= True)
+
+        #print(df)
+        '''    elif "Brief" in set(DelTalList) and "Needs Cleanup" in set(DelTalList) and len(set(DelTalList))==2:
+                if DeTal == "Needs Cleanup":
+                    return "Needs Cleanup"
+                elif '''
         
         #***add code to make it so that it deletes any extra 'brief' cases for clients that have mutliple cases
         
+        #Reportable? pt2 - addk Brief cases eliminated
+        
+        df['Reportable?'] = df.apply(lambda x: ImmigrationToolBox.ReportableTester2(x['Case Clean?'],x['Brief Eliminator']),axis=1)
+        print("Just did reportable on Brief cases") 
         
         #gender
         def HRAGender (gender):
@@ -366,9 +433,35 @@ def upload_IOIimmTally():
         #Makes a dataframe of only reportable cases, so pivot table is only reportable cases
         tdf = df[df['Reportable?'] == "Reportable"]
         
+        
+
+        #tdf=df
+        print(tdf['Modified Deliverable Tally'])
+        
         #Construct Summary Tables using tdf reportable only dataframe
         #city_pivot = pd.pivot_table(df,index=['Office'],values=['Deliverable Tally'],aggfunc='count',fill_value=0)
         city_pivot = pd.pivot_table(tdf,values=['Unique_ID'], index=['Office'], columns=['Modified Deliverable Tally'], aggfunc=lambda x: len(x.unique()))
+        
+        #city_pivot['Unique_ID','Tier 2 (removal)']=""
+        if 'Tier 2 (minor removal)'in city_pivot:
+            print("Already has T2MR column")
+        else:
+            city_pivot['Unique_ID','Tier 2 (minor removal)']=0
+            
+        if 'Tier 2 (other)'in city_pivot:
+            print("Already has T2O column")
+        else:
+            city_pivot['Unique_ID','Tier 2 (other)']=0
+            
+        if 'Tier 2 (removal)'in city_pivot:
+            print("Already has T2R column")
+        else:
+            city_pivot['Unique_ID','Tier 2 (removal)']=0
+            
+        if 'Tier 1'in city_pivot:
+            print("Already has T1 column")
+        else:
+            city_pivot['Unique_ID','Tier 1']=0
         
         #Adds dummy cleanup column to maintain formatting after non-reportable cases column removed
         city_pivot['Unique_ID','Needs Cleanup']=''
@@ -520,9 +613,13 @@ def upload_IOIimmTally():
             city_pivot['Unique_ID','Tier 1 '] = city_pivot['Unique_ID','Tier 1']
             city_pivot['Unique_ID','Ann T1 Goal'] = city_pivot.apply(lambda x: Tier1Goal(x['Office','']), axis=1)
             city_pivot['Unique_ID','Ann T1 %']=city_pivot['Unique_ID','Tier 1']/city_pivot['Unique_ID','Ann T1 Goal']
+            print('tier 1 goal happened')
+            print(city_pivot)
+            print(city_pivot.columns)
             #city_pivot['Unique_ID','Prop T1 Goal'] = round((city_pivot['Unique_ID','Ann T1 Goal']/12 * howmanymonths),2)
             #city_pivot['Unique_ID','Prop T1 %']=city_pivot['Unique_ID','Tier 1 ']/city_pivot['Unique_ID','Prop T1 Goal']
             city_pivot['Unique_ID','T2 MR'] = city_pivot['Unique_ID','Tier 2 (minor removal)']
+            print('t2mr is broken?')
             city_pivot['Unique_ID','Ann T2 MR Goal'] = city_pivot.apply(lambda x: T2MRGoal(x['Office','']), axis=1)
             city_pivot['Unique_ID','Ann T2 MR %']=city_pivot['Unique_ID','T2 MR']/city_pivot['Unique_ID','Ann T2 MR Goal']
             #city_pivot['Unique_ID','Prop T2MR Goal'] = round((city_pivot['Unique_ID','Ann T2 MR Goal']/12 * howmanymonths),2)
@@ -544,7 +641,7 @@ def upload_IOIimmTally():
             
               
         #REPORTING VERSION Put everything in the right order
-        df = df[['Hyperlinked Case #','Office','Primary Advocate','Client Name','Special Legal Problem Code','Level of Service','Needs DHCI?','Exclude due to Income?','Needs Substantial Activity?','Country of Origin','Outcome To Report','Modified Deliverable Tally','Reportable?']]
+        df = df[['Hyperlinked Case #','Office','Primary Advocate','Client Name','Special Legal Problem Code','Level of Service','Needs DHCI?','Exclude due to Income?','Needs Substantial Activity?','Country of Origin','Outcome To Report','Modified Deliverable Tally','Case Clean?','Reportable?','Brief Eliminator','Deliverable Tally','Case Disposition','Unique Client ID#']]
         
         #,'HRA Case Coding','Deliverable Tally','Age at Intake','Unique Client ID#'
                    
@@ -555,7 +652,7 @@ def upload_IOIimmTally():
         #Preparing Excel Document
         
         #Bounce to Excel
-        borough_dictionary = dict(tuple(df.groupby('Office')))
+        borough_dictionary = dict(tuple(df.groupby('Case Disposition')))
         
         #dimensions = worksheet.shape
         #print(dimensions)
@@ -592,7 +689,7 @@ def upload_IOIimmTally():
                 #print(dict_df[i].shape[1])
                 #HeaderRange='A1:'str(dict_df[i].shape[1]'+'1')
                 #print(HeaderRange)
-                worksheet.autofilter('A1:M1')
+                worksheet.autofilter('A1:V1')
                 worksheet.set_column('A:A',20,link_format)
                 worksheet.set_column('B:B',19)
                 worksheet.set_column('C:BL',30)
@@ -711,7 +808,7 @@ def upload_IOIimmTally():
                                                  'format': problem_format})
                 worksheet.conditional_format('I1:I100000',{'type': 'cell',
                                                  'criteria': '==',
-                                                 'value': '"Needs Substantial Activity in FY22"',
+                                                 'value': '"Needs Substantial Activity in FY23"',
                                                  'format': problem_format})
                 worksheet.conditional_format('I1:I100000',{'type': 'cell',
                                                  'criteria': '==',

@@ -100,7 +100,7 @@ def upload_IOIimmQuarterly():
                 return Effective_Date
             else:
                 return Date_Opened
-        df['Eligibility_Date'] = df.apply(lambda x : Eligibility_Date(x['IOI Date Substantial Activity Performed 2022'],x['IOI HRA Effective Date (optional) (IOI 2)'],x['Date Opened']), axis = 1)
+        df['Eligibility_Date'] = df.apply(lambda x : Eligibility_Date(x['IOI Date Substantial Activity Performed 2023'],x['IOI HRA Effective Date (optional) (IOI 2)'],x['Date Opened']), axis = 1)
         
     
         #Manipulable Dates               
@@ -109,7 +109,7 @@ def upload_IOIimmQuarterly():
         df['Open Construct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['Eligibility_Date']),axis = 1)
         
         #Substantial Activity construct
-        df['Subs Construct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['IOI Date Substantial Activity Performed 2022']),axis = 1)
+        df['Subs Construct'] = df.apply(lambda x: DataWizardTools.DateMaker(x['IOI Date Substantial Activity Performed 2023']),axis = 1)
         
         
         df['Outcome1 Month'] = df['IOI Outcome 2 Date (IOI 2)'].apply(lambda x: str(x)[:2])
@@ -143,11 +143,11 @@ def upload_IOIimmQuarterly():
         
         
         
-        #Needs Substantial Activity to Rollover into FY'22
+        #Needs Substantial Activity to Rollover into FY'23
         
         
         
-        df['Needs Substantial Activity?'] = df.apply(lambda x: ImmigrationToolBox.Needs_Rollover(x['Open Construct'],x['IOI FY22 Substantial Activity 2022'],x['Subs Construct'],x['Matter/Case ID#']), axis=1) 
+        df['Needs Substantial Activity?'] = df.apply(lambda x: ImmigrationToolBox.Needs_Rollover(x['Open Construct'],x['IOI FY23 Immigration Substantial Activity 2023'],x['Subs Construct'],x['Matter/Case ID#']), axis=1) 
         
         
 
@@ -255,15 +255,72 @@ def upload_IOIimmQuarterly():
             else:
                 return ModifiedTally
         df['Modified Deliverable Tally'] = df.apply(lambda x: fillBlanks(x['Modified Deliverable Tally'],x['Deliverable Tally']),axis=1)
-
-        #Reportable?
         
-        df['Reportable?'] = df.apply(lambda x: ImmigrationToolBox.ReportableTester(x['Exclude due to Income?'],x['Needs DHCI?'],x['Needs Substantial Activity?'],x['Deliverable Tally']),axis=1)
+        #Reportable? - cases that have no more cleanup needs
+        
+        df['Case Clean?'] = df.apply(lambda x: ImmigrationToolBox.ReportableTester(x['Exclude due to Income?'],x['Needs DHCI?'],x['Needs Substantial Activity?'],x['Deliverable Tally']),axis=1)
+        print("Just did reportable")  
+        
+        dfNO = df[df['Case Clean?'] == 'No']
+        dfNO['Brief Eliminator'] = 'Not Reportable'
+        dfREP = df[df['Case Clean?'] == 'Reportable']
+
+        #Function to calculate # of reportable cases based on case types per client
+        #changes made here must be made to IMM Tally as well
+        dfs2 = dfREP.groupby('Unique Client ID#',sort = False)
+        #print("this is dfs2")
+        #print(dfs2)
+        tdf2 = pd.DataFrame()
+        for x, y in dfs2:
+            #print(x)
+            #print(y)
+            DelTalList=list(y['Deliverable Tally'])
+            #print("DelTalList is " + str(DelTalList))
+            BriefOriginalList=['Brief']
+            #print("BriefOriginalList is " + str(BriefOriginalList))
+            AddlBriefList=['Additional Brief']
+            #print("DuplicateList is " + str(SingleDuplicateList))
+            NewAddlBriefList= (y['Deliverable Tally'].shape[0]-1)*AddlBriefList
+            #print("NewDuplicateList is " + str(NewDuplicateList))
+            SingleExtraList=['Extra Case']
+            RemoveExtraList = (y['Deliverable Tally'].shape[0]-1)*SingleExtraList
+            y = y.sort_values(by=['Exclude due to Income?','Needs DHCI?','Needs Substantial Activity?','Deliverable Tally'])
+            if "Brief" in set(DelTalList) and len(set(DelTalList))==1:
+                #df['Brief Only Eliminator'] = 
+                #print("Brief Only Eliminator list is" + str(df['Brief Only Eliminator']))
+                y['Brief Eliminator'] = BriefOriginalList + NewAddlBriefList
+            elif "Brief" in set(DelTalList) and "Needs Cleanup" in set(DelTalList) and len(set(DelTalList))==2:
+                y['Brief Eliminator'] = BriefOriginalList + RemoveExtraList
+            else:
+                def BriefEliminator (DelTal):
+                    DelTalList=list(y['Deliverable Tally'])
+                    #print("DelTalList is " + str(DelTalList))
+                    if "Brief" not in DelTalList:
+                        return DelTal
+                        #df['Brief Eliminator']= df['Brief Eliminator'].drop_duplicates(keep = 'first')
+                    elif "Brief" in set(DelTalList) and len(set(DelTalList))>1:
+                        if DelTal == "Brief":
+                            return "Extra Case"
+                        else:
+                            return DelTal
+                    else:
+                        return "something is wrong"
+                        
+                y['Brief Eliminator'] = df.apply(lambda b: BriefEliminator(b['Deliverable Tally']),axis=1)
+                
+                #print(y['Brief Eliminator'])
+
+            tdf2 = tdf2.append(y)
+        df = tdf2.append(dfNO)
+
+        df.fillna('',inplace= True)
+        
+        
+        #Reportable? pt2 - add on Brief cases eliminated      
+        df['Reportable?'] = df.apply(lambda x: ImmigrationToolBox.ReportableTester2(x['Case Clean?'],x['Brief Eliminator']),axis=1)
+        print("Just did reportable on Brief cases") 
         
         #***add code to make it so that it deletes any extra 'brief' cases for clients that have mutliple cases
-        
-        
-        
         
         
         #gender
@@ -353,7 +410,7 @@ def upload_IOIimmQuarterly():
           
                 
         #REPORTING VERSION Put everything in the right order
-        df = df[['Unique_ID','Last_Initial','First_Initial','Year_of_Birth','Gender','Country of Origin','Borough','Zip Code','Language','Household_Size','Number_of_Children','Annual_Income','Income_Eligible','Waiver_Type','Waiver_Approval_Date','Eligibility_Date','Referral_Source','Service_Type_Code','Proceeding_Type_Code','Outcome','Outcome_Date','Seized_at_Border','Group','Prior_Enrollment_FY','Pro_Bono','Special Legal Problem Code','HRA Level of Service','HRA Case Coding','Hyperlinked Case #','Office','Primary Advocate','Client Name','Special Legal Problem Code','Level of Service','Needs DHCI?','Exclude due to Income?','Needs Substantial Activity?','IOI FY22 Substantial Activity 2022','IOI Date Substantial Activity Performed 2022','Country of Origin','Outcome To Report','HRA Case Coding','IOI Was client apprehended at border? (IOI 2&3)','Deliverable Tally','Modified Deliverable Tally','Reportable?']]
+        df = df[['Unique_ID','Last_Initial','First_Initial','Year_of_Birth','Gender','Country of Origin','Borough','Zip Code','Language','Household_Size','Number_of_Children','Annual_Income','Income_Eligible','Waiver_Type','Waiver_Approval_Date','Eligibility_Date','Referral_Source','Service_Type_Code','Proceeding_Type_Code','Outcome','Outcome_Date','Seized_at_Border','Group','Prior_Enrollment_FY','Pro_Bono','Special Legal Problem Code','HRA Level of Service','HRA Case Coding','Hyperlinked Case #','Office','Primary Advocate','Client Name','Special Legal Problem Code','Level of Service','Needs DHCI?','Exclude due to Income?','Needs Substantial Activity?','IOI FY23 Immigration Substantial Activity 2023','IOI Date Substantial Activity Performed 2023','Country of Origin','Outcome To Report','HRA Case Coding','IOI Was client apprehended at border? (IOI 2&3)','Deliverable Tally','Modified Deliverable Tally','Case Clean?','Reportable?','Brief Eliminator','Deliverable Tally','Case Disposition','Unique Client ID#']]
             
         
                 
