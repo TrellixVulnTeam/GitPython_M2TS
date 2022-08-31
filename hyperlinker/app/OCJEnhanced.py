@@ -252,6 +252,23 @@ def OCJEnhanced():
         
         NonERAPOther_pivot = pd.pivot_table(FRdf,values=['Matter/Case ID#'], index=['NonERAPOther'], aggfunc='count')
         
+        #order columns on advocate sheet
+        
+        '''
+        this is an unnecessarily complicated way to rearrange sub-columns in a multi-index dataframe 
+        
+        multi_tuples = [('Matter/Case ID#','Last Initial'),('Matter/Case ID#','First Initial'),('Matter/Case ID#','(Blank LoS/Hold For Review)'),('Matter/Case ID#','Total Cases for OCJ'), ('Matter/Case ID#','Non-Pay'),('Matter/Case ID#','Holdover'),('Matter/Case ID#','Other')]
+        
+        multi_cols = pd.MultiIndex.from_tuples(multi_tuples, names=['OCJ Type Tally', 'Primary Advocate'])
+        
+        advocate_pivot = pd.DataFrame(advocate_pivot, columns=multi_cols)
+        '''
+        
+        
+        advocate_pivot = advocate_pivot[[('Matter/Case ID#','Last Initial'),('Matter/Case ID#','First Initial'),('Matter/Case ID#','Total Cases for OCJ'), ('Matter/Case ID#','Non-Pay'),('Matter/Case ID#','Holdover'),('Matter/Case ID#','Other'),('Matter/Case ID#','(Blank LoS/Hold For Review)'),('Matter/Case ID#','Advice/Brief/OoC Advocacy')]]
+        
+        
+        
         #order columns on data sheet
         df['Most Recent Time Entry'] = df['Date of Service']
         
@@ -277,11 +294,12 @@ def OCJEnhanced():
         
         advocate_pivot.ix['Total',0] = ''
         advocate_pivot.ix['Total',1] = ''
-        advocate_pivot.ix['Total',2] = ''
+        
         advocate_pivot.ix['Total',3] = ''
         advocate_pivot.ix['Total',4] = ''
         advocate_pivot.ix['Total',6] = ''
-        
+        advocate_pivot.ix['Total',7] = ''
+        advocate_pivot.ix['Total',5] = ''
         
         #bounce worksheets back to excel
         output_filename = f.filename     
@@ -331,24 +349,25 @@ def OCJEnhanced():
         advocatesheet.set_column('D:D',15)
 
         pivotsheet.set_column('A:A',30)
-        pivotsheet.set_column('F:F',25)
-        pivotsheet.set_column('G:H',20)
-        pivotsheet.set_column('H:I',10)
+        pivotsheet.set_column('D:D',20)
+        pivotsheet.set_column('H:I',25)
+        pivotsheet.set_column('B:C',10)
+        pivotsheet.set_column('E:G',10)
         pivotsheet.set_column('J:J',50)
         pivotsheet.set_column('K:K',20)
         
         pivotsheet.write('A3',"Primary Advocate",header_format)
         
-        BRowRange='B4:B'+str(advocate_pivot['Matter/Case ID#'].shape[0]+2)
+        BCRowRange='B4:C'+str(advocate_pivot['Matter/Case ID#'].shape[0]+2)
         
-        pivotsheet.conditional_format(BRowRange,{'type': 'cell',
+        pivotsheet.conditional_format(BCRowRange,{'type': 'cell',
                                                  'criteria': '>=',
                                                  'value': 0,
-                                                 'format': fyi_format})
+                                                 'format': report_format})
         
-        CDRowRange='C4:D'+str(advocate_pivot['Matter/Case ID#'].shape[0]+2)
+        DRowRange='D4:D'+str(advocate_pivot['Matter/Case ID#'].shape[0]+3)
         
-        pivotsheet.conditional_format(CDRowRange,{'type': 'cell',
+        pivotsheet.conditional_format(DRowRange,{'type': 'cell',
                                                  'criteria': '>=',
                                                  'value': 0,
                                                  'format': report_format})
@@ -358,35 +377,27 @@ def OCJEnhanced():
         pivotsheet.conditional_format(EFRowRange,{'type': 'cell',
                                                  'criteria': '>=',
                                                  'value': 0,
+                                                 'format': report_format})
+        
+        GIRowRange='G4:I'+str(advocate_pivot['Matter/Case ID#'].shape[0]+2)
+        
+        pivotsheet.conditional_format(GIRowRange,{'type': 'cell',
+                                                 'criteria': '>=',
+                                                 'value': 0,
                                                  'format': fyi_format})
-        
-        GRowRange='G4:G'+str(advocate_pivot['Matter/Case ID#'].shape[0]+3)
-        
-        pivotsheet.conditional_format(GRowRange,{'type': 'cell',
-                                                 'criteria': '>=',
-                                                 'value': 0,
-                                                 'format': report_format})
                                                  
                                                  
-        HIRowRange='H4:I'+str(advocate_pivot['Matter/Case ID#'].shape[0]+2)
-        
-        
-        
-        #AddBorders
-        borderrange='B4:I'+str(advocate_pivot['Matter/Case ID#'].shape[0]+3)
-        pivotsheet.conditional_format( borderrange , { 'type' : 'cell' ,
-                                                        'criteria': '!=',
-                                                        'value':'""',
-                                                        'format' : border_format} )
         
         
         
         
         
-        pivotsheet.conditional_format(HIRowRange,{'type': 'cell',
-                                                 'criteria': '>=',
-                                                 'value': 0,
-                                                 'format': report_format})
+        
+        
+        
+        
+        
+       
         
         GRowRange='G4:G'+str(advocate_pivot['Matter/Case ID#'].shape[0]+3)
         
@@ -407,6 +418,13 @@ def OCJEnhanced():
                                                  'value': 0,
                                                  'format': report_format})
         
+        
+        #AddBorders
+        borderrange='B4:I'+str(advocate_pivot['Matter/Case ID#'].shape[0]+3)
+        pivotsheet.conditional_format( borderrange , { 'type' : 'cell' ,
+                                                        'criteria': '!=',
+                                                        'value':'""',
+                                                        'format' : border_format} )
         writer.save()
         
         #send file back to user
