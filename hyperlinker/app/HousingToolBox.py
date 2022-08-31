@@ -617,7 +617,7 @@ def PostureOnEligibility(Posture):
     return "; ".join(recombinedposturelist)
 
 #ERAP tester
-#UAHPLPCLeaner, UAHPLPConsolidatedBoroughCleaner (not AllHousingSimpler-sim but different
+#UAHPLPCLeaner, UAHPLPConsolidatedBoroughCleaner, TRCCleaner, (not AllHousingSimpler-sim but different)
 def ERAPTester (Type,Involved,Stayed,Active):
     print("ERAP testing")
     if Type == "":

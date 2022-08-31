@@ -230,17 +230,18 @@ def TRCCleaner():
         
         df['Non-Housing Case?'] = df.apply(lambda x: NonHousing(x['Legal Problem Code']), axis=1)
 
-        
+        #ERAP Testing
+        df['ERAP Tester'] = df.apply(lambda x: HousingToolBox.ERAPTester(x['Housing Type Of Case'],x['ERAP Involved Case?'],x['Stayed ERAP Case?'],x['Is stayed ERAP case active?']), axis = 1)
     
         #Is everything okay with a case? 
 
-        def TesterTester (ReleaseTester,TypeTester,LevelTester,BuildingTester,ReferralTester,RentTester,UnitTester,RegulationTester,SubsidyTester,YearsTester,LanguageTester,PostureTester,IncomeVerification,CaseNumberTester,SSTester,ActivityTester,ServicesTester,OutcomeTester,EligibilityDate, HousingCase):
-            if ReleaseTester == '' and TypeTester == '' and LevelTester == '' and BuildingTester == '' and ReferralTester == '' and RentTester == '' and UnitTester == '' and RegulationTester == '' and SubsidyTester == '' and YearsTester == '' and LanguageTester == '' and PostureTester == '' and IncomeVerification == '' and CaseNumberTester == '' and SSTester == '' and ActivityTester == '' and ServicesTester == '' and OutcomeTester == '' and EligibilityDate != '' and HousingCase == 'Housing':
+        def TesterTester (ReleaseTester,TypeTester,LevelTester,BuildingTester,ReferralTester,RentTester,UnitTester,RegulationTester,SubsidyTester,YearsTester,LanguageTester,PostureTester,IncomeVerification,CaseNumberTester,SSTester,ActivityTester,ServicesTester,OutcomeTester,EligibilityDate, HousingCase, ERAPTester):
+            if ReleaseTester == '' and TypeTester == '' and LevelTester == '' and BuildingTester == '' and ReferralTester == '' and RentTester == '' and UnitTester == '' and RegulationTester == '' and SubsidyTester == '' and YearsTester == '' and LanguageTester == '' and PostureTester == '' and IncomeVerification == '' and CaseNumberTester == '' and SSTester == '' and ActivityTester == '' and ServicesTester == '' and OutcomeTester == '' and EligibilityDate != '' and HousingCase == 'Housing' and ERAPTester == 'ERAP answers okay':
                 return 'No Cleanup Necessary'
             else:
                 return 'Case Needs Attention'
             
-        df['Tester Tester'] = df.apply(lambda x: TesterTester(x['HRA Release Tester'],x['Housing Type Tester'],x['Housing Level Tester'],x['Building Case Tester'],x['Referral Tester'],x['Rent Tester'],x['Unit Tester'],x[ 'Regulation Tester'],x['Subsidy Tester'],x['Years in Apartment Tester'],x['Language Tester'],x['Posture Tester'],x['Income Verification Tester'],x['Case Number Tester'],x['SS # Tester'],x['Housing Activity Tester'],x['Housing Services Tester'],x['Outcome Tester'],x['HAL Eligibility Date'],x['Non-Housing Case?']),axis=1)
+        df['Tester Tester'] = df.apply(lambda x: TesterTester(x['HRA Release Tester'],x['Housing Type Tester'],x['Housing Level Tester'],x['Building Case Tester'],x['Referral Tester'],x['Rent Tester'],x['Unit Tester'],x[ 'Regulation Tester'],x['Subsidy Tester'],x['Years in Apartment Tester'],x['Language Tester'],x['Posture Tester'],x['Income Verification Tester'],x['Case Number Tester'],x['SS # Tester'],x['Housing Activity Tester'],x['Housing Services Tester'],x['Outcome Tester'],x['HAL Eligibility Date'],x['Non-Housing Case?'],x['ERAP Tester']),axis=1)
         
         
         
@@ -287,6 +288,7 @@ def TRCCleaner():
         "Housing Activity Indicators",'Housing Activity Tester',
         "Housing Services Rendered to Client",'Housing Services Tester',
         "Housing Outcome",'Outcome Tester',"Housing Outcome Date",
+        "ERAP Involved Case?","Stayed ERAP Case?","Is stayed ERAP case active?","ERAP Tester",
         "Number of People under 18",
         "Number of People 18 and Over",
         "Percentage of Poverty",
@@ -422,17 +424,22 @@ jgs \\|//   \\|///  \\\|//\\\|/// \|///  \\\|//  \\|//  \\\|//
                 medium_problem_format = workbook.add_format({'bg_color':'orange'})
                 ws.set_column('A:A',20,link_format)
                 ws.set_column('B:ZZ',25)
-                ws.autofilter('B1:ZZ1')
+                Col = dict_df[i].shape[1]
+                Row = dict_df[i].shape[0]+1
+                print(Row)
+                print(Col)
+                ws.autofilter(0,0,0,Col)
                 ws.freeze_panes(1, 2)
+
                 ws.conditional_format('C2:BO100000',{'type': 'text',
                                                  'criteria': 'containing',
                                                  'value': 'No Release - Remove Elig Date',
                                                  'format': bad_problem_format})
-                ws.conditional_format('C2:BO100000',{'type': 'text',
+                ws.conditional_format(0,0,Row,Col,{'type': 'text',
                                                  'criteria': 'containing',
                                                  'value': 'Needs',
                                                  'format': problem_format})
-                ws.conditional_format('C1:BO1',{'type': 'text',
+                ws.conditional_format(0,0,0,Col,{'type': 'text',
                                                  'criteria': 'containing',
                                                  'value': 'Tester',
                                                  'format': problem_format})
