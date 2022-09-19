@@ -498,7 +498,7 @@ def ComplianceConsolidater():
             UntimelyOverridden_df = df[df['Untimely Closed Overridden Tester'] == "Needs Review"]
             Citizenship_df = df[df['Citizenship & Immigration Tester'] == "Needs Review"]
             ActiveAdvocate_df = df[df['Active Advocate Tester'] == "Needs Review"]
-            Retainer_df = df[df['Retainer Tester'] == "Needs Review"]
+            Retainer_df = df[df['Retainer Tester'] == "Needs Retainer"]
             
         
             borough_dictionary = {'No Legal Assistance' : NoLegalAssistance_df, 'No Time Entered' : NoTimeEntered_df, '200% Poverty': TwoHundredPoverty_df , '125% Poverty': OneTwentyFivePovertydf , 'Funding Code 4000': FundingCode4000_df , 'No Age': NoAge_df , 'Untimely Closed': UntimelyClosed_df , 'Untimely Overridden': UntimelyOverridden_df , 'Citizenship': Citizenship_df , 'Active Advocate': ActiveAdvocate_df , 'Retainer': Retainer_df} 

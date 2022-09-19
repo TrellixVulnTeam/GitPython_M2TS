@@ -153,7 +153,7 @@ def UAHPLPConsolidatedBoroughCleaner():
             Evelyn_Casehandlers = ['Delgadillo, Omar','Heller, Steven E','Latterner, Matt J','Tilyayeva, Rakhil','Almanzar, Yocari']
             Diana_V_Casehandlers = ['Abbas, Sayeda','Evers, Erin C.','Hao, Lindsay','He, Ricky','Sharma, Sagar','Spencer, Eleanor G','Wilkes, Nicole','Allen, Sharette','Ortiz, Matthew B','Sun, Dao','Risener, Jennifer A','Evers, Erin C.','Surface, Ben L','Velasquez, Diana']
             Diana_G_Casehandlers = ['Frierson, Jerome C','Saxton, Jonathan G','Orsini, Mary K','Duffy-Greaves, Kevin','Freeman, Daniel A','Gokhale, Aparna S','Gonzalez, Matias','Gonzalez, Matias G','Labossiere, Samantha J.','Shah, Ami Mahendra']
-            Keiannis_Casehandlers = ['Almanzar, Milagros','Briggs, John M','Dittakavi, Archana','Gonzalez-Munoz, Rossana G','Honan, Thomas J','James, Lelia','Kelly, Kitanya','Yamasaki, Emily Woo J','McCune, Mary','Vogltanz, Amy K','Whedan, Rebecca','McDonald, John']
+            #Keiannis_Casehandlers = ['Almanzar, Milagros','Briggs, John M','Dittakavi, Archana','Gonzalez-Munoz, Rossana G','Honan, Thomas J','James, Lelia','Kelly, Kitanya','Yamasaki, Emily Woo J','McCune, Mary','Vogltanz, Amy K','Whedan, Rebecca','McDonald, John']
             Dennis_Casehandlers = ['Braudy, Erica','Kulig, Jessica M','Mercedes, Jannelys J','Harshberger, Sae','Black, Rosalind','Basu, Shantonu J','Gelly-Rahim, Jibril']
             Rosa_Casehandlers = ['Acron, Denise D','Anunkor, Ifeoma O','Reyes, Nicole V','Vega, Rita']
             
@@ -167,8 +167,10 @@ def UAHPLPConsolidatedBoroughCleaner():
                     return "Diana V."
                 elif Casehandler == 'Garcia, Diana':
                     return "Diana G."
-                elif Casehandler == 'De Jesus, Christine' or Casehandler == 'Garcia, Keiannis':
-                    return "Christine D."
+                elif Casehandler == 'Trinidad, Ayla A':
+                    return "Ayla T."
+                #elif Casehandler == 'De Jesus, Christine' or Casehandler == 'Garcia, Keiannis':
+                #    return "Christine D."
                 elif Casehandler == 'Sanchez, Dennis':
                     return "Dennis S."
                 elif Casehandler == 'Acosta, Rosa F':
@@ -185,8 +187,8 @@ def UAHPLPConsolidatedBoroughCleaner():
                     return "Diana V."
                 elif Advocate in Diana_G_Casehandlers:
                     return "Diana G."
-                elif Advocate in Keiannis_Casehandlers:
-                    return "Christine D."
+                #elif Advocate in Keiannis_Casehandlers:
+                #    return "Christine D."
                 elif Advocate in Dennis_Casehandlers:
                     return "Dennis S."
                 elif Advocate in Rosa_Casehandlers:
@@ -207,7 +209,7 @@ def UAHPLPConsolidatedBoroughCleaner():
                     elif whoseturn == 3:
                         return 'Diana G.'
                     elif whoseturn == 4:
-                        return 'Christine D.'
+                        return 'Ayla T.'
                     elif whoseturn == 5:
                         return 'Dennis S.'
                 else:
