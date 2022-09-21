@@ -284,11 +284,11 @@ def AllHousingSimpler():
         df['Case Number Tester'] = df.apply(lambda x: CaseNumClean(x['Gen Case Index Number'],x['Housing Level of Service']), axis=1) 
  
          
-        #Test Housing Services Rendered - can't be blank for closed cases that are full rep state or full rep federal(housing level of service) 
+        #Test Housing Services Rendered - can't be blank for closed cases that are full rep state or full rep federal(housing level of service) - FY23 change: removed out of court advocacy with retainer from list of service levels to trigger test
                  
         def ServicesTesterClean(HousingServices,Level,Type): 
              
-            if Level == 'Representation - State Court' or Level == 'Representation - Admin. Agency' or Level == 'Representation - Federal Court' or Level == 'UAC Out of Court Advocacy WITH Retainer': 
+            if Level == 'Representation - State Court' or Level == 'Representation - Admin. Agency' or Level == 'Representation - Federal Court': 
                 if HousingServices == '': 
                     return 'Needs Services Rendered' 
                 else: 
@@ -326,11 +326,11 @@ def AllHousingSimpler():
         df['Housing Posture of Case on Eligibility Date'] = df.apply(lambda x: PostureClean(x['Housing Posture of Case on Eligibility Date'],x['Housing Type Of Case'],x['Housing Level of Service']), axis=1) 
          
          
-        #Outcome Tester - needs outcome and date for eviction cases that are full rep at state or federal level (not admin)**complete, Tester split in 2 
+        #Outcome Tester - needs outcome and date for eviction cases that are full rep at state or federal level (not admin)**complete, Tester split in 2  - FY23 change: removed out of court advocacy with retainer from list of service levels to trigger test
          
         def OutcomeClean (Outcome,Level,Type,Disposition): 
              
-            if Level == 'Representation - State Court' or Level == 'Representation - Admin. Agency' or Level == 'Representation - Federal Court' or Level == 'UAC Out of Court Advocacy WITH Retainer': 
+            if Level == 'Representation - State Court' or Level == 'Representation - Admin. Agency' or Level == 'Representation - Federal Court': 
                 if Type in evictiontypes and Disposition == "Closed": 
                     if  Outcome == '': 
                         return 'Needs Outcome' 
@@ -345,7 +345,7 @@ def AllHousingSimpler():
          
         def OutcomeDateClean (OutcomeDate,Level,Type,Disposition): 
              
-            if Level == 'Representation - State Court' or Level == 'Representation - Admin. Agency' or Level == 'Representation - Federal Court' or Level == 'UAC Out of Court Advocacy WITH Retainer': 
+            if Level == 'Representation - State Court' or Level == 'Representation - Admin. Agency' or Level == 'Representation - Federal Court': 
                 if Type in evictiontypes and Disposition == "Closed": 
                     if OutcomeDate == '': 
                         return 'Needs Outcome Date' 
