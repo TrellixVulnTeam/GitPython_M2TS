@@ -25,11 +25,7 @@ def OCJEnhanced():
         else:
             df = pd.read_excel(f)
             print("Dataframe starts from top")
-        
-        
-      
-     
-        
+
 
         #Remove Rows without Case ID values
         df.fillna('',inplace = True)
@@ -79,6 +75,11 @@ def OCJEnhanced():
             'Surface, Ben L',
             'Tenorio Bocangel, Maricella',
             'Leinbach, August J',
+            'MacArthur, Cecilia',
+            'Babaturk, Kubra',
+            'Basuk, Daniel L',
+            'Sugar, Danny',
+            'Chu, Katherine B'
             )
             df = df.loc[df['Primary Advocate'].isin(MLS_Advocates)]
             
@@ -87,48 +88,55 @@ def OCJEnhanced():
             df = df[df['Assigned Branch/CC'] == "Brooklyn Legal Services"]
             
             BLS_Advocates = (
-            'Ali, Stephanie',
+            #'Ali, Stephanie',
             'Barney, Darryl',
+            'Bartholome, Mei Li B.',
             'McLain, Catrina Shanell',
             'Cepeda, Jeanette',
             'Chew, Thomas F',
             'Corsaro, Veronica M',
             'Crowder, Jasmin K',
+            'Dolin, Brett A',
             'Drimal, Alex V',
             'Drumm, Kristen E.',
-            'Eisom, Stanley',
-            'Fitzgerald, Mario Q',
-            'Frias De Sosa, Yajaira',
+            #'Eisom, Stanley',
+            #'Fitzgerald, Mario Q',
+            #'Frias De Sosa, Yajaira',
+            'Feliz, Alexandra',
             'Gardner III, George C.',
             'Gilfoil, Casey Q',
             'Ginsberg, Irene',
             'Gooding, Nnamdia E',
-            'Groener, Aitan Z',
-            'Haarmann, Landry',
+            #'Groener, Aitan Z',
+            #'Haarmann, Landry',
+            'Hassan, Ali Hassan Abdelhady',
             'James, Natalie C',
             'Joly, Coco',
             'Kaushal, Mallika',
-            'McCammon, Larry A',
+            'Koepp, Charlie M',
+            #'McCammon, Larry A',
             'Lee, Jooyeon',
             'Leroux, Paul A',
+            'Loh, Nicholas J',
             'Maltezos, Alexander',
             'McHugh Mills, Maura',
             'Morgan, Dominique A',
-            'Mullen, Evan M',
+            #'Mullen, Evan M',
             'Pepe, Lailah H.',
+            'Perez, Amanda M',
             'Pope-Sussman, Raphael A',
             'Record, John-Chris',
             'Reed, Jessica',
-            'Roussos, Katie A',
+            #'Roussos, Katie A',
             'Schiff, Logan J.',
             'Sexton, Andrew R',
             'Stevens, Jean',
             'Sumerall, Iesha R',
+            'Sullivan, Jessica T.',
             'Wilson-Wieland, Cherille K',
             'Yavarone, Max J',
-            'Ash, Anissa M',
-            'Dolin, Brett A',
-            'Harned, Christian C'
+            #'Ash, Anissa M',
+            #'Harned, Christian C'
             )
             
             df = df.loc[df['Primary Advocate'].isin(BLS_Advocates)]

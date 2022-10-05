@@ -151,12 +151,12 @@ def UAHPLPConsolidatedBoroughCleaner():
         if request.form.get('MLS'):
             
             Evelyn_Casehandlers = ['Delgadillo, Omar','Heller, Steven E','Latterner, Matt J','Tilyayeva, Rakhil','Almanzar, Yocari']
-            Diana_V_Casehandlers = ['Abbas, Sayeda','Evers, Erin C.','Hao, Lindsay','He, Ricky','Sharma, Sagar','Spencer, Eleanor G','Wilkes, Nicole','Allen, Sharette','Ortiz, Matthew B','Sun, Dao','Risener, Jennifer A','Evers, Erin C.','Surface, Ben L','Velasquez, Diana']
-            Diana_G_Casehandlers = ['Frierson, Jerome C','Saxton, Jonathan G','Orsini, Mary K','Duffy-Greaves, Kevin','Freeman, Daniel A','Gokhale, Aparna S','Gonzalez, Matias','Gonzalez, Matias G','Labossiere, Samantha J.','Shah, Ami Mahendra']
+            Diana_V_Casehandlers = ['Abbas, Sayeda','Hao, Lindsay','He, Ricky','Spencer, Eleanor G','Wilkes, Nicole','Allen, Sharette','Ortiz, Matthew B','Sun, Dao','Risener, Jennifer A','Surface, Ben L','Velasquez, Diana']
+            Diana_G_Casehandlers = ['Saxton, Jonathan G','Orsini, Mary K','Duffy-Greaves, Kevin','Freeman, Daniel A','Gokhale, Aparna S','Gonzalez, Matias','Gonzalez, Matias G','Labossiere, Samantha J.','Shah, Ami Mahendra']
             #Keiannis_Casehandlers = ['Almanzar, Milagros','Briggs, John M','Dittakavi, Archana','Gonzalez-Munoz, Rossana G','Honan, Thomas J','James, Lelia','Kelly, Kitanya','Yamasaki, Emily Woo J','McCune, Mary','Vogltanz, Amy K','Whedan, Rebecca','McDonald, John']
-            Dennis_Casehandlers = ['Braudy, Erica','Kulig, Jessica M','Mercedes, Jannelys J','Harshberger, Sae','Black, Rosalind','Basu, Shantonu J','Gelly-Rahim, Jibril']
+            Dennis_Casehandlers = ['Braudy, Erica','Kulig, Jessica M','Mercedes, Jannelys J','Harshberger, Sae','Black, Rosalind','Gelly-Rahim, Jibril']
             Rosa_Casehandlers = ['Acron, Denise D','Anunkor, Ifeoma O','Reyes, Nicole V','Vega, Rita']
-            
+            Anthony_Casehandlers = ['Basu, Shantonu J','Arboleda, Heather M','Grater, Ashley P','Sharma, Sagar','Evers, Erin C.','Frierson, Jerome C','Rockett, Molly C']
 
             Access_Line = ["Pierre, Haenley","Ortega, Luis","Djourab, Atteib","Suriel, Sal","Villanueva, Anthony","Ruiz-Caceres, Gaby A","Yeh, Victoria","Paz, Alex","Khanam, Aysha"]
             
@@ -181,6 +181,8 @@ def UAHPLPConsolidatedBoroughCleaner():
                     return "Delci G"
                 elif Casehandler == 'Garcia, Alexandra A.':
                     return "Alexandra G."
+                elif Casehandler == 'Villanueva, Anthony':
+                    return "Tony V."
                 elif Advocate in Evelyn_Casehandlers:
                     return "Evelyn V."
                 elif Advocate in Diana_V_Casehandlers:
@@ -193,13 +195,15 @@ def UAHPLPConsolidatedBoroughCleaner():
                     return "Dennis S."
                 elif Advocate in Rosa_Casehandlers:
                     return "Rosa A."
+                elif Advocate in Anthony_Casehandlers:
+                    return "Tony V."
                 elif Casehandler in Access_Line:
                     global whoseturn
                     try: 
                         whoseturn += 1
                     except:
                         whoseturn = 1
-                    if whoseturn == 6:
+                    if whoseturn == 7:
                         whoseturn = 1
                         
                     if whoseturn == 1:
@@ -212,6 +216,8 @@ def UAHPLPConsolidatedBoroughCleaner():
                         return 'Ayla T.'
                     elif whoseturn == 5:
                         return 'Dennis S.'
+                    elif whoseturn == 6:
+                        return 'Tony V.'
                 else:
                     return "zzMiscellaneous"
 
