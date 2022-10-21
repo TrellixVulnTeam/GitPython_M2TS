@@ -210,13 +210,14 @@ def ComplianceConsolidater():
         if request.form.get('YearEnd'):
             print('Year End')
         else:
-            def ActiveAdvocateTester(ActiveAdvocate):
-                if ActiveAdvocate != "Yes":
+            def ActiveAdvocateTester(ActiveAdvocate,DateClosed):
+                DateClosed = str(DateClosed)
+                if DateClosed == "" and ActiveAdvocate != "Yes":
                     return "Needs Review"
                 else:
                     return ''
                  
-            df['Active Advocate Tester'] = df.apply(lambda x : ActiveAdvocateTester(x['Login Active']),axis=1)
+            df['Active Advocate Tester'] = df.apply(lambda x : ActiveAdvocateTester(x['Login Active'],x['Date Closed']),axis=1)
         
         #Case needs a retainer if it's closed with higher level of service than A or B, or has level of service entered, or is more than 30 days old (PAI cases don't need it)
         
